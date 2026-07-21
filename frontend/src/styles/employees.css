@@ -4,30 +4,34 @@
 
 .employees-page h1 {
   margin: 0 0 1.25rem;
-  color: var(--primary);
+  color: var(--navy);
   font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .employees-page table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 .employees-page th,
 .employees-page td {
   text-align: left;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
 }
 
 .employees-page th {
-  background: #eef3f8;
-  color: var(--primary);
-  font-size: 0.85rem;
+  background: var(--sky);
+  color: var(--navy);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .employees-page p {
