@@ -1,0 +1,50 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: personel_portali
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python kurulumu
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Bağımlılıkları kur
+        working-directory: ./backend
+        run: pip install -r requirements.txt
+
+      - name: Django check ve testler
+        working-directory: ./backend
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: personel_portali
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DJANGO_SECRET_KEY: ci-test-key
+        run: |
+          python manage.py check
+          python manage.py test
