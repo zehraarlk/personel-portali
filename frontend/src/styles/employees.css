@@ -1,0 +1,35 @@
+.employees-page {
+  padding: 2rem 0 3rem;
+}
+
+.employees-page h1 {
+  margin: 0 0 1.25rem;
+  color: var(--primary);
+  font-size: 1.5rem;
+}
+
+.employees-page table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.employees-page th,
+.employees-page td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.employees-page th {
+  background: #eef3f8;
+  color: var(--primary);
+  font-size: 0.85rem;
+}
+
+.employees-page p {
+  color: var(--muted);
+}
