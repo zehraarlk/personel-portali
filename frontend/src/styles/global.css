@@ -1,0 +1,64 @@
+:root {
+  --primary: #022842;
+  --primary-light: #1e4a6b;
+  --secondary: #344e75;
+  --hover-accent: orange;
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --border: #e9ecef;
+  --text: #212529;
+  --muted: #6c757d;
+  --font: "Inter", system-ui, sans-serif;
+  --content-width: 90%;
+  --content-max: 1600px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-area {
+  width: var(--content-width);
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.nav-container,
+.footer-inner {
+  width: var(--content-width);
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
