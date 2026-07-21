@@ -1,0 +1,21 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+venv/
+env/
+*.egg-info/
+
+# Node / React
+node_modules/
+frontend/dist/
+frontend/.env
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docker
+*.log
