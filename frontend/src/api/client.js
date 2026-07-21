@@ -24,3 +24,11 @@ export async function fetchSystemStatus() {
   }
   return response.json();
 }
+
+export async function fetchHomeDashboard() {
+  const response = await fetch(`${API_BASE}/home/`);
+  if (!response.ok) {
+    throw new Error('Ana sayfa verileri alınamadı');
+  }
+  return response.json();
+}
