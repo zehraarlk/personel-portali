@@ -1,67 +1,69 @@
-.sitefoot {
+/* ==========================================================================
+   Footer — styled to match the Navbar's navy brand tokens
+   ========================================================================== */
+
+.site-footer {
   margin-top: auto;
-  background: var(--navy);
-  color: rgba(255, 255, 255, 0.78);
-  padding: 2.75rem 0 1.5rem;
+  width: 100%;
+  border-top: 1px solid rgba(2, 40, 66, 0.12);
+  background: #f4f6f8;
 }
 
-.sitefoot__grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sitefoot__brand {
-  margin: 0 0 0.55rem;
-  color: #fff;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.sitefoot__label {
-  margin: 0 0 0.75rem;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.sitefoot__text {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  max-width: 32ch;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.sitefoot__links {
+.site-footer-inner {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px 16px;
 }
 
-.sitefoot__links a {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.92rem;
+.site-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-footer-logo {
+  height: 40px;
+  width: auto;
+  max-width: 152px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #022842;
+  padding: 6px 10px;
+  border: 1px solid rgba(2, 40, 66, 0.2);
+}
+
+.site-footer-copy {
+  font-size: 13px;
+  color: #5b6b78;
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.site-footer-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5b6b78;
+  text-decoration: underline;
   transition: color 0.15s ease;
 }
 
-.sitefoot__links a:hover {
-  color: #fff;
+.site-footer-link:hover {
+  color: #022842;
 }
 
-.sitefoot__bottom {
-  padding-top: 1.15rem;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-@media (max-width: 800px) {
-  .sitefoot__grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+@media (min-width: 768px) {
+  .site-footer-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
   }
 }
