@@ -6,10 +6,10 @@ import ComingSoon from './pages/ComingSoon';
 import ChangePassword from './pages/ChangePassword';
 import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
+import SizdenGelenler from './pages/SizdenGelenler';
 
 const PLACEHOLDER_PATHS = [
   'videolar',
-  'sizden-gelenler',
   'etkinlikler',
   'duyurular',
   'protokoller',
@@ -30,6 +30,7 @@ export default function App() {
       <Route path="/test/personel-db" element={<PersonelDb />} />
       <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
       <Route path="/profil/eposta-degistir" element={<ChangeEmail />} />
+      <Route path="/sizden-gelenler" element={<SizdenGelenler />} />
       <Route path="/profil/oturum-kayitlari" element={<SessionHistory />} />
       {PLACEHOLDER_PATHS.map((slug) => (
         <Route key={slug} path={`/${slug}`} element={<ComingSoon />} />

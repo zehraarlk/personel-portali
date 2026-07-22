@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Haber, Duyuru, Personel, AnasayfaLink, SiteIkon
+from .models import (
+    Haber, Duyuru, Personel, AnasayfaLink, SiteIkon,
+    SizdenGelenler, SizdengelenlerKategori, normalize_image_path,
+)
 
 
 class HaberSerializer(serializers.ModelSerializer):
@@ -42,3 +45,25 @@ class SiteIkonSerializer(serializers.ModelSerializer):
     class Meta:
         model = SiteIkon
         fields = ['id', 'anahtar', 'ad', 'kategori', 'ikon_sinifi', 'renk', 'sira']
+
+
+class SizdengelenlerKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SizdengelenlerKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class SizdenGelenlerSerializer(serializers.ModelSerializer):
+    kategori = serializers.StringRelatedField()
+    kategori_slug = serializers.SerializerMethodField()
+    resim = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SizdenGelenler
+        fields = ['id', 'baslik', 'ozet', 'tarih', 'goruntulenme', 'resim', 'kategori', 'kategori_slug']
+
+    def get_resim(self, obj):
+        return normalize_image_path(obj.gorsel_yolu)
+
+    def get_kategori_slug(self, obj):
+        return obj.kategori.slug if obj.kategori else None
