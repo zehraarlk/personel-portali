@@ -6,6 +6,7 @@ import ComingSoon from './pages/ComingSoon';
 import ChangePassword from './pages/ChangePassword';
 import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
+import AdminRoutes from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
   'videolar',
@@ -34,6 +35,7 @@ export default function App() {
       {PLACEHOLDER_PATHS.map((slug) => (
         <Route key={slug} path={`/${slug}`} element={<ComingSoon />} />
       ))}
+      <Route path="/admin/*" element={<AdminRoutes />} />
     </Routes>
   );
 }

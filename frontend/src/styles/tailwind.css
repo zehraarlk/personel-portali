@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Admin klasöründeki sınıflar da derlensin */
+@source "../../admin/src/**/*.{js,jsx}";
+
 @theme {
   --color-on-primary: #ffffff;
   --color-on-tertiary-container: #ef9900;
