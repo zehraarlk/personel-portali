@@ -1,54 +1,57 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BRAND_IMG, SITE_LOGO_WHITE } from '../constants';
+import { BRAND_IMG } from '../constants';
 import { fetchSiteIcons, fetchProfile } from '../api/client';
+
+/** Portal altında /admin/* olarak çalışır */
+const BASE = '/admin';
 
 const NAV_SECTIONS = [
   {
     title: null,
     items: [
-      { to: '/', label: 'Anasayfa', iconKey: 'anasayfa', end: true },
-      { to: '/videolar', label: 'Videolar', iconKey: 'videolar' },
+      { to: BASE, label: 'Dashboard', iconKey: 'anasayfa', end: true },
+      { to: `${BASE}/videolar`, label: 'Videolar', iconKey: 'videolar' },
     ],
   },
   {
     title: 'Etkinlikler',
     items: [
-      { to: '/sizden-gelenler', label: 'Sizden Gelenler', iconKey: 'sizden_gelenler' },
-      { to: '/etkinlikler', label: 'Etkinlikler', iconKey: 'etkinlik_takvimi' },
-      { to: '/duyurular', label: 'Duyurular', iconKey: 'duyurular' },
+      { to: `${BASE}/sizden-gelenler`, label: 'Sizden Gelenler', iconKey: 'sizden_gelenler' },
+      { to: `${BASE}/etkinlikler`, label: 'Etkinlikler', iconKey: 'etkinlik_takvimi' },
+      { to: `${BASE}/duyurular`, label: 'Duyurular', iconKey: 'duyurular' },
     ],
   },
   {
     title: 'Kaynaklar',
     items: [
-      { to: '/protokoller', label: 'Protokoller', iconKey: 'protokoller' },
-      { to: '/dokumanlar', label: 'Dokümanlar', iconKey: 'dokumanlar' },
-      { to: '/mevzuatlar', label: 'Mevzuatlar', iconKey: 'mevzuatlar' },
-      { to: '/egitimler', label: 'Eğitimler', iconKey: 'egitimler' },
+      { to: `${BASE}/protokoller`, label: 'Protokoller', iconKey: 'protokoller' },
+      { to: `${BASE}/dokumanlar`, label: 'Dokümanlar', iconKey: 'dokumanlar' },
+      { to: `${BASE}/mevzuatlar`, label: 'Mevzuatlar', iconKey: 'mevzuatlar' },
+      { to: `${BASE}/egitimler`, label: 'Eğitimler', iconKey: 'egitimler' },
     ],
   },
   {
     title: 'Diğer',
     items: [
-      { to: '/anketler', label: 'Anketler', iconKey: 'anketler' },
-      { to: '/yardimci-linkler', label: 'Yardımcı Linkler', iconKey: 'yardimci_linkler' },
-      { to: '/vefat', label: 'Vefat Eden Bilgisi', iconKey: 'vefat_bilgisi' },
-      { to: '/dogum-gunu', label: 'Doğum Günü Bilgisi', iconKey: 'dogum_gunu' },
+      { to: `${BASE}/anketler`, label: 'Anketler', iconKey: 'anketler' },
+      { to: `${BASE}/yardimci-linkler`, label: 'Yardımcı Linkler', iconKey: 'yardimci_linkler' },
+      { to: `${BASE}/vefat`, label: 'Vefat Eden Bilgisi', iconKey: 'vefat_bilgisi' },
+      { to: `${BASE}/dogum-gunu`, label: 'Doğum Günü Bilgisi', iconKey: 'dogum_gunu' },
     ],
   },
   {
     title: 'Sistem',
     items: [
-      { to: '/test', label: 'Sistem Testi', iconKey: 'yonetim_paneli' },
+      { to: '/', label: 'Personel Portal', iconKey: 'anasayfa' },
+      { to: '/test', label: 'Test', iconKey: 'yonetim_paneli' },
     ],
   },
 ];
 
 const PROFILE_MENU = [
-  { to: '/profil/sifre-degistir', label: 'Şifre Değiştir', iconKey: 'sifre_degistir' },
-  { to: '/profil/eposta-degistir', label: 'E-posta Değiştir', iconKey: 'email_degistir' },
-  { to: '/profil/oturum-kayitlari', label: 'Oturum Kayıtları', iconKey: 'oturum_bilgileri' },
+  { to: `${BASE}/profil/sifre-degistir`, label: 'Şifre Değiştir', iconKey: 'sifre_degistir' },
+  { to: `${BASE}/profil/oturum-kayitlari`, label: 'Oturum Kayıtları', iconKey: 'oturum_bilgileri' },
 ];
 
 const FALLBACK_ICONS = {
@@ -124,14 +127,16 @@ export default function SideNav({ open, onClose }) {
   }, [menuOpen]);
 
   const isActive = (item) => {
-    if (item.end) return location.pathname === '/';
-    return location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+    const path = location.pathname.replace(/\/$/, '') || '/';
+    const target = item.to.replace(/\/$/, '') || '/';
+    if (item.end) return path === target;
+    return path === target || path.startsWith(`${target}/`);
   };
 
   const iconClass = (key) => icons[key] || FALLBACK_ICONS[key] || 'fas fa-circle';
   const foto = profile?.foto || BRAND_IMG;
-  const adSoyad = profile?.ad_soyad || 'Personel';
-  const rol = profile?.rol || 'Personel';
+  const adSoyad = profile?.ad_soyad || profile?.kullanici_adi || 'Yönetici';
+  const rol = profile?.yetki || profile?.rol || 'Yönetici';
 
   return (
     <>
@@ -149,33 +154,17 @@ export default function SideNav({ open, onClose }) {
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="shrink-0 bg-[#022842] px-3 py-4">
-          <div className="flex items-center gap-4">
-            <div className="hidden w-9 shrink-0 lg:block" aria-hidden="true" />
-            <Link
-              to="/"
-              onClick={onClose}
-              className="flex min-w-0 flex-1 items-center justify-center"
-              aria-label="Ana Sayfa"
-            >
-              <img
-                src={SITE_LOGO_WHITE}
-                alt="Gebze Belediyesi"
-                className="h-12 w-auto max-w-[160px] object-contain object-center mix-blend-lighten"
-              />
-            </Link>
+        <div className="relative shrink-0 border-b border-outline-variant/20 px-3 py-3" ref={menuRef}>
+          <div className="mb-2 flex justify-end lg:hidden">
             <button
               type="button"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white/80 hover:bg-white/10 lg:invisible lg:pointer-events-none"
+              className="grid h-9 w-9 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container-low"
               onClick={onClose}
               aria-label="Menüyü kapat"
             >
               <i className="fas fa-times text-[18px]" aria-hidden="true" />
             </button>
           </div>
-        </div>
-
-        <div className="relative shrink-0 border-b border-outline-variant/20 px-3 py-3" ref={menuRef}>
           <button
             type="button"
             className="flex w-full items-center gap-3 rounded-xl bg-surface-container-low px-3 py-2.5 text-left transition hover:bg-surface-container"
@@ -235,23 +224,38 @@ export default function SideNav({ open, onClose }) {
               )}
               <div className="flex flex-col gap-0.5">
                 {section.items.map((item) => {
-                  const active = isActive(item);
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      onClick={onClose}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                        active
-                          ? 'bg-primary-container text-white'
-                          : 'text-on-surface-variant hover:bg-surface-container-low'
-                      }`}
-                    >
+                  const active = !item.external && isActive(item);
+                  const className = `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                    active
+                      ? 'bg-primary-container text-white'
+                      : 'text-on-surface-variant hover:bg-surface-container-low'
+                  }`;
+                  const inner = (
+                    <>
                       <i
                         className={`${iconClass(item.iconKey)} shrink-0 w-5 text-center text-[16px]`}
                         aria-hidden="true"
                       />
                       <span className="truncate">{item.label}</span>
+                    </>
+                  );
+                  if (item.external) {
+                    return (
+                      <a
+                        key={item.to}
+                        href={item.to}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={onClose}
+                        className={className}
+                      >
+                        {inner}
+                      </a>
+                    );
+                  }
+                  return (
+                    <Link key={item.to} to={item.to} onClick={onClose} className={className}>
+                      {inner}
                     </Link>
                   );
                 })}
