@@ -3,13 +3,23 @@ from datetime import date
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Haber, Duyuru, Personel, AnasayfaLink, SiteIkon
+from .models import (
+    Haber,
+    Duyuru,
+    Personel,
+    AnasayfaLink,
+    SiteIkon,
+    Videolar,
+    VideolarKategori,
+)
 from .serializers import (
     HaberSerializer,
     DuyuruSerializer,
     BirthdaySerializer,
     AnasayfaLinkSerializer,
     SiteIkonSerializer,
+    VideoSerializer,
+    VideoKategoriSerializer,
 )
 
 
@@ -47,3 +57,44 @@ def site_icons(request):
     items = SiteIkonSerializer(qs, many=True).data
     by_key = {row['anahtar']: row['ikon_sinifi'] for row in items}
     return Response({'icons': by_key, 'items': items})
+
+@api_view(['GET'])
+def videos(request):
+    video_queryset = (
+        Videolar.objects
+        .select_related('kategori')
+        .order_by('-id')
+    )
+
+    kategori_slug = request.query_params.get('kategori')
+
+    if kategori_slug:
+        video_queryset = video_queryset.filter(
+            kategori__slug=kategori_slug
+        )
+
+    kategoriler = VideolarKategori.objects.order_by('id')
+
+    vitrin_video = (
+        video_queryset
+        .filter(vitrin=1)
+        .first()
+    )
+
+    return Response({
+        'videolar': VideoSerializer(
+            video_queryset,
+            many=True
+        ).data,
+
+        'kategoriler': VideoKategoriSerializer(
+            kategoriler,
+            many=True
+        ).data,
+
+        'vitrin': (
+            VideoSerializer(vitrin_video).data
+            if vitrin_video
+            else None
+        ),
+    })

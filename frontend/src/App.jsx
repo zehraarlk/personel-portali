@@ -6,9 +6,9 @@ import ComingSoon from './pages/ComingSoon';
 import ChangePassword from './pages/ChangePassword';
 import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
+import Videos from './pages/Videos';
 
 const PLACEHOLDER_PATHS = [
-  'videolar',
   'sizden-gelenler',
   'etkinlikler',
   'duyurular',
@@ -26,6 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/videolar" element={<Videos />} />
       <Route path="/test" element={<Test />} />
       <Route path="/test/personel-db" element={<PersonelDb />} />
       <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
