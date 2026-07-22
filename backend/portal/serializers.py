@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Haber, Duyuru, Personel, AnasayfaLink
+from .models import Haber, Duyuru, Personel, AnasayfaLink, SiteIkon
 
 
 class HaberSerializer(serializers.ModelSerializer):
@@ -36,3 +36,9 @@ class AnasayfaLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnasayfaLink
         fields = ['id', 'baslik', 'logo', 'hedef_url']
+
+
+class SiteIkonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteIkon
+        fields = ['id', 'anahtar', 'ad', 'kategori', 'ikon_sinifi', 'renk', 'sira']

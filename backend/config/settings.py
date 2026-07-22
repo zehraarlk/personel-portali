@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'django_filters',
 
     # local apps
-    'employees',
     'portal',
 ]
 

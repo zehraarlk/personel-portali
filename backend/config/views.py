@@ -10,6 +10,25 @@ def health(request):
 
 
 @api_view(["GET"])
+def api_root(request):
+    """GET /api/ — mevcut uç noktaların listesi."""
+    base = request.build_absolute_uri("/").rstrip("/")
+    return Response(
+        {
+            "status": "ok",
+            "message": "Personel Portalı API",
+            "endpoints": {
+                "health": f"{base}/api/health/",
+                "system_status": f"{base}/api/system-status/",
+                "home": f"{base}/api/home/",
+                "icons": f"{base}/api/icons/",
+                "admin": f"{base}/admin/",
+            },
+        }
+    )
+
+
+@api_view(["GET"])
 def system_status(request):
     db_ok = False
     db_error = None
