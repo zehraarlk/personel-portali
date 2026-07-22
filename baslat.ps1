@@ -1,4 +1,5 @@
-﻿# Personel Portali - backend + frontend + admin
+﻿# Personel Portali - backend + frontend
+# Admin paneli: http://127.0.0.1:5173/admin/ (frontend icinde, ayni CSS)
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
 $OutputEncoding = [Console]::OutputEncoding
 try { chcp 65001 | Out-Null } catch {}
@@ -31,29 +32,14 @@ if (-not (Test-Path "$Root\frontend\node_modules")) {
     exit 1
 }
 
-if (-not (Test-Path "$Root\admin\node_modules")) {
-    Write-Host "Admin paketleri kuruluyor..." -ForegroundColor Yellow
-    Push-Location "$Root\admin"
-    npm install
-    Pop-Location
-}
-
 if (-not (Test-Path "$Root\frontend\.env")) {
     Copy-Item "$Root\frontend\.env.example" "$Root\frontend\.env"
-}
-if (-not (Test-Path "$Root\admin\.env")) {
-    if (Test-Path "$Root\admin\.env.example") {
-        Copy-Item "$Root\admin\.env.example" "$Root\admin\.env"
-    } elseif (Test-Path "$Root\frontend\.env") {
-        Copy-Item "$Root\frontend\.env" "$Root\admin\.env"
-    }
 }
 
 # Tablodaki ../images/... yollari -> /images/... (kok images klasoru)
 Ensure-ImagesJunction (Join-Path $Root "frontend")
-Ensure-ImagesJunction (Join-Path $Root "admin")
 
-foreach ($port in 8000, 5173, 5174) {
+foreach ($port in 8000, 5173) {
     $pids = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty OwningProcess -Unique
     foreach ($procId in $pids) {
@@ -79,12 +65,6 @@ Start-Process powershell -ArgumentList @(
     "Set-Location '$Root\frontend'; npm run dev -- --host 127.0.0.1 --port 5173"
 )
 
-Start-Process powershell -ArgumentList @(
-    "-NoExit",
-    "-Command",
-    "Set-Location '$Root\admin'; npm run dev -- --host 127.0.0.1 --port 5174"
-)
-
 Write-Host ""
 Write-Host "Anasayfa     -> http://127.0.0.1:5173/" -ForegroundColor Green
 Write-Host "Test         -> http://127.0.0.1:5173/test" -ForegroundColor Green
@@ -93,7 +73,7 @@ Write-Host "Backend API  -> http://127.0.0.1:8000/api/" -ForegroundColor Green
 Write-Host "Django Admin -> http://127.0.0.1:8000/admin/" -ForegroundColor Green
 Write-Host "Gorseller    -> $Images (public/images junction)" -ForegroundColor Green
 Write-Host ""
-Write-Host "Uc pencere acildi. Durdurmak icin pencereleri kapatin."
+Write-Host "Iki pencere acildi. Durdurmak icin pencereleri kapatin."
 Write-Host "Tarayici anasayfa ile aciliyor..."
 
 Start-Sleep -Seconds 5

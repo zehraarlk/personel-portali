@@ -1,7 +1,16 @@
 from rest_framework import serializers
+
 from .models import (
-    Haber, Duyuru, Personel, AnasayfaLink, SiteIkon,
-    SizdenGelenler, SizdengelenlerKategori, normalize_image_path,
+    Haber,
+    Duyuru,
+    Personel,
+    AnasayfaLink,
+    SiteIkon,
+    SizdenGelenler,
+    SizdengelenlerKategori,
+    normalize_image_path,
+    Videolar,
+    VideolarKategori,
 )
 
 
@@ -67,3 +76,42 @@ class SizdenGelenlerSerializer(serializers.ModelSerializer):
 
     def get_kategori_slug(self, obj):
         return obj.kategori.slug if obj.kategori else None
+
+
+class VideoKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideolarKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    kategori = VideoKategoriSerializer(read_only=True)
+    thumbnail = serializers.SerializerMethodField()
+    youtube_url = serializers.SerializerMethodField()
+    embed_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Videolar
+        fields = [
+            'id',
+            'youtube_id',
+            'baslik',
+            'aciklama',
+            'sure',
+            'kategori',
+            'vitrin',
+            'vitrin_baslik',
+            'vitrin_aciklama',
+            'thumbnail',
+            'youtube_url',
+            'embed_url',
+        ]
+
+    def get_thumbnail(self, obj):
+        return f'https://img.youtube.com/vi/{obj.youtube_id}/hqdefault.jpg'
+
+    def get_youtube_url(self, obj):
+        return f'https://www.youtube.com/watch?v={obj.youtube_id}'
+
+    def get_embed_url(self, obj):
+        return f'https://www.youtube.com/embed/{obj.youtube_id}'

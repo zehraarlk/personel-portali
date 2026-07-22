@@ -7,9 +7,10 @@ import ChangePassword from './pages/ChangePassword';
 import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
 import SizdenGelenler from './pages/SizdenGelenler';
+import Videos from './pages/Videos';
+import AdminRoutes from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
-  'videolar',
   'etkinlikler',
   'duyurular',
   'protokoller',
@@ -26,6 +27,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/videolar" element={<Videos />} />
       <Route path="/test" element={<Test />} />
       <Route path="/test/personel-db" element={<PersonelDb />} />
       <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
@@ -35,6 +37,7 @@ export default function App() {
       {PLACEHOLDER_PATHS.map((slug) => (
         <Route key={slug} path={`/${slug}`} element={<ComingSoon />} />
       ))}
+      <Route path="/admin/*" element={<AdminRoutes />} />
     </Routes>
   );
 }

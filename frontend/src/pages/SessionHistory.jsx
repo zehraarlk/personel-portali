@@ -19,7 +19,7 @@ export default function SessionHistory() {
 
   useEffect(() => {
     fetchProfileSessions()
-      .then((data) => setRows(data.oturumlar || []))
+      .then((data) => setRows((data.oturumlar || []).slice(0, 10)))
       .catch((ex) => setErr(ex.message))
       .finally(() => setLoading(false));
   }, []);
