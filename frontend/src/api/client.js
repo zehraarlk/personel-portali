@@ -33,6 +33,24 @@ export async function fetchHomeDashboard() {
   return response.json();
 }
 
+export async function fetchVideos(kategori = '') {
+  const query = kategori
+    ? `?kategori=${encodeURIComponent(kategori)}`
+    : '';
+
+  const response = await fetch(`${API_BASE}/videos/${query}`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    throw new Error(
+      errorData.detail || `Videolar alınamadı (${response.status})`
+    );
+  }
+
+  return response.json();
+}
+
 /** site_ikonlari — { icons: { anahtar: 'fas fa-...' }, items: [...] } */
 export async function fetchSiteIcons(kategori) {
   const qs = kategori ? `?kategori=${encodeURIComponent(kategori)}` : '';

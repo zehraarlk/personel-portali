@@ -3,7 +3,17 @@ from datetime import date
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Haber, Duyuru, Personel, AnasayfaLink, SiteIkon, SizdenGelenler, SizdengelenlerKategori
+from .models import (
+    Haber,
+    Duyuru,
+    Personel,
+    AnasayfaLink,
+    SiteIkon,
+    SizdenGelenler,
+    SizdengelenlerKategori,
+    Videolar,
+    VideolarKategori,
+)
 from .serializers import (
     HaberSerializer,
     DuyuruSerializer,
@@ -12,6 +22,8 @@ from .serializers import (
     SiteIkonSerializer,
     SizdenGelenlerSerializer,
     SizdengelenlerKategoriSerializer,
+    VideoSerializer,
+    VideoKategoriSerializer,
 )
 
 
@@ -50,6 +62,7 @@ def site_icons(request):
     by_key = {row['anahtar']: row['ikon_sinifi'] for row in items}
     return Response({'icons': by_key, 'items': items})
 
+
 @api_view(['GET'])
 def sizden_gelenler_list(request):
     """Sizden Gelenler: kategori sekmeleri + (varsa filtrelenmiş) içerik listesi."""
@@ -64,4 +77,46 @@ def sizden_gelenler_list(request):
     return Response({
         'kategoriler': SizdengelenlerKategoriSerializer(kategoriler, many=True).data,
         'icerikler': SizdenGelenlerSerializer(icerikler, many=True).data,
+    })
+
+
+@api_view(['GET'])
+def videos(request):
+    video_queryset = (
+        Videolar.objects
+        .select_related('kategori')
+        .order_by('-id')
+    )
+
+    kategori_slug = request.query_params.get('kategori')
+
+    if kategori_slug:
+        video_queryset = video_queryset.filter(
+            kategori__slug=kategori_slug
+        )
+
+    kategoriler = VideolarKategori.objects.order_by('id')
+
+    vitrin_video = (
+        video_queryset
+        .filter(vitrin=1)
+        .first()
+    )
+
+    return Response({
+        'videolar': VideoSerializer(
+            video_queryset,
+            many=True
+        ).data,
+
+        'kategoriler': VideoKategoriSerializer(
+            kategoriler,
+            many=True
+        ).data,
+
+        'vitrin': (
+            VideoSerializer(vitrin_video).data
+            if vitrin_video
+            else None
+        ),
     })
