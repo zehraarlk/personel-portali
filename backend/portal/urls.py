@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home_dashboard, site_icons
+from .views import home_dashboard, site_icons, videos
 from .profile_views import (
     profile_me,
     profile_sessions,
@@ -10,6 +10,8 @@ from .profile_views import (
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
     path('icons/', site_icons, name='site-icons'),
+    path('videos/', videos, name='videos'),
+
     path('profile/', profile_me, name='profile-me'),
     path('profile/sessions/', profile_sessions, name='profile-sessions'),
     path('profile/change-email/', profile_change_email, name='profile-change-email'),
