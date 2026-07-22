@@ -3,13 +3,15 @@ from datetime import date
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Haber, Duyuru, Personel, AnasayfaLink, SiteIkon
+from .models import Haber, Duyuru, Personel, AnasayfaLink, SiteIkon, SizdenGelenler, SizdengelenlerKategori
 from .serializers import (
     HaberSerializer,
     DuyuruSerializer,
     BirthdaySerializer,
     AnasayfaLinkSerializer,
     SiteIkonSerializer,
+    SizdenGelenlerSerializer,
+    SizdengelenlerKategoriSerializer,
 )
 
 
@@ -47,3 +49,19 @@ def site_icons(request):
     items = SiteIkonSerializer(qs, many=True).data
     by_key = {row['anahtar']: row['ikon_sinifi'] for row in items}
     return Response({'icons': by_key, 'items': items})
+
+@api_view(['GET'])
+def sizden_gelenler_list(request):
+    """Sizden Gelenler: kategori sekmeleri + (varsa filtrelenmiş) içerik listesi."""
+    icerikler = SizdenGelenler.objects.order_by('-tarih')
+
+    kategori_slug = request.query_params.get('kategori')
+    if kategori_slug:
+        icerikler = icerikler.filter(kategori__slug=kategori_slug)
+
+    kategoriler = SizdengelenlerKategori.objects.all()
+
+    return Response({
+        'kategoriler': SizdengelenlerKategoriSerializer(kategoriler, many=True).data,
+        'icerikler': SizdenGelenlerSerializer(icerikler, many=True).data,
+    })
