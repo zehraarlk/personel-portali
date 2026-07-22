@@ -64,18 +64,32 @@ const QUICK_LINKS = [
     desc: "Ana sayfa",
   },
   {
+    title: "Admin panel",
+    href: "/admin/",
+    external: false,
+    iconKey: "admin",
+    desc: "Yönetim arayüzü (React admin)",
+  },
+  {
     title: "Django Admin",
     href: `${API_ORIGIN}/admin/`,
     external: true,
     iconKey: "admin",
-    desc: "Haber, duyuru, OMIS, personel yönetimi",
+    desc: "Django CRUD paneli",
   },
   {
-    title: "personel_db",
-    href: "/test/personel-db",
+    title: "personel_db API",
+    href: "/admin/test/personel-db",
     external: false,
     iconKey: "veritabani",
     desc: "API uç noktalarını tek tek kontrol edin",
+  },
+  {
+    title: "Django API",
+    href: `${API_ORIGIN}/api/`,
+    external: true,
+    iconKey: "api",
+    desc: "REST kökü",
   },
 ];
 
@@ -400,15 +414,17 @@ export default function Test() {
         <footer className="test-footer">
           <p>Personel Portalı — geliştirme ortamı test sayfası</p>
           <p className="test-footer__url">
-            <Link to="/">Portal</Link>
+            <Link to="/admin">Anasayfa</Link>
+            {" · "}
+            <Link to="/admin/test">Test</Link>
+            {" · "}
+            <a href="/admin/">Admin</a>
             {" · "}
             <a href={`${API_ORIGIN}/admin/`} target="_blank" rel="noreferrer">
-              Admin
+              Django Admin
             </a>
             {" · "}
-            <Link to="/test/personel-db">personel_db</Link>
-            {" · "}
-            <Link to="/test">Test</Link>
+            <Link to="/admin/test/personel-db">personel_db</Link>
           </p>
         </footer>
       </div>
