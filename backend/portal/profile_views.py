@@ -70,7 +70,7 @@ def profile_sessions(request):
     if not personel:
         return Response({'detail': 'Personel bulunamadı.'}, status=status.HTTP_404_NOT_FOUND)
 
-    rows = OturumKayitlari.objects.filter(personel=personel).order_by('-giris_zamani')[:50]
+    rows = OturumKayitlari.objects.filter(personel=personel).order_by('-giris_zamani')[:10]
     data = [
         {
             'id': r.id,
