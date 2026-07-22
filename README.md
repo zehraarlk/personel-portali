@@ -6,12 +6,12 @@ React + Django (DRF) + PostgreSQL ile geliştirilen personel yönetim portalı.
 personel-portali/
 ├── backend/          # Django + DRF API
 │   ├── config/       # settings, urls, health endpoints
-│   └── employees/    # personel modelleri + API
+│   └── portal/       # anasayfa API, modeller (haber, duyuru, …)
 ├── frontend/         # React (Vite)
 │   └── src/
-│       ├── components/  # Navbar, Footer, Layout
-│       ├── pages/       # Home, EmployeeList, Test
-│       ├── styles/      # global, navbar, footer, sayfa CSS
+│       ├── components/  # SideNav, Footer, Layout
+│       ├── pages/       # Home, Test, ComingSoon
+│       ├── styles/
 │       └── api/
 ├── baslat.ps1
 ├── docker-compose.yml
@@ -40,7 +40,7 @@ cp backend/.env.example backend/.env
 docker compose up --build
 ```
 
-- API: http://localhost:8000/api/employees/
+- API: http://localhost:8000/api/home/
 - Admin panel: http://localhost:8000/admin/ (önce `docker compose exec backend python manage.py createsuperuser`)
 
 Frontend'i ayrı çalıştırın (Docker'a dahil etmedim ki hot-reload hızlı kalsın) veya `.\baslat.ps1` kullanın:

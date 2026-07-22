@@ -1,23 +1,59 @@
-# Personel Portalı - backend + frontend başlat
+﻿# Personel Portali - backend + frontend + admin
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+$OutputEncoding = [Console]::OutputEncoding
+try { chcp 65001 | Out-Null } catch {}
+
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Images = Join-Path $Root "images"
+
+function Ensure-ImagesJunction($AppDir) {
+    $pub = Join-Path $AppDir "public"
+    $link = Join-Path $pub "images"
+    if (-not (Test-Path $pub)) {
+        New-Item -ItemType Directory -Path $pub | Out-Null
+    }
+    if (Test-Path $link) {
+        $item = Get-Item $link -Force
+        if ($item.LinkType -eq "Junction") { return }
+        Remove-Item $link -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    cmd /c "mklink /J `"$link`" `"$Images`"" | Out-Null
+    Write-Host "images baglandi: $link" -ForegroundColor Yellow
+}
 
 if (-not (Test-Path "$Root\backend\venv\Scripts\python.exe")) {
-    Write-Host "Backend venv yok. Önce şunu çalıştırın:" -ForegroundColor Red
-    Write-Host "  cd backend; python -m venv venv; .\venv\Scripts\pip install -r requirements.txt; .\venv\Scripts\python manage.py migrate"
+    Write-Host "Backend venv yok." -ForegroundColor Red
     exit 1
 }
 
 if (-not (Test-Path "$Root\frontend\node_modules")) {
-    Write-Host "Frontend paketleri yok. Önce: cd frontend; npm install" -ForegroundColor Red
+    Write-Host "Frontend paketleri yok. Once: cd frontend; npm install" -ForegroundColor Red
     exit 1
+}
+
+if (-not (Test-Path "$Root\admin\node_modules")) {
+    Write-Host "Admin paketleri kuruluyor..." -ForegroundColor Yellow
+    Push-Location "$Root\admin"
+    npm install
+    Pop-Location
 }
 
 if (-not (Test-Path "$Root\frontend\.env")) {
     Copy-Item "$Root\frontend\.env.example" "$Root\frontend\.env"
 }
+if (-not (Test-Path "$Root\admin\.env")) {
+    if (Test-Path "$Root\admin\.env.example") {
+        Copy-Item "$Root\admin\.env.example" "$Root\admin\.env"
+    } elseif (Test-Path "$Root\frontend\.env") {
+        Copy-Item "$Root\frontend\.env" "$Root\admin\.env"
+    }
+}
 
-# Eski süreçler portu kilitlemesin
-foreach ($port in 8000, 5173) {
+# Tablodaki ../images/... yollari -> /images/... (kok images klasoru)
+Ensure-ImagesJunction (Join-Path $Root "frontend")
+Ensure-ImagesJunction (Join-Path $Root "admin")
+
+foreach ($port in 8000, 5173, 5174) {
     $pids = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty OwningProcess -Unique
     foreach ($procId in $pids) {
@@ -29,7 +65,7 @@ foreach ($port in 8000, 5173) {
 }
 Start-Sleep -Seconds 1
 
-Write-Host "Personel Portalı başlatılıyor..." -ForegroundColor Cyan
+Write-Host "Personel Portali baslatiliyor..." -ForegroundColor Cyan
 
 Start-Process powershell -ArgumentList @(
     "-NoExit",
@@ -43,9 +79,22 @@ Start-Process powershell -ArgumentList @(
     "Set-Location '$Root\frontend'; npm run dev -- --host 127.0.0.1 --port 5173"
 )
 
+Start-Process powershell -ArgumentList @(
+    "-NoExit",
+    "-Command",
+    "Set-Location '$Root\admin'; npm run dev -- --host 127.0.0.1 --port 5174"
+)
+
 Write-Host ""
-Write-Host "Backend  -> http://127.0.0.1:8000"
-Write-Host "Frontend -> http://127.0.0.1:5173"
-Write-Host "Test     -> http://127.0.0.1:5173/test"
-Write-Host "İki pencere açıldı. Durdurmak için o pencereleri kapatın."
-Start-Sleep -Seconds 2
+Write-Host "Anasayfa     -> http://127.0.0.1:5173/" -ForegroundColor Green
+Write-Host "Test         -> http://127.0.0.1:5173/test" -ForegroundColor Green
+Write-Host "Admin panel  -> http://127.0.0.1:5173/admin/" -ForegroundColor Green
+Write-Host "Backend API  -> http://127.0.0.1:8000/api/" -ForegroundColor Green
+Write-Host "Django Admin -> http://127.0.0.1:8000/admin/" -ForegroundColor Green
+Write-Host "Gorseller    -> $Images (public/images junction)" -ForegroundColor Green
+Write-Host ""
+Write-Host "Uc pencere acildi. Durdurmak icin pencereleri kapatin."
+Write-Host "Tarayici anasayfa ile aciliyor..."
+
+Start-Sleep -Seconds 5
+Start-Process "http://127.0.0.1:5173/"
