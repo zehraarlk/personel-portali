@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BRAND_IMG, SITE_LOGO_WHITE } from '../constants';
 import { fetchSiteIcons, fetchProfile } from '../api/client';
+import '../styles/navbar.css';
 
 const NAV_SECTIONS = [
   {
@@ -37,13 +38,12 @@ const NAV_SECTIONS = [
       { to: '/dogum-gunu', label: 'Doğum Günü Bilgisi', iconKey: 'dogum_gunu' },
     ],
   },
-  {
-    title: 'Sistem',
-    items: [
-      { to: '/test', label: 'Sistem Testi', iconKey: 'yonetim_paneli' },
-    ],
-  },
 ];
+
+// Left / right split around the centered logo.
+// Left: Anasayfa, Videolar, Etkinlikler — Right: Kaynaklar, Diğer, Personel (profile)
+const LEFT_SECTIONS = NAV_SECTIONS.slice(0, 2); // Anasayfa/Videolar, Etkinlikler
+const RIGHT_SECTIONS = NAV_SECTIONS.slice(2); // Kaynaklar, Diğer
 
 const PROFILE_MENU = [
   { to: '/profil/sifre-degistir', label: 'Şifre Değiştir', iconKey: 'sifre_degistir' },
@@ -65,33 +65,35 @@ const FALLBACK_ICONS = {
   yardimci_linkler: 'fas fa-link',
   vefat_bilgisi: 'fas fa-ribbon',
   dogum_gunu: 'fas fa-birthday-cake',
-  yonetim_paneli: 'fas fa-cog',
   menu_ac: 'fas fa-bars',
   sifre_degistir: 'fas fa-key',
   email_degistir: 'fas fa-envelope',
   oturum_bilgileri: 'fas fa-history',
 };
 
-export default function SideNav({ open, onClose }) {
+export default function Navbar() {
   const location = useLocation();
   const [icons, setIcons] = useState(FALLBACK_ICONS);
   const [profile, setProfile] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [openMenu, setOpenMenu] = useState(null); // key of open desktop dropdown / 'profile'
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSection, setMobileSection] = useState(null); // key of expanded accordion on mobile
+  const navRef = useRef(null);
 
   useEffect(() => {
-    onClose();
-    setMenuOpen(false);
+    setOpenMenu(null);
+    setMobileOpen(false);
+    setMobileSection(null);
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!mobileOpen) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [mobileOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,154 +115,255 @@ export default function SideNav({ open, onClose }) {
   }, []);
 
   useEffect(() => {
-    if (!menuOpen) return undefined;
+    if (!openMenu) return undefined;
     const onDoc = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setOpenMenu(null);
       }
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [menuOpen]);
+  }, [openMenu]);
 
   const isActive = (item) => {
     if (item.end) return location.pathname === '/';
     return location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
   };
 
+  const sectionKey = (section) => section.title ?? 'main';
+  const sectionHasActive = (section) => section.items.some(isActive);
+
   const iconClass = (key) => icons[key] || FALLBACK_ICONS[key] || 'fas fa-circle';
   const foto = profile?.foto || BRAND_IMG;
   const adSoyad = profile?.ad_soyad || 'Personel';
   const rol = profile?.rol || 'Personel';
 
-  return (
-    <>
-      {open && (
+  const toggleMenu = (key) => setOpenMenu((cur) => (cur === key ? null : key));
+
+  const renderDesktopSection = (section) => {
+    const key = sectionKey(section);
+
+    // Untitled or single-item sections render as plain links, no dropdown.
+    if (!section.title || section.items.length === 1) {
+      return section.items.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          className={`navbar-link${isActive(item) ? ' is-active' : ''}`}
+        >
+          <span>{item.label}</span>
+        </Link>
+      ));
+    }
+
+    const active = sectionHasActive(section);
+    const expanded = openMenu === key;
+
+    return (
+      <div className="navbar-item" key={key}>
         <button
           type="button"
-          className="fixed inset-0 z-[60] bg-black/45 lg:hidden"
-          aria-label="Menüyü kapat"
-          onClick={onClose}
-        />
-      )}
+          className={`navbar-link navbar-link--trigger${active ? ' is-active' : ''}`}
+          aria-expanded={expanded}
+          aria-haspopup="menu"
+          onClick={() => toggleMenu(key)}
+        >
+          <span>{section.title}</span>
+          <i className={`fas fa-chevron-down navbar-caret${expanded ? ' is-open' : ''}`} aria-hidden="true" />
+        </button>
 
-      <aside
-        className={`fixed z-[70] inset-y-0 left-0 flex w-[min(18rem,88vw)] flex-col bg-white shadow-xl transition-transform duration-300 ease-out lg:w-64 lg:translate-x-0 lg:shadow-none lg:border-r lg:border-outline-variant/25 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="shrink-0 bg-[#022842] px-3 py-4">
-          <div className="flex items-center gap-4">
-            <div className="hidden w-9 shrink-0 lg:block" aria-hidden="true" />
-            <Link
-              to="/"
-              onClick={onClose}
-              className="flex min-w-0 flex-1 items-center justify-center"
-              aria-label="Ana Sayfa"
-            >
-              <img
-                src={SITE_LOGO_WHITE}
-                alt="Gebze Belediyesi"
-                className="h-12 w-auto max-w-[160px] object-contain object-center mix-blend-lighten"
-              />
-            </Link>
+        {expanded && (
+          <div role="menu" className="navbar-dropdown">
+            {section.items.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                role="menuitem"
+                className={`navbar-dropdown-link${isActive(item) ? ' is-active' : ''}`}
+                onClick={() => setOpenMenu(null)}
+              >
+                <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <header className="navbar">
+      <div className="navbar-inner" ref={navRef}>
+        <nav className="navbar-side navbar-side--left">
+          {LEFT_SECTIONS.map(renderDesktopSection)}
+        </nav>
+
+        <Link to="/" className="navbar-logo" aria-label="Ana Sayfa">
+          <img src={SITE_LOGO_WHITE} alt="Gebze Belediyesi" />
+        </Link>
+
+        <nav className="navbar-side navbar-side--right">
+          {RIGHT_SECTIONS.map(renderDesktopSection)}
+
+          <div className="navbar-item navbar-profile">
             <button
               type="button"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white/80 hover:bg-white/10 lg:invisible lg:pointer-events-none"
-              onClick={onClose}
-              aria-label="Menüyü kapat"
+              className="navbar-profile-trigger"
+              onClick={() => toggleMenu('profile')}
+              aria-expanded={openMenu === 'profile'}
+              aria-haspopup="menu"
             >
-              <i className="fas fa-times text-[18px]" aria-hidden="true" />
+              <img
+                src={foto}
+                alt=""
+                className="navbar-profile-avatar"
+                onError={(e) => {
+                  e.currentTarget.src = BRAND_IMG;
+                }}
+              />
+              <span className="navbar-profile-text">
+                <span className="navbar-profile-name">{adSoyad}</span>
+                <span className="navbar-profile-role">{rol}</span>
+              </span>
+              <i
+                className={`fas fa-chevron-down navbar-caret${openMenu === 'profile' ? ' is-open' : ''}`}
+                aria-hidden="true"
+              />
             </button>
-          </div>
-        </div>
 
-        <div className="relative shrink-0 border-b border-outline-variant/20 px-3 py-3" ref={menuRef}>
+            {openMenu === 'profile' && (
+              <div role="menu" className="navbar-dropdown navbar-dropdown--right">
+                {PROFILE_MENU.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    role="menuitem"
+                    className="navbar-dropdown-link"
+                    onClick={() => setOpenMenu(null)}
+                  >
+                    <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </nav>
+
+        <button
+          type="button"
+          className="navbar-burger"
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label={mobileOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+          aria-expanded={mobileOpen}
+        >
+          <i className={`fas ${mobileOpen ? 'fa-times' : 'fa-bars'}`} aria-hidden="true" />
+        </button>
+      </div>
+
+      {mobileOpen && (
+        <>
           <button
             type="button"
-            className="flex w-full items-center gap-3 rounded-xl bg-surface-container-low px-3 py-2.5 text-left transition hover:bg-surface-container"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-          >
-            <img
-              src={foto}
-              alt=""
-              className="h-10 w-10 shrink-0 rounded-full object-cover border border-outline-variant/40 bg-white"
-              onError={(e) => {
-                e.currentTarget.src = BRAND_IMG;
-              }}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-on-surface">{adSoyad}</p>
-              <p className="truncate text-xs text-on-surface-variant">{rol}</p>
+            className="navbar-scrim"
+            aria-label="Menüyü kapat"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="navbar-mobile">
+            <div className="navbar-mobile-profile">
+              <img
+                src={foto}
+                alt=""
+                className="navbar-profile-avatar"
+                onError={(e) => {
+                  e.currentTarget.src = BRAND_IMG;
+                }}
+              />
+              <span className="navbar-profile-text">
+                <span className="navbar-profile-name">{adSoyad}</span>
+                <span className="navbar-profile-role">{rol}</span>
+              </span>
             </div>
-            <i
-              className={`fas fa-chevron-${menuOpen ? 'up' : 'down'} text-[11px] text-on-surface-variant`}
-              aria-hidden="true"
-            />
-          </button>
 
-          {menuOpen && (
-            <div
-              role="menu"
-              className="absolute left-3 right-3 top-[calc(100%-0.35rem)] z-20 overflow-hidden rounded-xl border border-outline-variant/25 bg-white py-1 shadow-lg"
-            >
+            {NAV_SECTIONS.map((section) => {
+              const key = sectionKey(section);
+              const accordion = section.title && section.items.length > 1;
+
+              if (!accordion) {
+                return (
+                  <div className="navbar-mobile-group" key={key}>
+                    {section.items.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`navbar-mobile-link${isActive(item) ? ' is-active' : ''}`}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                );
+              }
+
+              const expanded = mobileSection === key;
+              return (
+                <div className="navbar-mobile-group" key={key}>
+                  <button
+                    type="button"
+                    className={`navbar-mobile-link navbar-mobile-link--trigger${
+                      sectionHasActive(section) ? ' is-active' : ''
+                    }`}
+                    onClick={() => setMobileSection((cur) => (cur === key ? null : key))}
+                    aria-expanded={expanded}
+                  >
+                    <span>{section.title}</span>
+                    <i
+                      className={`fas fa-chevron-down navbar-caret${expanded ? ' is-open' : ''}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  {expanded && (
+                    <div className="navbar-mobile-submenu">
+                      {section.items.map((item) => (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          className={`navbar-mobile-link navbar-mobile-link--sub${
+                            isActive(item) ? ' is-active' : ''
+                          }`}
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <div className="navbar-mobile-group">
+              <p className="navbar-mobile-caption">Hesap</p>
               {PROFILE_MENU.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onClose();
-                  }}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
+                  className="navbar-mobile-link"
+                  onClick={() => setMobileOpen(false)}
                 >
-                  <i className={`${iconClass(item.iconKey)} w-4 text-center text-[14px]`} aria-hidden="true" />
+                  <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
                   {item.label}
                 </Link>
               ))}
             </div>
-          )}
-        </div>
-
-        <nav className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
-          {NAV_SECTIONS.map((section) => (
-            <div key={section.title ?? 'main'}>
-              {section.title && (
-                <p className="mb-1 px-3 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70">
-                  {section.title}
-                </p>
-              )}
-              <div className="flex flex-col gap-0.5">
-                {section.items.map((item) => {
-                  const active = isActive(item);
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      onClick={onClose}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                        active
-                          ? 'bg-primary-container text-white'
-                          : 'text-on-surface-variant hover:bg-surface-container-low'
-                      }`}
-                    >
-                      <i
-                        className={`${iconClass(item.iconKey)} shrink-0 w-5 text-center text-[16px]`}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
-      </aside>
-    </>
+          </div>
+        </>
+      )}
+    </header>
   );
 }
 
