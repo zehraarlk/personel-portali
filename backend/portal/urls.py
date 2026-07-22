@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import home_dashboard, site_icons
 from .profile_views import (
     profile_me,
@@ -6,6 +7,25 @@ from .profile_views import (
     profile_change_email,
     profile_change_password,
 )
+from .admin_profile_views import (
+    admin_profile_me,
+    admin_profile_sessions,
+    admin_profile_change_password,
+)
+from .admin_dashboard_views import admin_dashboard
+from .admin_upload_views import admin_upload_image
+from .admin_crud_views import (
+    EtkinlikViewSet,
+    EtkinlikDuyuruViewSet,
+    PersonelViewSet,
+    YoneticiViewSet,
+)
+
+router = DefaultRouter()
+router.register(r'admin/etkinlikler', EtkinlikViewSet, basename='admin-etkinlikler')
+router.register(r'admin/duyurular', EtkinlikDuyuruViewSet, basename='admin-duyurular')
+router.register(r'admin/personeller', PersonelViewSet, basename='admin-personeller')
+router.register(r'admin/yoneticiler', YoneticiViewSet, basename='admin-yoneticiler')
 
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
@@ -14,4 +34,14 @@ urlpatterns = [
     path('profile/sessions/', profile_sessions, name='profile-sessions'),
     path('profile/change-email/', profile_change_email, name='profile-change-email'),
     path('profile/change-password/', profile_change_password, name='profile-change-password'),
+    path('admin/profile/', admin_profile_me, name='admin-profile-me'),
+    path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),
+    path(
+        'admin/profile/change-password/',
+        admin_profile_change_password,
+        name='admin-profile-change-password',
+    ),
+    path('admin/dashboard/', admin_dashboard, name='admin-dashboard'),
+    path('admin/upload/', admin_upload_image, name='admin-upload'),
+    path('', include(router.urls)),
 ]
