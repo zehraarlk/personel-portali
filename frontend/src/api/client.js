@@ -84,3 +84,13 @@ export async function changePassword(payload) {
   }
   return data;
 }
+
+
+export async function fetchSizdenGelenler(kategori) {
+  const qs = kategori ? `?kategori=${encodeURIComponent(kategori)}` : '';
+  const response = await fetch(`${API_BASE}/sizden-gelenler/${qs}`);
+  if (!response.ok) {
+    throw new Error('Sizden gelenler alınamadı!');
+  }
+  return response.json();
+}
