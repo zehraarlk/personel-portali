@@ -9,6 +9,10 @@ from .models import (
     EtkinliklerDuyurular,
     Personeller,
     Yoneticiler,
+    Videolar,
+    VideolarKategori,
+    SizdenGelenler,
+    SizdengelenlerKategori,
     normalize_image_path,
 )
 
@@ -179,6 +183,121 @@ class PersonelViewSet(viewsets.ModelViewSet):
 class YoneticiViewSet(viewsets.ModelViewSet):
     queryset = Yoneticiler.objects.all().order_by('id')
     serializer_class = AdminYoneticiSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+class AdminVideoSerializer(serializers.ModelSerializer):
+    kategori_ad = serializers.SerializerMethodField(read_only=True)
+    thumbnail = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Videolar
+        fields = [
+            'id',
+            'youtube_id',
+            'baslik',
+            'aciklama',
+            'sure',
+            'kategori',
+            'kategori_ad',
+            'vitrin',
+            'vitrin_baslik',
+            'vitrin_aciklama',
+            'thumbnail',
+        ]
+
+    def get_kategori_ad(self, obj):
+        return obj.kategori.ad if obj.kategori_id else None
+
+    def get_thumbnail(self, obj):
+        if not obj.youtube_id:
+            return ''
+        return f'https://img.youtube.com/vi/{obj.youtube_id}/hqdefault.jpg'
+
+    def create(self, validated_data):
+        if validated_data.get('vitrin') is None:
+            validated_data['vitrin'] = 0
+        if not validated_data.get('sure'):
+            validated_data['sure'] = '00:00'
+        if not validated_data.get('aciklama'):
+            validated_data['aciklama'] = ''
+        return super().create(validated_data)
+
+
+class AdminSizdenGelenSerializer(serializers.ModelSerializer):
+    kategori_ad = serializers.SerializerMethodField(read_only=True)
+    gorsel_display = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = SizdenGelenler
+        fields = [
+            'id',
+            'baslik',
+            'ozet',
+            'tarih',
+            'goruntulenme',
+            'gorsel_yolu',
+            'gorsel_display',
+            'olusturma_tarihi',
+            'kategori',
+            'kategori_ad',
+        ]
+        read_only_fields = ['olusturma_tarihi']
+
+    def get_kategori_ad(self, obj):
+        return obj.kategori.ad if obj.kategori_id else None
+
+    def get_gorsel_display(self, obj):
+        return normalize_image_path(obj.gorsel_yolu)
+
+    def create(self, validated_data):
+        validated_data['olusturma_tarihi'] = timezone.now()
+        if validated_data.get('goruntulenme') is None:
+            validated_data['goruntulenme'] = 0
+        return super().create(validated_data)
+
+
+class VideoViewSet(viewsets.ModelViewSet):
+    queryset = Videolar.objects.select_related('kategori').all().order_by('-id')
+    serializer_class = AdminVideoSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+class SizdenGelenViewSet(viewsets.ModelViewSet):
+    queryset = SizdenGelenler.objects.select_related('kategori').all().order_by('-id')
+    serializer_class = AdminSizdenGelenSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+class VideoKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideolarKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class SizdenGelenKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SizdengelenlerKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class VideoKategoriViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = VideolarKategori.objects.all().order_by('id')
+    serializer_class = VideoKategoriSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+class SizdenGelenKategoriViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SizdengelenlerKategori.objects.all().order_by('id')
+    serializer_class = SizdenGelenKategoriSerializer
     permission_classes = [AllowAny]
     authentication_classes = []
     pagination_class = None
