@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { fetchSizdenGelenler, goruntulenmeArttir } from '../api/client';
+import { fetchSizdenGelenler } from '../api/client';
+
 const SAYFA_BASI = 6;
 
 function getDeptIcon(kategori) {
@@ -77,8 +78,6 @@ function IcerikKarti({ item, arama }) {
           </span>
         </div>
       </div>
-
-      <span className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-[#f5a623] transition-transform duration-300 group-hover:scale-x-100" />
     </Link>
   );
 }
@@ -90,8 +89,27 @@ export default function SizdenGelenler() {
   const [seciliKategori, setSeciliKategori] = useState(null);
   const [arama, setArama] = useState('');
   const [slide, setSlide] = useState(0);
-  const [sayfa, setSayfa] = useState(0);
   const listeRef = useRef(null);
+  const ilkYuklemeRef = useRef(true);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sayfa = Number(searchParams.get('sayfa') || 0);
+
+  function sayfaAyarla(deger) {
+    setSearchParams(
+      (prev) => {
+        const yeniDeger = typeof deger === 'function' ? deger(sayfa) : deger;
+        const next = new URLSearchParams(prev);
+        if (yeniDeger === 0) {
+          next.delete('sayfa');
+        } else {
+          next.set('sayfa', String(yeniDeger));
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  }
 
   useEffect(() => {
     fetchSizdenGelenler()
@@ -135,7 +153,11 @@ export default function SizdenGelenler() {
   }, [icerikler, seciliKategori, arama]);
 
   useEffect(() => {
-    setSayfa(0);
+    if (ilkYuklemeRef.current) {
+      ilkYuklemeRef.current = false;
+      return;
+    }
+    sayfaAyarla(0);
   }, [seciliKategori, arama]);
 
   const toplamSayfa = Math.max(1, Math.ceil(filtreliIcerikler.length / SAYFA_BASI));
@@ -192,13 +214,12 @@ export default function SizdenGelenler() {
             {/* Öne çıkanlar: kayan ekran + filtre paneli, ayrı ayrı kutular */}
             {vitrin.length > 0 && (
               <div className="mb-10 grid gap-6 lg:grid-cols-12">
-                {/* Sol: kayan görsel - ayrı kart */}
                 <div className="relative isolate overflow-hidden rounded-[28px] border border-[#022842]/10 bg-[#011f34] shadow-[0_18px_50px_rgba(2,40,66,0.12)] lg:col-span-8">
                   <div className="relative aspect-video">
                     {vitrin.map((item, i) => (
                       <Link
                         key={item.id}
-                        to={`/sizden-gelenler/${item.id}`}
+                        to={`/sizden-gelenler/detay/${item.id}`}
                         className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
                           i === slide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                         }`}
@@ -263,7 +284,6 @@ export default function SizdenGelenler() {
                   </div>
                 </div>
 
-                {/* Sağ: arama + müdürlük filtresi - ayrı kart */}
                 <div className="relative flex flex-col justify-center overflow-hidden rounded-[28px] border border-[#022842]/10 border-t-4 border-t-[#f5a623] bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] p-6 shadow-[0_18px_50px_rgba(2,40,66,0.12)] md:p-8 lg:col-span-4">
                   <h2 className="mb-4 text-xl font-extrabold leading-tight tracking-tight text-[#0b1c30]">
                     Müdürlüğe Göre Filtrele
@@ -318,7 +338,6 @@ export default function SizdenGelenler() {
               </div>
             )}
 
-            {/* Aktif kategori başlığı - listeye kaydırma hedefi */}
             <div ref={listeRef} className="mb-5 flex flex-wrap items-center justify-between gap-3 scroll-mt-6">
               <div>
                 <h2 className="text-xl font-bold text-[#0b1c30] md:text-2xl">
@@ -332,7 +351,6 @@ export default function SizdenGelenler() {
               </div>
             </div>
 
-            {/* Kart grid'i */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {gosterilenler.map((item) => (
                 <IcerikKarti key={item.id} item={item} arama={arama} />
@@ -351,11 +369,10 @@ export default function SizdenGelenler() {
               )}
             </div>
 
-            {/* Sayfalama */}
             {toplamSayfa > 1 && (
               <div className="flex items-center justify-center gap-2 pt-8">
                 <button
-                  onClick={() => setSayfa((s) => Math.max(0, s - 1))}
+                  onClick={() => sayfaAyarla((s) => Math.max(0, s - 1))}
                   disabled={sayfa === 0}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-[#022842]/10 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#022842]/30 transition"
                   aria-label="Önceki sayfa"
@@ -368,7 +385,7 @@ export default function SizdenGelenler() {
                 {sayfaNumaralari.map((n) => (
                   <button
                     key={n}
-                    onClick={() => setSayfa(n)}
+                    onClick={() => sayfaAyarla(n)}
                     aria-label={`${n + 1}. sayfaya git`}
                     aria-current={sayfa === n ? 'page' : undefined}
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition ${
@@ -382,7 +399,7 @@ export default function SizdenGelenler() {
                 ))}
 
                 <button
-                  onClick={() => setSayfa((s) => Math.min(toplamSayfa - 1, s + 1))}
+                  onClick={() => sayfaAyarla((s) => Math.min(toplamSayfa - 1, s + 1))}
                   disabled={sayfa >= toplamSayfa - 1}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-[#022842]/10 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#022842]/30 transition"
                   aria-label="Sonraki sayfa"
