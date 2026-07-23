@@ -18,7 +18,18 @@
   text-transform: uppercase;
   color: var(--navy-soft);
 }
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
 
+.animate-marquee {
+  animation: marquee 55s linear infinite;
+}
 .home__heading {
   margin: 0 0 0.4rem;
   font-size: clamp(1.7rem, 3vw, 2.2rem);
@@ -378,6 +389,125 @@
 
   .systems {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Kurum İçi Otomasyon Sistemleri — Liste Görünümü */
+.automation-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .automation-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.automation-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 0.4rem;
+  border-bottom: 1px solid var(--line, #ff7700);
+  text-decoration: none;
+  border-radius: 14px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.automation-row:last-child {
+  border-bottom: none;
+}
+
+.automation-row:hover {
+  background: #f8fafc;
+  transform: translateX(3px);
+}
+
+.automation-icon {
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #f8fafc;
+  border: 1px solid var(--line, #f0ebe6);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.automation-row:hover .automation-icon {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px -6px rgba(2, 40, 66, 0.25);
+}
+/* ==========================================================================
+   Yenilenmiş Doğum Günü Ve Otomasyon Stilleri
+   ========================================================================== */
+
+.birthday-section {
+  box-shadow: 0 4px 20px -2px rgba(244, 63, 94, 0.05);
+}
+
+.birthday-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.25s ease;
+}
+
+.automation-card {
+  min-height: 115px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.25s ease, 
+              background-color 0.25s ease;
+}
+
+.automation-card-icon img {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+}
+.automation-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+
+.automation-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: var(--navy, #022842);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.automation-arrow {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #eef2f6;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.automation-row:hover .automation-arrow {
+  transform: translateX(3px);
+  background: #022842;
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .automation-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
   }
 }
 
