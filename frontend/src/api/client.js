@@ -112,3 +112,13 @@ export async function fetchSizdenGelenler(kategori) {
   }
   return response.json();
 }
+
+/** etkinlikler — { durumlar: [...], etkinlikler: [...] } */
+export async function fetchEtkinlikler(durum) {
+  const qs = durum ? `?durum=${encodeURIComponent(durum)}` : '';
+  const response = await fetch(`${API_BASE}/etkinlikler/${qs}`);
+  if (!response.ok) {
+    throw new Error('Etkinlikler alınamadı');
+  }
+  return response.json();
+}
