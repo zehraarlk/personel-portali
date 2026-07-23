@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { adminAuthHeaders, getYoneticiId, getYoneticiOturumId } from '../auth/session';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -8,6 +9,10 @@ const apiClient = axios.create({
 });
 
 export default apiClient;
+
+function jsonHeaders(extra = {}) {
+  return adminAuthHeaders({ 'Content-Type': 'application/json', ...extra });
+}
 
 export async function fetchHealth() {
   const response = await fetch(`${API_BASE}/health/`);
@@ -44,7 +49,9 @@ export async function fetchSiteIcons(kategori) {
 }
 
 export async function fetchAdminDashboard() {
-  const response = await fetch(`${API_BASE}/admin/dashboard/`);
+  const response = await fetch(`${API_BASE}/admin/dashboard/`, {
+    headers: adminAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error('Dashboard verileri alınamadı');
   }
@@ -218,8 +225,92 @@ export async function deleteYonetici(id) {
   return true;
 }
 
+export async function listVideolar() {
+  const response = await fetch(`${API_BASE}/admin/videolar/`);
+  return parseJson(response);
+}
+
+export async function getVideo(id) {
+  const response = await fetch(`${API_BASE}/admin/videolar/${id}/`);
+  return parseJson(response);
+}
+
+export async function createVideo(payload) {
+  const response = await fetch(`${API_BASE}/admin/videolar/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateVideo(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/videolar/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteVideo(id) {
+  const response = await fetch(`${API_BASE}/admin/videolar/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listVideoKategoriler() {
+  const response = await fetch(`${API_BASE}/admin/videolar-kategoriler/`);
+  return parseJson(response);
+}
+
+export async function listSizdenGelenler() {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/`);
+  return parseJson(response);
+}
+
+export async function getSizdenGelen(id) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`);
+  return parseJson(response);
+}
+
+export async function createSizdenGelen(payload) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateSizdenGelen(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteSizdenGelen(id) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listSizdenGelenKategoriler() {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler-kategoriler/`);
+  return parseJson(response);
+}
+
 export async function fetchProfile() {
-  const response = await fetch(`${API_BASE}/admin/profile/`);
+  const response = await fetch(`${API_BASE}/admin/profile/`, {
+    headers: adminAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error('Yönetici profili alınamadı');
   }
@@ -227,7 +318,9 @@ export async function fetchProfile() {
 }
 
 export async function fetchProfileSessions() {
-  const response = await fetch(`${API_BASE}/admin/profile/sessions/`);
+  const response = await fetch(`${API_BASE}/admin/profile/sessions/`, {
+    headers: adminAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error('Oturum kayıtları alınamadı');
   }
@@ -237,7 +330,7 @@ export async function fetchProfileSessions() {
 export async function changePassword(payload) {
   const response = await fetch(`${API_BASE}/admin/profile/change-password/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));
@@ -245,4 +338,23 @@ export async function changePassword(payload) {
     throw new Error(data.detail || 'Şifre güncellenemedi');
   }
   return data;
+}
+
+export async function logoutAdmin(options = {}) {
+  const { kapanis_tipi = 'manuel' } = options;
+  const payload = {
+    kapanis_tipi,
+    oturum_id: getYoneticiOturumId() || undefined,
+    yonetici_id: getYoneticiId() || undefined,
+  };
+  const response = await fetch(`${API_BASE}/auth/admin-logout/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.detail || 'Çıkış yapılamadı');
+  }
+  return response.json().catch(() => ({ status: 'ok' }));
 }
