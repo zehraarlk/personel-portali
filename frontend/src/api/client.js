@@ -217,6 +217,16 @@ export async function fetchSizdenGelenler(kategori) {
   return response.json();
 }
 
+export async function goruntulenmeArttir(id) {
+  const response = await fetch(`${API_BASE}/sizden-gelenler/${id}/goruntule/`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error('Görüntülenme sayısı güncellenemedi');
+  }
+  return response.json();
+}
+
 /** etkinlikler — { durumlar: [...], etkinlikler: [...] } */
 export async function fetchEtkinlikler(durum) {
   const qs = durum ? `?durum=${encodeURIComponent(durum)}` : '';
