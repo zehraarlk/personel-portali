@@ -53,6 +53,11 @@ def verify_sifre(raw: str, stored: str) -> bool:
             return bcrypt.checkpw(raw.encode('utf-8'), normalized)
         except Exception:
             return False
+    # Eski PHP login.md5 uyumu
+    if len(stored) == 32 and all(c in '0123456789abcdef' for c in stored.lower()):
+        import hashlib
+
+        return hashlib.md5(raw.encode('utf-8')).hexdigest() == stored.lower()
     return stored == raw
 
 

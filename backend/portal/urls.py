@@ -14,6 +14,13 @@ from .admin_profile_views import (
 )
 from .admin_dashboard_views import admin_dashboard
 from .admin_upload_views import admin_upload_image
+from .auth_views import (
+    auth_login,
+    auth_admin_login,
+    auth_forgot_password,
+    auth_logout,
+    auth_admin_logout,
+)
 from .admin_crud_views import (
     EtkinlikViewSet,
     EtkinlikDuyuruViewSet,
@@ -45,6 +52,12 @@ urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
     path('icons/', site_icons, name='site-icons'),
     path('videos/', videos, name='videos'),
+
+    path('auth/login/', auth_login, name='auth-login'),
+    path('auth/admin-login/', auth_admin_login, name='auth-admin-login'),
+    path('auth/forgot-password/', auth_forgot_password, name='auth-forgot-password'),
+    path('auth/logout/', auth_logout, name='auth-logout'),
+    path('auth/admin-logout/', auth_admin_logout, name='auth-admin-logout'),
 
     path('profile/', profile_me, name='profile-me'),
     path('profile/sessions/', profile_sessions, name='profile-sessions'),
