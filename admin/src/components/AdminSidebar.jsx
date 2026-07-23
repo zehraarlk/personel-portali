@@ -19,19 +19,20 @@ export default function AdminSidebar({ open, onClose }) {
 
   return (
     <aside className={`admin-sidebar${open ? ' is-open' : ''}`}>
-      <button type="button" className="admin-sidebar__close" onClick={onClose} aria-label="Kapat">
-        <i className="fas fa-times" aria-hidden="true" />
-      </button>
-
-      <Link to={ADMIN_BASE} className="admin-sidebar__brand" onClick={onClose}>
-        <span className="admin-sidebar__brand-mark" aria-hidden="true">
-          <img src={BRAND_IMG} alt="" />
-        </span>
-        <div>
-          <strong>Yönetim Paneli</strong>
-          <span>Gebze Belediyesi</span>
-        </div>
-      </Link>
+      <div className="admin-sidebar__brand-row">
+        <Link to={ADMIN_BASE} className="admin-sidebar__brand" onClick={onClose}>
+          <span className="admin-sidebar__brand-mark" aria-hidden="true">
+            <img src={BRAND_IMG} alt="" />
+          </span>
+          <div>
+            <strong>Yönetim Paneli</strong>
+            <span>Gebze Belediyesi</span>
+          </div>
+        </Link>
+        <button type="button" className="admin-sidebar__close" onClick={onClose} aria-label="Kapat">
+          <i className="fas fa-times" aria-hidden="true" />
+        </button>
+      </div>
 
       <nav className="admin-sidebar__nav">
         {ADMIN_NAV.map((section, idx) => (

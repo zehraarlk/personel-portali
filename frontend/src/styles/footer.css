@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Footer — full navbar-matching design (navy brand tokens, gold accent)
+   Footer — navy brand, responsive grid
    ========================================================================== */
 
 .site-footer {
@@ -7,62 +7,81 @@
   width: 100%;
   background: var(--nav-bg, #022842);
   color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+  overflow-x: clip;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .site-footer-inner {
-  max-width: 1280px;
+  width: min(1280px, 100%);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 48px 20px 0;
+  padding: 36px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
-
-/* --- Top grid: brand / link columns / contact --- */
 
 .site-footer-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 36px;
-  padding-bottom: 36px;
+  gap: 28px;
+  padding-bottom: 28px;
   border-bottom: 1px solid var(--nav-border, rgba(255, 255, 255, 0.12));
+}
+
+.site-footer-brand-col,
+.site-footer-grid > div,
+.site-footer-links-row > div {
+  min-width: 0;
+}
+
+/* Mobil: Hızlı Erişim + Kaynaklar yan yana */
+.site-footer-links-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 16px;
 }
 
 .site-footer-brand-col {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: 12px;
 }
 
 .site-footer-logo {
-  height: 40px;
+  height: clamp(32px, 8vw, 40px);
   width: auto;
-  max-width: 172px;
+  max-width: min(172px, 70vw);
   object-fit: contain;
 }
 
 .site-footer-tagline {
+  margin: 0;
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
-  max-width: 320px;
+  max-width: 36rem;
+  overflow-wrap: break-word;
 }
 
 .site-footer-social {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .site-footer-social-link {
   display: grid;
   place-items: center;
-  height: 36px;
-  width: 36px;
+  height: 40px;
+  width: 40px;
   border-radius: 999px;
   background: var(--nav-bg-raised, #0b3757);
   color: var(--nav-text, #ffffff);
   font-size: 14px;
   transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .site-footer-social-link:hover {
@@ -72,7 +91,7 @@
 }
 
 .site-footer-col-title {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -92,7 +111,9 @@
   color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
   text-decoration: none;
   width: fit-content;
+  max-width: 100%;
   transition: color 0.15s ease;
+  padding: 2px 0;
 }
 
 .site-footer-link:hover {
@@ -106,10 +127,18 @@
   font-size: 13.5px;
   line-height: 1.5;
   color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+  min-width: 0;
 }
 
 .site-footer-contact-item + .site-footer-contact-item {
   margin-top: 12px;
+}
+
+.site-footer-contact-item > span,
+.site-footer-contact-link {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .site-footer-contact-icon {
@@ -131,25 +160,31 @@
   color: var(--nav-accent, #f5a623);
 }
 
-/* --- Bottom bar --- */
+/* --- Alt bar --- */
 
 .site-footer-bottom {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 18px 0 24px;
+  gap: 12px;
+  padding: 16px 0 22px;
   font-size: 12px;
+  line-height: 1.45;
   color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
   text-align: center;
+}
+
+.site-footer-bottom > span {
+  max-width: 36rem;
+  overflow-wrap: break-word;
 }
 
 .site-footer-bottom-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 16px;
+  gap: 8px 16px;
 }
 
 .site-footer-bottom-link {
@@ -158,6 +193,7 @@
   color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
   text-decoration: none;
   transition: color 0.15s ease;
+  padding: 4px 0;
 }
 
 .site-footer-bottom-link:hover {
@@ -165,28 +201,80 @@
 }
 
 /* ==========================================================================
-   Responsive breakpoints
+   Breakpoints
    ========================================================================== */
+
+@media (min-width: 480px) {
+  .site-footer-inner {
+    padding-top: 40px;
+  }
+}
 
 @media (min-width: 640px) {
   .site-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 28px;
+  }
+
+  /* Marka sütunu tam genişlik (üst sıra) */
+  .site-footer-brand-col {
+    grid-column: 1 / -1;
+  }
+
+  .site-footer-links-row {
+    gap: 28px;
   }
 }
 
 @media (min-width: 768px) {
   .site-footer-inner {
-    padding: 56px 32px 0;
+    padding: 48px clamp(20px, 4vw, 32px) 0;
   }
 
   .site-footer-bottom {
     flex-direction: row;
+    align-items: center;
     text-align: left;
+    gap: 16px;
+  }
+
+  .site-footer-bottom-links {
+    justify-content: flex-end;
+    flex-shrink: 0;
   }
 }
 
 @media (min-width: 1024px) {
   .site-footer-grid {
-    grid-template-columns: 1.4fr 0.8fr 0.8fr 1fr;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.7fr) minmax(0, 1.1fr);
+    gap: 36px 32px;
+    padding-bottom: 36px;
+  }
+
+  .site-footer-brand-col {
+    grid-column: auto;
+  }
+
+  .site-footer-links-row {
+    gap: 32px;
+  }
+
+  .site-footer-tagline {
+    max-width: 320px;
+  }
+
+  .site-footer-social-link {
+    height: 36px;
+    width: 36px;
+  }
+}
+
+@media (max-width: 379px) {
+  .site-footer-inner {
+    padding-inline: 12px;
+  }
+
+  .site-footer-bottom-links {
+    gap: 6px 12px;
   }
 }
