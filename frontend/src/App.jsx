@@ -7,6 +7,7 @@ import ChangePassword from './pages/ChangePassword';
 import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
 import SizdenGelenler from './pages/SizdenGelenler';
+import SizdenGelenlerDetay from './pages/SizdenGelenlerDetay';
 import Videos from './pages/Videos';
 import AdminRoutes from '@admin/AdminRoutes.jsx';
 
@@ -33,6 +34,7 @@ export default function App() {
       <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
       <Route path="/profil/eposta-degistir" element={<ChangeEmail />} />
       <Route path="/sizden-gelenler" element={<SizdenGelenler />} />
+      <Route path="/sizden-gelenler/detay/:id" element={<SizdenGelenlerDetay />} />
       <Route path="/profil/oturum-kayitlari" element={<SessionHistory />} />
       {PLACEHOLDER_PATHS.map((slug) => (
         <Route key={slug} path={`/${slug}`} element={<ComingSoon />} />
