@@ -19,6 +19,10 @@ from .admin_crud_views import (
     EtkinlikDuyuruViewSet,
     PersonelViewSet,
     YoneticiViewSet,
+    VideoViewSet,
+    SizdenGelenViewSet,
+    VideoKategoriViewSet,
+    SizdenGelenKategoriViewSet,
 )
 
 router = DefaultRouter()
@@ -26,6 +30,16 @@ router.register(r'admin/etkinlikler', EtkinlikViewSet, basename='admin-etkinlikl
 router.register(r'admin/duyurular', EtkinlikDuyuruViewSet, basename='admin-duyurular')
 router.register(r'admin/personeller', PersonelViewSet, basename='admin-personeller')
 router.register(r'admin/yoneticiler', YoneticiViewSet, basename='admin-yoneticiler')
+router.register(r'admin/videolar', VideoViewSet, basename='admin-videolar')
+router.register(r'admin/sizden-gelenler', SizdenGelenViewSet, basename='admin-sizden-gelenler')
+router.register(
+    r'admin/videolar-kategoriler', VideoKategoriViewSet, basename='admin-videolar-kategoriler'
+)
+router.register(
+    r'admin/sizden-gelenler-kategoriler',
+    SizdenGelenKategoriViewSet,
+    basename='admin-sizden-gelenler-kategoriler',
+)
 
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
