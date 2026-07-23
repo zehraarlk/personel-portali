@@ -13,6 +13,8 @@ from .models import (
     SizdengelenlerKategori,
     Videolar,
     VideolarKategori,
+    Etkinlikler,
+    EtkinliklerDurum,
 )
 from .serializers import (
     HaberSerializer,
@@ -24,6 +26,8 @@ from .serializers import (
     SizdengelenlerKategoriSerializer,
     VideoSerializer,
     VideoKategoriSerializer,
+    EtkinlikSerializer,
+    EtkinliklerDurumSerializer,
 )
 
 
@@ -119,4 +123,21 @@ def videos(request):
             if vitrin_video
             else None
         ),
+    })
+
+
+@api_view(['GET'])
+def etkinlikler_list(request):
+    """Etkinlikler: durum sekmeleri + (varsa filtrelenmiş) etkinlik listesi."""
+    etkinlikler = Etkinlikler.objects.select_related('durum_ref').order_by('tarih')
+
+    durum_slug = request.query_params.get('durum')
+    if durum_slug:
+        etkinlikler = etkinlikler.filter(durum_ref__slug=durum_slug)
+
+    durumlar = EtkinliklerDurum.objects.order_by('id')
+
+    return Response({
+        'durumlar': EtkinliklerDurumSerializer(durumlar, many=True).data,
+        'etkinlikler': EtkinlikSerializer(etkinlikler, many=True).data,
     })

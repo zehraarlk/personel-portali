@@ -8,10 +8,10 @@ import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
 import SizdenGelenler from './pages/SizdenGelenler';
 import Videos from './pages/Videos';
+import Etkinlikler from './pages/Etkinlikler';
 import AdminRoutes from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
-  'etkinlikler',
   'duyurular',
   'protokoller',
   'dokumanlar',
@@ -28,6 +28,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/videolar" element={<Videos />} />
+      <Route path="/etkinlikler" element={<Etkinlikler />} />
       <Route path="/test" element={<Test />} />
       <Route path="/test/personel-db" element={<PersonelDb />} />
       <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
