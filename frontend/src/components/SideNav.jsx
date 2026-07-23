@@ -53,10 +53,8 @@ const NAV_SECTIONS = [
   },
 ];
 
-// Left / right split around the centered logo.
-// Left: Anasayfa, Videolar, Etkinlikler — Right: Kaynaklar, Diğer, Personel (profile)
-const LEFT_SECTIONS = NAV_SECTIONS.slice(0, 2); // Anasayfa/Videolar, Etkinlikler
-const RIGHT_SECTIONS = NAV_SECTIONS.slice(2); // Kaynaklar, Diğer
+const LEFT_SECTIONS = NAV_SECTIONS.slice(0, 2);
+const RIGHT_SECTIONS = NAV_SECTIONS.slice(2);
 
 const PROFILE_MENU_PERSONEL = [
   { to: '/profil/sifre-degistir', label: 'Şifre Değiştir', iconKey: 'sifre_degistir' },
@@ -100,25 +98,38 @@ export default function Navbar() {
   const [profile, setProfile] = useState(null);
   const [loggedIn, setLoggedIn] = useState(() => canAccessPortal());
   const [isAdmin, setIsAdmin] = useState(() => isYoneticiLoggedIn());
-  const [openMenu, setOpenMenu] = useState(null); // key of open desktop dropdown / 'profile'
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSection, setMobileSection] = useState(null); // key of expanded accordion on mobile
+  const [openMenu, setOpenMenu] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const navRef = useRef(null);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     setOpenMenu(null);
-    setMobileOpen(false);
-    setMobileSection(null);
+    setSidebarOpen(false);
+    setProfileOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!mobileOpen) return undefined;
+    if (!sidebarOpen) return undefined;
+    setProfileOpen(false);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [mobileOpen]);
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (!profileOpen) return undefined;
+    const onDoc = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [profileOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -170,7 +181,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setOpenMenu(null);
-    setMobileOpen(false);
+    setSidebarOpen(false);
+    setProfileOpen(false);
     const admin = isYoneticiLoggedIn();
     try {
       if (admin) {
@@ -179,7 +191,7 @@ export default function Navbar() {
         await logoutPersonel();
       }
     } catch {
-      /* local clear yine de */
+      /* local clear */
     }
     if (admin) {
       clearAuth();
@@ -204,7 +216,6 @@ export default function Navbar() {
 
   const sectionKey = (section) => section.title ?? 'main';
   const sectionHasActive = (section) => section.items.some(isActive);
-
   const iconClass = (key) => icons[key] || FALLBACK_ICONS[key] || 'fas fa-circle';
   const foto = profile?.foto || BRAND_IMG;
   const adSoyad = loggedIn
@@ -216,10 +227,35 @@ export default function Navbar() {
 
   const toggleMenu = (key) => setOpenMenu((cur) => (cur === key ? null : key));
 
+  const renderProfileItems = (onClose, linkClass, withDropdownIcon = false) => {
+    const ico = (key) => `${iconClass(key)}${withDropdownIcon ? ' navbar-dropdown-icon' : ''}`;
+    if (!loggedIn) {
+      return (
+        <Link to="/giris" role="menuitem" className={linkClass} onClick={onClose}>
+          <i className={ico('giris')} aria-hidden="true" />
+          Giriş Yap
+        </Link>
+      );
+    }
+    return (
+      <>
+        {profileMenu.map((item) => (
+          <Link key={item.to} to={item.to} role="menuitem" className={linkClass} onClick={onClose}>
+            <i className={ico(item.iconKey)} aria-hidden="true" />
+            {item.label}
+          </Link>
+        ))}
+        <button type="button" role="menuitem" className={linkClass} onClick={handleLogout}>
+          <i className={ico('cikis')} aria-hidden="true" />
+          Çıkış Yap
+        </button>
+      </>
+    );
+  };
+
   const renderDesktopSection = (section) => {
     const key = sectionKey(section);
 
-    // Untitled or single-item sections render as plain links, no dropdown.
     if (!section.title || section.items.length === 1) {
       return section.items.map((item) => (
         <Link
@@ -271,11 +307,28 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-inner" ref={navRef}>
-        <nav className="navbar-side navbar-side--left">
-          {LEFT_SECTIONS.map(renderDesktopSection)}
-        </nav>
+        {/* Mobil topbar: hamburger + logo (admin sol blok) */}
+        <div className="navbar-mobile-left">
+          <button
+            type="button"
+            className="navbar-burger"
+            onClick={() => {
+              setProfileOpen(false);
+              setSidebarOpen(true);
+            }}
+            aria-label="Menüyü aç"
+            aria-expanded={sidebarOpen}
+          >
+            <i className="fas fa-bars" aria-hidden="true" />
+          </button>
+          <Link to="/" className="navbar-logo navbar-logo--mobile" aria-label="Ana Sayfa">
+            <img src={SITE_LOGO_WHITE} alt="Gebze Belediyesi" />
+          </Link>
+        </div>
 
-        <Link to="/" className="navbar-logo" aria-label="Ana Sayfa">
+        <nav className="navbar-side navbar-side--left">{LEFT_SECTIONS.map(renderDesktopSection)}</nav>
+
+        <Link to="/" className="navbar-logo navbar-logo--desktop" aria-label="Ana Sayfa">
           <img src={SITE_LOGO_WHITE} alt="Gebze Belediyesi" />
         </Link>
 
@@ -310,174 +363,99 @@ export default function Navbar() {
 
             {openMenu === 'profile' && (
               <div role="menu" className="navbar-dropdown navbar-dropdown--right">
-                {loggedIn ? (
-                  <>
-                    {profileMenu.map((item) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        role="menuitem"
-                        className="navbar-dropdown-link"
-                        onClick={() => setOpenMenu(null)}
-                      >
-                        <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
-                        {item.label}
-                      </Link>
-                    ))}
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className="navbar-dropdown-link"
-                      onClick={handleLogout}
-                    >
-                      <i className={`${iconClass('cikis')} navbar-dropdown-icon`} aria-hidden="true" />
-                      Çıkış Yap
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    to="/giris"
-                    role="menuitem"
-                    className="navbar-dropdown-link"
-                    onClick={() => setOpenMenu(null)}
-                  >
-                    <i className={`${iconClass('giris')} navbar-dropdown-icon`} aria-hidden="true" />
-                    Giriş Yap
-                  </Link>
-                )}
+                {renderProfileItems(() => setOpenMenu(null), 'navbar-dropdown-link', true)}
               </div>
             )}
           </div>
         </nav>
 
-        <button
-          type="button"
-          className="navbar-burger"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label={mobileOpen ? 'Menüyü kapat' : 'Menüyü aç'}
-          aria-expanded={mobileOpen}
-        >
-          <i className={`fas ${mobileOpen ? 'fa-times' : 'fa-bars'}`} aria-hidden="true" />
-        </button>
-      </div>
-
-      {mobileOpen && (
-        <>
+        {/* Mobil topbar: profil rozeti (admin sağ blok) */}
+        <div className="navbar-mobile-user" ref={profileRef}>
           <button
             type="button"
-            className="navbar-scrim"
-            aria-label="Menüyü kapat"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="navbar-mobile">
-            <div className="navbar-mobile-profile">
-              <img
-                src={foto}
-                alt=""
-                className="navbar-profile-avatar"
-                onError={(e) => {
-                  e.currentTarget.src = BRAND_IMG;
-                }}
-              />
-              <span className="navbar-profile-text">
-                <span className="navbar-profile-name">{adSoyad}</span>
-                <span className="navbar-profile-role">{rol}</span>
-              </span>
+            className="navbar-mobile-badge"
+            onClick={() => {
+              setSidebarOpen(false);
+              setProfileOpen((v) => !v);
+            }}
+            aria-expanded={profileOpen}
+            aria-haspopup="menu"
+          >
+            <img
+              src={foto}
+              alt=""
+              onError={(e) => {
+                e.currentTarget.src = BRAND_IMG;
+              }}
+            />
+            <span className="navbar-mobile-badge-text">
+              <strong>{adSoyad}</strong>
+              <small>{rol}</small>
+            </span>
+            <i className={`fas fa-chevron-${profileOpen ? 'up' : 'down'}`} aria-hidden="true" />
+          </button>
+
+          {profileOpen && (
+            <div className="navbar-mobile-dropdown" role="menu">
+              {renderProfileItems(() => setProfileOpen(false), 'navbar-mobile-dropdown-item')}
             </div>
+          )}
+        </div>
+      </div>
 
-            {NAV_SECTIONS.map((section) => {
-              const key = sectionKey(section);
-              const accordion = section.title && section.items.length > 1;
-
-              if (!accordion) {
-                return (
-                  <div className="navbar-mobile-group" key={key}>
-                    {section.items.map((item) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className={`navbar-mobile-link${isActive(item) ? ' is-active' : ''}`}
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                );
-              }
-
-              const expanded = mobileSection === key;
-              return (
-                <div className="navbar-mobile-group" key={key}>
-                  <button
-                    type="button"
-                    className={`navbar-mobile-link navbar-mobile-link--trigger${
-                      sectionHasActive(section) ? ' is-active' : ''
-                    }`}
-                    onClick={() => setMobileSection((cur) => (cur === key ? null : key))}
-                    aria-expanded={expanded}
-                  >
-                    <span>{section.title}</span>
-                    <i
-                      className={`fas fa-chevron-down navbar-caret${expanded ? ' is-open' : ''}`}
-                      aria-hidden="true"
-                    />
-                  </button>
-                  {expanded && (
-                    <div className="navbar-mobile-submenu">
-                      {section.items.map((item) => (
-                        <Link
-                          key={item.to}
-                          to={item.to}
-                          className={`navbar-mobile-link navbar-mobile-link--sub${
-                            isActive(item) ? ' is-active' : ''
-                          }`}
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            <div className="navbar-mobile-group">
-              <p className="navbar-mobile-caption">Hesap</p>
-              {loggedIn ? (
-                <>
-                  {profileMenu.map((item) => (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      className="navbar-mobile-link"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
-                      {item.label}
-                    </Link>
-                  ))}
-                  <button type="button" className="navbar-mobile-link" onClick={handleLogout}>
-                    <i className={`${iconClass('cikis')} navbar-dropdown-icon`} aria-hidden="true" />
-                    Çıkış Yap
-                  </button>
-                </>
-              ) : (
-                <Link
-                  to="/giris"
-                  className="navbar-mobile-link"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <i className={`${iconClass('giris')} navbar-dropdown-icon`} aria-hidden="true" />
-                  Giriş Yap
-                </Link>
-              )}
-            </div>
+      {/* Mobil sidebar — admin sidebar gibi */}
+      <aside className={`navbar-sidebar${sidebarOpen ? ' is-open' : ''}`} aria-hidden={!sidebarOpen}>
+        <div className="navbar-sidebar__brand">
+          <span className="navbar-sidebar__brand-mark" aria-hidden="true">
+            <img
+              src={foto}
+              alt=""
+              onError={(e) => {
+                e.currentTarget.src = BRAND_IMG;
+              }}
+            />
+          </span>
+          <div>
+            <strong>{adSoyad}</strong>
+            <span>{rol}</span>
           </div>
-        </>
+          <button
+            type="button"
+            className="navbar-sidebar__close"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Kapat"
+          >
+            <i className="fas fa-times" aria-hidden="true" />
+          </button>
+        </div>
+
+        <nav className="navbar-sidebar__nav">
+          {NAV_SECTIONS.map((section, idx) => (
+            <div key={sectionKey(section) || `sec-${idx}`}>
+              {section.title && <p className="navbar-nav-section">{section.title}</p>}
+              {section.items.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`navbar-nav-link${isActive(item) ? ' is-active' : ''}`}
+                >
+                  <i className={iconClass(item.iconKey)} aria-hidden="true" />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="navbar-sidebar-backdrop is-open"
+          aria-label="Menüyü kapat"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
     </header>
   );
