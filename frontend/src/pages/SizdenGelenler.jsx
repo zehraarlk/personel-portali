@@ -1,8 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { fetchSizdenGelenler } from '../api/client';
 
 const SAYFA_BASI = 6;
+
+function getDeptIcon(kategori) {
+  const value = `${kategori?.slug ?? ''} ${kategori?.ad ?? ''}`.toLocaleLowerCase('tr-TR');
+
+  if (value.includes('insan') || value.includes('kaynak')) return 'groups';
+  if (value.includes('fen')) return 'construction';
+  if (value.includes('temizlik')) return 'cleaning_services';
+  if (value.includes('veteriner')) return 'pets';
+  if (value.includes('park') || value.includes('bahce') || value.includes('bahçe')) return 'park';
+  if (value.includes('zabita') || value.includes('zabıta')) return 'shield';
+
+  return 'apartment';
+}
 
 function vurgula(metin, sorgu) {
   const temizSorgu = sorgu.trim();
@@ -13,12 +27,60 @@ function vurgula(metin, sorgu) {
 
   return parcalar.map((parca, i) =>
     parca.toLocaleLowerCase('tr-TR') === temizSorgu.toLocaleLowerCase('tr-TR') ? (
-      <span key={i} className="font-bold text-on-surface bg-primary/15 rounded px-0.5">
+      <span key={i} className="font-bold text-[#022842] bg-[#f5a623]/25 rounded px-0.5">
         {parca}
       </span>
     ) : (
       parca
     )
+  );
+}
+
+function IcerikKarti({ item, arama }) {
+  return (
+    <Link
+      to={`/sizden-gelenler/detay/${item.id}`}
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] shadow-[0_6px_22px_rgba(2,40,66,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/25 hover:shadow-[0_16px_36px_rgba(2,40,66,0.14)]"
+    >
+      <div className="relative h-52 overflow-hidden bg-[#dce6ed]">
+        <img
+          src={item.resim}
+          alt={item.kategori}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/55 via-transparent to-black/5 opacity-80 transition duration-300 group-hover:opacity-100" />
+
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/65 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+          <span className="material-symbols-outlined text-[14px]">visibility</span>
+          {item.goruntulenme ?? 0}
+        </span>
+
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/65 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+          {item.tarih}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col p-5">
+        <h2 className="line-clamp-2 min-h-[3.25rem] text-lg font-extrabold leading-[1.45] tracking-tight text-[#0b1c30] transition group-hover:text-[#022842]">
+          {vurgula(item.kategori, arama)}
+        </h2>
+
+        <p className="mt-2 line-clamp-2 min-h-12 text-sm leading-6 text-[#61717d]">
+          {item.ozet}
+        </p>
+
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#022842]/10 pt-4">
+          <span className="text-sm font-bold text-[#022842]">
+            Detayları gör
+          </span>
+          <span className="material-symbols-outlined text-xl text-[#7a8994] transition duration-300 group-hover:translate-x-1 group-hover:text-[#022842]">
+            arrow_forward
+          </span>
+        </div>
+      </div>
+
+      <span className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-[#f5a623] transition-transform duration-300 group-hover:scale-x-100" />
+    </Link>
   );
 }
 
@@ -29,8 +91,8 @@ export default function SizdenGelenler() {
   const [seciliKategori, setSeciliKategori] = useState(null);
   const [arama, setArama] = useState('');
   const [slide, setSlide] = useState(0);
-  const [acikKart, setAcikKart] = useState(null);
   const [sayfa, setSayfa] = useState(0);
+  const listeRef = useRef(null);
 
   useEffect(() => {
     fetchSizdenGelenler()
@@ -83,221 +145,258 @@ export default function SizdenGelenler() {
     sayfa * SAYFA_BASI + SAYFA_BASI
   );
 
+  function kategoriSecVeKaydir(slug) {
+    setSeciliKategori(slug);
+    listeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const sayfaNumaralari = Array.from({ length: toplamSayfa }, (_, i) => i);
+
   return (
     <Layout>
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-on-surface">
-          Sizden Gelenler
-        </h1>
-      </div>
+      <div className="mx-auto w-full max-w-[1440px]">
+        {/* Başlık kutusu - sağ panelle aynı stil, küçük */}
+        <section className="mb-4 inline-flex items-center rounded-2xl border border-[#022842]/10 border-t-4 border-t-[#f5a623] bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] px-5 py-3 shadow-[0_8px_20px_rgba(2,40,66,0.08)]">
+          <h1 className="text-lg font-extrabold tracking-tight text-[#0b1c30]">
+            Sizden Gelenler
+          </h1>
+        </section>
 
-      {loading && (
-        <div className="rounded-2xl bg-white border border-outline-variant/20 p-8 text-on-surface-variant shadow-sm animate-pulse">
-          Yükleniyor…
-        </div>
-      )}
+        {loading && (
+          <div className="rounded-2xl border border-[#022842]/10 bg-white p-8 text-[#536575] shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined animate-spin text-[#022842]">
+                progress_activity
+              </span>
+              Yükleniyor…
+            </div>
+          </div>
+        )}
 
-      {error && (
-        <div className="rounded-2xl bg-error-container text-on-error-container p-6">
-          Veriler alınamadı: {error}
-        </div>
-      )}
-
-      {!loading && !error && (
-        <div className="flex flex-col gap-8">
-          {/* Öne çıkanlar - kayan ekran */}
-          {vitrin.length > 0 && (
-            <div className="relative overflow-hidden rounded-3xl shadow-lg h-[420px] sm:h-[480px] md:h-[560px] group">
-              {vitrin.map((item, i) => (
-                <div
-                  key={item.id}
-                  onClick={() => setAcikKart(item)}
-                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${
-                    i === slide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                  }`}
-                >
-                  <img
-                    src={item.resim}
-                    alt={item.baslik}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                    <span className="inline-block rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white mb-2">
-                      {item.kategori}
-                    </span>
-                    <h2 className="text-white text-xl sm:text-3xl font-bold drop-shadow-sm max-w-2xl">
-                      {item.kategori}
-                    </h2>
-                  </div>
-                </div>
-              ))}
-
-              <button
-                onClick={() => setSlide((s) => (s - 1 + vitrin.length) % vitrin.length)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/80 hover:bg-white p-2 shadow-md opacity-0 group-hover:opacity-100 transition"
-                aria-label="Önceki"
-              >
-                ‹
-              </button>
-              <button
-                onClick={() => setSlide((s) => (s + 1) % vitrin.length)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/80 hover:bg-white p-2 shadow-md opacity-0 group-hover:opacity-100 transition"
-                aria-label="Sonraki"
-              >
-                ›
-              </button>
-
-              <div className="absolute bottom-3 right-4 z-20 flex gap-1.5">
-                {vitrin.map((item, i) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setSlide(i)}
-                    aria-label={`${i + 1}. görsele git`}
-                    className={`h-2 rounded-full transition-all ${
-                      i === slide ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
-                    }`}
-                  />
-                ))}
+        {error && (
+          <div className="rounded-2xl border border-error/20 bg-error-container p-6 text-on-error-container">
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined">error</span>
+              <div>
+                <p className="font-semibold">Veriler alınamadı</p>
+                <p className="mt-1 text-sm">{error}</p>
               </div>
             </div>
-          )}
-
-          {/* Arama */}
-          <div className="relative max-w-md w-full mx-auto">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
-              🔍
-            </span>
-            <input
-              type="text"
-              value={arama}
-              onChange={(e) => setArama(e.target.value)}
-              placeholder="Başlık veya içerikte ara…"
-              className="w-full rounded-full border border-outline-variant/30 bg-white pl-11 pr-4 py-2.5 text-sm text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
-            />
           </div>
+        )}
 
-          {/* Kategori filtre butonları */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSeciliKategori(null)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                seciliKategori === null
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'bg-white border border-outline-variant/30 text-on-surface-variant hover:border-primary/40'
-              }`}
-            >
-              Tümü
-            </button>
-            {kategoriler.map((k) => (
-              <button
-                key={k.id}
-                onClick={() => setSeciliKategori(k.slug)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  seciliKategori === k.slug
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-white border border-outline-variant/30 text-on-surface-variant hover:border-primary/40'
-                }`}
-              >
-                {k.ad}
-              </button>
-            ))}
-          </div>
+        {!loading && !error && (
+          <>
+            {/* Öne çıkanlar: kayan ekran + filtre paneli, ayrı ayrı kutular */}
+            {vitrin.length > 0 && (
+              <div className="mb-10 grid gap-6 lg:grid-cols-12">
+                {/* Sol: kayan görsel - ayrı kart */}
+                <div className="relative isolate overflow-hidden rounded-[28px] border border-[#022842]/10 bg-[#011f34] shadow-[0_18px_50px_rgba(2,40,66,0.12)] lg:col-span-8">
+                  <div className="relative aspect-video">
+                    {vitrin.map((item, i) => (
+                      <Link
+                        key={item.id}
+                        to={`/sizden-gelenler/${item.id}`}
+                        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                          i === slide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                        }`}
+                      >
+                        <img
+                          src={item.resim}
+                          alt={item.kategori}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/85 via-[#011f34]/25 to-transparent" />
+                        <div className="absolute left-4 bottom-4 right-4 sm:left-6 sm:bottom-6 sm:right-24">
+                          <span className="mb-3 inline-flex items-center gap-2 rounded-lg border border-white/20 bg-[#022842]/85 px-3.5 py-2 text-sm font-bold text-white backdrop-blur-md">
+                            <span className="material-symbols-outlined text-[20px] text-[#f5a623]">
+                              {getDeptIcon({ ad: item.kategori })}
+                            </span>
+                            {item.kategori}
+                          </span>
+                          <p className="line-clamp-2 max-w-xl text-base leading-7 text-white/85 sm:text-lg">
+                            {item.ozet}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
 
-          {/* Kart grid'i - dikey kartlar */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {gosterilenler.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setAcikKart(item)}
-                className="group flex flex-col text-left rounded-2xl bg-white border border-outline-variant/15 shadow-[0_4px_20px_rgba(30,58,138,0.05)] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(30,58,138,0.14)] cursor-pointer"
-              >
-                <div className="w-full h-70 shrink-0 bg-surface-container overflow-hidden">
-                  <img
-                    src={item.resim}
-                    alt={item.baslik}
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                  />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSlide((s) => (s - 1 + vitrin.length) % vitrin.length);
+                      }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/35 hover:bg-white/80 shadow-md transition"
+                      aria-label="Önceki"
+                    >
+                      <span className="material-symbols-outlined text-[16px] leading-none">
+                        chevron_left
+                      </span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSlide((s) => (s + 1) % vitrin.length);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/35 hover:bg-white/80 shadow-md transition"
+                      aria-label="Sonraki"
+                    >
+                      <span className="material-symbols-outlined text-[16px] leading-none">
+                        chevron_right
+                      </span>
+                    </button>
+
+                    <div className="absolute bottom-4 right-4 z-20 flex gap-1.5">
+                      {vitrin.map((item, i) => (
+                        <button
+                          key={item.id}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setSlide(i);
+                          }}
+                          aria-label={`${i + 1}. görsele git`}
+                          className={`h-2 rounded-full transition-all ${
+                            i === slide ? 'w-6 bg-[#f5a623]' : 'w-2 bg-white/50 hover:bg-white/80'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col p-4">
-                  <span className="text-xs font-semibold text-primary">
-                    {vurgula(item.kategori, arama)}
-                  </span>
-                  <h2 className="mt-1 text-base font-semibold text-on-surface transition-colors group-hover:text-primary line-clamp-2">
-                    {vurgula(item.kategori, arama)}
+
+                {/* Sağ: arama + müdürlük filtresi - ayrı kart */}
+                <div className="relative flex flex-col justify-center overflow-hidden rounded-[28px] border border-[#022842]/10 border-t-4 border-t-[#f5a623] bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] p-6 shadow-[0_18px_50px_rgba(2,40,66,0.12)] md:p-8 lg:col-span-4">
+                  <h2 className="mb-4 text-xl font-extrabold leading-tight tracking-tight text-[#0b1c30]">
+                    Müdürlüğe Göre Filtrele
                   </h2>
-                  <p className="mt-1 text-xs text-on-surface-variant">{item.tarih}</p>
+
+                  <div className="relative mb-4">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#8a98a2]">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      value={arama}
+                      onChange={(e) => setArama(e.target.value)}
+                      placeholder="Başlık veya içerikte ara…"
+                      className="w-full rounded-xl border border-[#022842]/10 bg-white py-2.5 pl-10 pr-4 text-sm text-[#0b1c30] shadow-sm transition focus:border-[#022842]/40 focus:outline-none focus:ring-2 focus:ring-[#022842]/10"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => kategoriSecVeKaydir(null)}
+                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition ${
+                        seciliKategori === null
+                          ? 'bg-[#022842] text-white shadow-[0_5px_14px_rgba(2,40,66,0.18)]'
+                          : 'bg-white/70 text-[#33495a] hover:bg-white'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[19px]">grid_view</span>
+                      Tümü
+                    </button>
+
+                    {kategoriler.map((k) => (
+                      <button
+                        key={k.id}
+                        type="button"
+                        onClick={() => kategoriSecVeKaydir(k.slug)}
+                        className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition ${
+                          seciliKategori === k.slug
+                            ? 'bg-[#022842] text-white shadow-[0_5px_14px_rgba(2,40,66,0.18)]'
+                            : 'bg-white/70 text-[#33495a] hover:bg-white'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[19px]">
+                          {getDeptIcon(k)}
+                        </span>
+                        {k.ad}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </button>
-            ))}
-
-            {!gosterilenler.length && (
-              <p className="text-on-surface-variant col-span-full">
-                Aramanla eşleşen içerik bulunamadı.
-              </p>
+              </div>
             )}
-          </div>
 
-          {/* Sayfalama okları */}
-          {filtreliIcerikler.length > SAYFA_BASI && (
-            <div className="flex items-center justify-center gap-4 pt-2">
-              <button
-                onClick={() => setSayfa((s) => Math.max(0, s - 1))}
-                disabled={sayfa === 0}
-                className="rounded-full bg-white border border-outline-variant/30 p-2.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary/40 transition"
-                aria-label="Önceki sayfa"
-              >
-                ‹
-              </button>
-              <span className="text-sm text-on-surface-variant">
-                Sayfa {sayfa + 1} / {toplamSayfa}
-              </span>
-              <button
-                onClick={() => setSayfa((s) => Math.min(toplamSayfa - 1, s + 1))}
-                disabled={sayfa >= toplamSayfa - 1}
-                className="rounded-full bg-white border border-outline-variant/30 p-2.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary/40 transition"
-                aria-label="Sonraki sayfa"
-              >
-                ›
-              </button>
+            {/* Aktif kategori başlığı - listeye kaydırma hedefi */}
+            <div ref={listeRef} className="mb-5 flex flex-wrap items-center justify-between gap-3 scroll-mt-6">
+              <div>
+                <h2 className="text-xl font-bold text-[#0b1c30] md:text-2xl">
+                  {kategoriler.find((k) => k.slug === seciliKategori)?.ad || 'Tüm İçerikler'}
+                </h2>
+                <p className="mt-1 text-sm text-[#61717d]">
+                  {filtreliIcerikler.length > 0
+                    ? `${filtreliIcerikler.length} içerik listeleniyor`
+                    : 'Bu kategoride içerik bulunmuyor'}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* Detay modalı */}
-      {acikKart && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setAcikKart(null)}
-        >
-          <div
-            className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setAcikKart(null)}
-              className="absolute top-3 right-3 z-10 rounded-full bg-white/90 hover:bg-white p-2 shadow-md text-on-surface"
-              aria-label="Kapat"
-            >
-              ✕
-            </button>
-            <img
-              src={acikKart.resim}
-              alt={acikKart.baslik}
-              className="w-full h-64 sm:h-80 object-cover"
-            />
-            <div className="p-5 sm:p-8">
-              <span className="inline-block rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold mb-3">
-                {acikKart.kategori}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-on-surface">{acikKart.kategori}</h2>
-              <p className="mt-1 text-sm text-on-surface-variant">{acikKart.tarih}</p>
-              <p className="mt-4 text-base leading-7 text-on-surface-variant">{acikKart.ozet}</p>
+            {/* Kart grid'i */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+              {gosterilenler.map((item) => (
+                <IcerikKarti key={item.id} item={item} arama={arama} />
+              ))}
+
+              {!gosterilenler.length && (
+                <div className="col-span-full rounded-2xl border border-[#022842]/10 bg-white p-10 text-center shadow-sm">
+                  <span className="material-symbols-outlined mb-3 text-5xl text-[#c3ccd3]">
+                    search_off
+                  </span>
+                  <h3 className="text-lg font-semibold text-[#0b1c30]">İçerik bulunamadı</h3>
+                  <p className="mt-2 text-sm text-[#61717d]">
+                    Aramanla ya da seçtiğin müdürlükle eşleşen bir içerik yok.
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-      )}
+
+            {/* Sayfalama */}
+            {toplamSayfa > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-8">
+                <button
+                  onClick={() => setSayfa((s) => Math.max(0, s - 1))}
+                  disabled={sayfa === 0}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-[#022842]/10 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#022842]/30 transition"
+                  aria-label="Önceki sayfa"
+                >
+                  <span className="material-symbols-outlined text-[16px] leading-none">
+                    chevron_left
+                  </span>
+                </button>
+
+                {sayfaNumaralari.map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setSayfa(n)}
+                    aria-label={`${n + 1}. sayfaya git`}
+                    aria-current={sayfa === n ? 'page' : undefined}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition ${
+                      sayfa === n
+                        ? 'bg-[#022842] text-white shadow-sm'
+                        : 'bg-white border border-[#022842]/10 text-[#33495a] hover:border-[#022842]/30'
+                    }`}
+                  >
+                    {n + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setSayfa((s) => Math.min(toplamSayfa - 1, s + 1))}
+                  disabled={sayfa >= toplamSayfa - 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-[#022842]/10 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#022842]/30 transition"
+                  aria-label="Sonraki sayfa"
+                >
+                  <span className="material-symbols-outlined text-[16px] leading-none">
+                    chevron_right
+                  </span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </Layout>
   );
 }
