@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { changePassword } from '../api/client';
 import usePageTitle from '../hooks/usePageTitle';
+import AdminAlert from '../components/AdminAlert';
 
 export default function ChangePassword() {
   usePageTitle('Şifre Değiştir');
@@ -23,7 +24,7 @@ export default function ChangePassword() {
         yeni_sifre: yeni,
         yeni_sifre_tekrar: tekrar,
       });
-      setMsg(res.message || 'Şifre güncellendi.');
+      setMsg(res.message || 'Şifre başarıyla güncellendi.');
       setMevcut('');
       setYeni('');
       setTekrar('');
@@ -36,9 +37,16 @@ export default function ChangePassword() {
 
   return (
     <>
-      <p className="admin-page-lead">yoneticiler tablosundaki şifre güncellenir.</p>
-      {msg && <div className="admin-alert admin-alert-success">{msg}</div>}
-      {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+      {msg && (
+        <AdminAlert key={`ok-${msg}`} type="success" onClose={() => setMsg('')}>
+          {msg}
+        </AdminAlert>
+      )}
+      {err && (
+        <AdminAlert key={`err-${err}`} type="danger" onClose={() => setErr('')}>
+          {err}
+        </AdminAlert>
+      )}
       <div className="admin-card">
         <div className="admin-card-header">
           <h2>

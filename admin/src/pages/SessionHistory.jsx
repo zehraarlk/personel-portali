@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchProfileSessions } from '../api/client';
 import usePageTitle from '../hooks/usePageTitle';
+import AdminAlert from '../components/AdminAlert';
 
 function formatTs(value) {
   if (!value) return '—';
@@ -27,9 +28,12 @@ export default function SessionHistory() {
 
   return (
     <>
-      <p className="admin-page-lead">yonetici_oturum_kayitlari — son 10 giriş.</p>
       {loading && <p className="admin-muted">Yükleniyor…</p>}
-      {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+      {err && (
+        <AdminAlert type="danger" onClose={() => setErr('')}>
+          {err}
+        </AdminAlert>
+      )}
       {!loading && !err && (
         <div className="admin-card">
           <div className="admin-card-header">
