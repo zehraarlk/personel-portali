@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import home_dashboard, site_icons, sizden_gelenler_list, videos
+from .views import home_dashboard, site_icons, sizden_gelenler_list, videos, etkinlikler_list
 from .profile_views import (
     profile_me,
     profile_sessions,
@@ -51,6 +51,7 @@ urlpatterns = [
     path('profile/change-email/', profile_change_email, name='profile-change-email'),
     path('profile/change-password/', profile_change_password, name='profile-change-password'),
     path('sizden-gelenler/', sizden_gelenler_list, name='sizden-gelenler'),
+    path('etkinlikler/', etkinlikler_list, name='etkinlikler'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),
     path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),
