@@ -111,7 +111,8 @@ export default function SizdenGelenler() {
               {vitrin.map((item, i) => (
                 <div
                   key={item.id}
-                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                  onClick={() => setAcikKart(item)}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${
                     i === slide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                   }`}
                 >
