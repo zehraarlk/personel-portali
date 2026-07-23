@@ -1,4 +1,14 @@
 import axios from 'axios';
+import {
+  authHeaders,
+  canAccessPortal,
+  getOturumId,
+  getPersonelId,
+  getYoneticiId,
+  getYoneticiOturumId,
+  isPersonelLoggedIn,
+  isYoneticiLoggedIn,
+} from '../auth/session';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -8,6 +18,10 @@ const apiClient = axios.create({
 });
 
 export default apiClient;
+
+function jsonHeaders(extra = {}) {
+  return authHeaders({ 'Content-Type': 'application/json', ...extra });
+}
 
 export async function fetchHealth() {
   const response = await fetch(`${API_BASE}/health/`);
@@ -61,16 +75,107 @@ export async function fetchSiteIcons(kategori) {
   return response.json();
 }
 
+export async function loginPersonel(payload) {
+  const response = await fetch(`${API_BASE}/auth/login/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.status === 'error') {
+    throw new Error(data.message || data.detail || 'Giriş başarısız');
+  }
+  return data;
+}
+
+export async function loginAdmin(payload) {
+  const response = await fetch(`${API_BASE}/auth/admin-login/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.status === 'error') {
+    throw new Error(data.message || data.detail || 'Giriş başarısız');
+  }
+  return data;
+}
+
+export async function forgotPassword(payload) {
+  const response = await fetch(`${API_BASE}/auth/forgot-password/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.status === 'error') {
+    throw new Error(data.message || data.detail || 'İşlem başarısız');
+  }
+  return data;
+}
+
+export async function logoutPersonel(options = {}) {
+  const { kapanis_tipi = 'manuel' } = options;
+  const payload = {
+    kapanis_tipi,
+    oturum_id: getOturumId() || undefined,
+    personel_id: getPersonelId() || undefined,
+  };
+  const response = await fetch(`${API_BASE}/auth/logout/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.detail || 'Çıkış yapılamadı');
+  }
+  return response.json().catch(() => ({ status: 'ok' }));
+}
+
+export async function logoutAdmin(options = {}) {
+  const { kapanis_tipi = 'manuel' } = options;
+  const payload = {
+    kapanis_tipi,
+    oturum_id: getYoneticiOturumId() || undefined,
+    yonetici_id: getYoneticiId() || undefined,
+  };
+  const response = await fetch(`${API_BASE}/auth/admin-logout/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.detail || 'Çıkış yapılamadı');
+  }
+  return response.json().catch(() => ({ status: 'ok' }));
+}
+
 export async function fetchProfile() {
-  const response = await fetch(`${API_BASE}/profile/`);
+  const response = await fetch(`${API_BASE}/profile/`, {
+    headers: authHeaders(),
+  });
   if (!response.ok) {
     throw new Error('Profil alınamadı');
   }
   return response.json();
 }
 
+export async function fetchAdminProfile() {
+  const response = await fetch(`${API_BASE}/admin/profile/`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('Yönetici profili alınamadı');
+  }
+  return response.json();
+}
+
 export async function fetchProfileSessions() {
-  const response = await fetch(`${API_BASE}/profile/sessions/`);
+  const response = await fetch(`${API_BASE}/profile/sessions/`, {
+    headers: authHeaders(),
+  });
   if (!response.ok) {
     throw new Error('Oturum kayıtları alınamadı');
   }
@@ -80,7 +185,7 @@ export async function fetchProfileSessions() {
 export async function changeEmail(payload) {
   const response = await fetch(`${API_BASE}/profile/change-email/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));
@@ -93,7 +198,7 @@ export async function changeEmail(payload) {
 export async function changePassword(payload) {
   const response = await fetch(`${API_BASE}/profile/change-password/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));
@@ -102,7 +207,6 @@ export async function changePassword(payload) {
   }
   return data;
 }
-
 
 export async function fetchSizdenGelenler(kategori) {
   const qs = kategori ? `?kategori=${encodeURIComponent(kategori)}` : '';
@@ -122,3 +226,5 @@ export async function fetchEtkinlikler(durum) {
   }
   return response.json();
 }
+
+export { canAccessPortal, isPersonelLoggedIn, isYoneticiLoggedIn } from '../auth/session';
