@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { fetchSizdenGelenler } from '../api/client';
-
+import { fetchSizdenGelenler, goruntulenmeArttir } from '../api/client';
 const SAYFA_BASI = 6;
 
 function getDeptIcon(kategori) {
@@ -50,12 +49,12 @@ function IcerikKarti({ item, arama }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/55 via-transparent to-black/5 opacity-80 transition duration-300 group-hover:opacity-100" />
 
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/65 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/50 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
           <span className="material-symbols-outlined text-[14px]">visibility</span>
           {item.goruntulenme ?? 0}
         </span>
 
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/65 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/50 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
           {item.tarih}
         </span>
       </div>
@@ -155,12 +154,15 @@ export default function SizdenGelenler() {
   return (
     <Layout>
       <div className="mx-auto w-full max-w-[1440px]">
-        {/* Başlık kutusu - sağ panelle aynı stil, küçük */}
-        <section className="mb-4 inline-flex items-center rounded-2xl border border-[#022842]/10 border-t-4 border-t-[#f5a623] bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] px-5 py-3 shadow-[0_8px_20px_rgba(2,40,66,0.08)]">
-          <h1 className="text-lg font-extrabold tracking-tight text-[#0b1c30]">
+        {/* Başlık - sade, kutusuz */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#0b1c30] md:text-3xl">
             Sizden Gelenler
           </h1>
-        </section>
+          <p className="mt-1 text-sm leading-6 text-[#61717d]">
+            Müdürlüklerimizden gelen haber, çalışma ve paylaşımlar.
+          </p>
+        </div>
 
         {loading && (
           <div className="rounded-2xl border border-[#022842]/10 bg-white p-8 text-[#536575] shadow-sm">
@@ -208,13 +210,10 @@ export default function SizdenGelenler() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/85 via-[#011f34]/25 to-transparent" />
                         <div className="absolute left-4 bottom-4 right-4 sm:left-6 sm:bottom-6 sm:right-24">
-                          <span className="mb-3 inline-flex items-center gap-2 rounded-lg border border-white/20 bg-[#022842]/85 px-3.5 py-2 text-sm font-bold text-white backdrop-blur-md">
-                            <span className="material-symbols-outlined text-[20px] text-[#f5a623]">
-                              {getDeptIcon({ ad: item.kategori })}
-                            </span>
+                          <span className="mb-2 inline-block text-xs font-bold uppercase tracking-wide text-[#f5a623]">
                             {item.kategori}
                           </span>
-                          <p className="line-clamp-2 max-w-xl text-base leading-7 text-white/85 sm:text-lg">
+                          <p className="line-clamp-2 max-w-xl text-sm leading-6 text-white/80">
                             {item.ozet}
                           </p>
                         </div>

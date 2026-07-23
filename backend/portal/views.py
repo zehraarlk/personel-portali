@@ -83,6 +83,19 @@ def sizden_gelenler_list(request):
         'icerikler': SizdenGelenlerSerializer(icerikler, many=True).data,
     })
 
+@api_view(['POST'])
+def sizden_gelenler_goruntule(request, pk):
+    """Bir Sizden Gelenler kaydının görüntülenme sayısını 1 artırır."""
+    try:
+        kayit = SizdenGelenler.objects.get(pk=pk)
+    except SizdenGelenler.DoesNotExist:
+        return Response({'detail': 'Kayıt bulunamadı.'}, status=404)
+
+    kayit.goruntulenme = (kayit.goruntulenme or 0) + 1
+    kayit.save(update_fields=['goruntulenme'])
+
+    return Response({'goruntulenme': kayit.goruntulenme})
+
 
 @api_view(['GET'])
 def videos(request):
