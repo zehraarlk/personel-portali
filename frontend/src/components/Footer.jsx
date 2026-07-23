@@ -60,26 +60,28 @@ export default function Footer() {
             </div>
           </div>
 
-          <div>
-            <h3 className="site-footer-col-title">Hızlı Erişim</h3>
-            <nav className="site-footer-list">
-              {QUICK_LINKS.map((item) => (
-                <Link key={item.to} to={item.to} className="site-footer-link">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          <div className="site-footer-links-row">
+            <div>
+              <h3 className="site-footer-col-title">Hızlı Erişim</h3>
+              <nav className="site-footer-list">
+                {QUICK_LINKS.map((item) => (
+                  <Link key={item.to} to={item.to} className="site-footer-link">
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
-          <div>
-            <h3 className="site-footer-col-title">Kaynaklar</h3>
-            <nav className="site-footer-list">
-              {RESOURCE_LINKS.map((item) => (
-                <Link key={item.to} to={item.to} className="site-footer-link">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <div>
+              <h3 className="site-footer-col-title">Kaynaklar</h3>
+              <nav className="site-footer-list">
+                {RESOURCE_LINKS.map((item) => (
+                  <Link key={item.to} to={item.to} className="site-footer-link">
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
           </div>
 
           <div>
@@ -108,14 +110,6 @@ export default function Footer() {
         <div className="site-footer-bottom">
           <span>© {year} Gebze Belediyesi Personel Portalı — Tüm hakları saklıdır.</span>
           <div className="site-footer-bottom-links">
-            <a
-              href="http://127.0.0.1:8000/api/"
-              target="_blank"
-              rel="noreferrer"
-              className="site-footer-bottom-link"
-            >
-              Django API
-            </a>
             <Link to="/gizlilik-politikasi" className="site-footer-bottom-link">
               Gizlilik Politikası
             </Link>

@@ -17,10 +17,10 @@ export default function Layout({ children, videoPage = false }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-on-background">
+    <div className="app-shell flex min-h-dvh flex-col bg-background text-on-background">
       <Navbar />
 
-      <main className="w-full flex-1 px-4 py-6 md:px-8 md:py-8">
+      <main className="app-main w-full min-w-0 flex-1 px-3 py-5 sm:px-4 sm:py-6 md:px-8 md:py-8">
         {children}
       </main>
 
