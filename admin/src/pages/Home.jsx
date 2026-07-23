@@ -5,6 +5,8 @@ import usePageTitle from '../hooks/usePageTitle';
 import { BRAND_IMG } from '../constants';
 import { ADMIN_QUICK_ACTIONS, ADMIN_STATS } from '../navConfig';
 
+const TONES = ['tone-teal', 'tone-cyan', 'tone-orange', 'tone-rose', 'tone-amber', 'tone-indigo', 'tone-emerald', 'tone-sky'];
+
 export default function Home() {
   usePageTitle('Dashboard');
   const [data, setData] = useState(null);
@@ -26,8 +28,12 @@ export default function Home() {
   return (
     <>
       <div className="admin-stats">
-        {ADMIN_STATS.map((stat) => (
-          <Link key={stat.key} to={stat.to} className="admin-stat-card">
+        {ADMIN_STATS.map((stat, i) => (
+          <Link
+            key={stat.key}
+            to={stat.to}
+            className={`admin-stat-card ${TONES[i % TONES.length]}`}
+          >
             <div className="admin-stat-card__icon">
               <i className={stat.icon} aria-hidden="true" />
             </div>
@@ -76,8 +82,12 @@ export default function Home() {
         </div>
         <div className="admin-card-body">
           <div className="admin-quick-links">
-            {ADMIN_QUICK_ACTIONS.map((action) => (
-              <Link key={action.key} to={action.to} className="admin-quick-link">
+            {ADMIN_QUICK_ACTIONS.map((action, i) => (
+              <Link
+                key={action.key}
+                to={action.to}
+                className={`admin-quick-link ${TONES[i % TONES.length]}`}
+              >
                 <span className="admin-quick-link__icon">
                   <i className={action.icon} aria-hidden="true" />
                 </span>
