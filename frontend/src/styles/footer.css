@@ -1,69 +1,192 @@
 /* ==========================================================================
-   Footer — styled to match the Navbar's navy brand tokens
+   Footer — full navbar-matching design (navy brand tokens, gold accent)
    ========================================================================== */
 
 .site-footer {
   margin-top: auto;
   width: 100%;
-  border-top: 1px solid rgba(2, 40, 66, 0.12);
-  background: #f4f6f8;
+  background: var(--nav-bg, #022842);
+  color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
 }
 
 .site-footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 20px 0;
+}
+
+/* --- Top grid: brand / link columns / contact --- */
+
+.site-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--nav-border, rgba(255, 255, 255, 0.12));
+}
+
+.site-footer-brand-col {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 20px 16px;
-}
-
-.site-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .site-footer-logo {
   height: 40px;
   width: auto;
-  max-width: 152px;
+  max-width: 172px;
   object-fit: contain;
-  border-radius: 8px;
-  background: #022842;
-  padding: 6px 10px;
-  border: 1px solid rgba(2, 40, 66, 0.2);
 }
 
-.site-footer-copy {
-  font-size: 13px;
-  color: #5b6b78;
+.site-footer-tagline {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+  max-width: 320px;
 }
 
-.site-footer-links {
+.site-footer-social {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.site-footer-social-link {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  width: 36px;
+  border-radius: 999px;
+  background: var(--nav-bg-raised, #0b3757);
+  color: var(--nav-text, #ffffff);
+  font-size: 14px;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.site-footer-social-link:hover {
+  background: var(--nav-accent, #f5a623);
+  color: var(--nav-bg, #022842);
+  transform: translateY(-2px);
+}
+
+.site-footer-col-title {
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--nav-text, #ffffff);
+}
+
+.site-footer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .site-footer-link {
-  font-size: 12px;
-  font-weight: 600;
-  color: #5b6b78;
-  text-decoration: underline;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+  text-decoration: none;
+  width: fit-content;
   transition: color 0.15s ease;
 }
 
 .site-footer-link:hover {
-  color: #022842;
+  color: var(--nav-accent, #f5a623);
+}
+
+.site-footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+}
+
+.site-footer-contact-item + .site-footer-contact-item {
+  margin-top: 12px;
+}
+
+.site-footer-contact-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--nav-accent, #f5a623);
+}
+
+.site-footer-contact-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.site-footer-contact-link:hover {
+  color: var(--nav-accent, #f5a623);
+}
+
+/* --- Bottom bar --- */
+
+.site-footer-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 0 24px;
+  font-size: 12px;
+  color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+  text-align: center;
+}
+
+.site-footer-bottom-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.site-footer-bottom-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--nav-text-muted, rgba(255, 255, 255, 0.72));
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.site-footer-bottom-link:hover {
+  color: var(--nav-accent, #f5a623);
+}
+
+/* ==========================================================================
+   Responsive breakpoints
+   ========================================================================== */
+
+@media (min-width: 640px) {
+  .site-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (min-width: 768px) {
   .site-footer-inner {
+    padding: 56px 32px 0;
+  }
+
+  .site-footer-bottom {
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 32px;
+    text-align: left;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-footer-grid {
+    grid-template-columns: 1.4fr 0.8fr 0.8fr 1fr;
   }
 }
