@@ -22,10 +22,18 @@ import {
   YoneticilerEkle,
   YoneticilerDuzenle,
 } from './pages/yonetim/YonetimPages';
+import {
+  VideolarIndex,
+  VideolarEkle,
+  VideolarDuzenle,
+} from './pages/videolar/VideolarPages';
+import {
+  SizdenGelenlerIndex,
+  SizdenGelenlerEkle,
+  SizdenGelenlerDuzenle,
+} from './pages/sizden-gelenler/SizdenGelenlerPages';
 
 const STUBS = [
-  'videolar',
-  'sizden-gelenler',
   'protokoller',
   'dokumanlar',
   'mevzuatlar',
@@ -48,6 +56,12 @@ export default function AdminRoutes() {
         <Route path="yoneticiler" element={<YoneticilerIndex />} />
         <Route path="yoneticiler/ekle" element={<YoneticilerEkle />} />
         <Route path="yoneticiler/:id/duzenle" element={<YoneticilerDuzenle />} />
+        <Route path="videolar" element={<VideolarIndex />} />
+        <Route path="videolar/ekle" element={<VideolarEkle />} />
+        <Route path="videolar/:id/duzenle" element={<VideolarDuzenle />} />
+        <Route path="sizden-gelenler" element={<SizdenGelenlerIndex />} />
+        <Route path="sizden-gelenler/ekle" element={<SizdenGelenlerEkle />} />
+        <Route path="sizden-gelenler/:id/duzenle" element={<SizdenGelenlerDuzenle />} />
         <Route path="etkinlikler" element={<EtkinliklerIndex />} />
         <Route path="etkinlikler/ekle" element={<EtkinliklerEkle />} />
         <Route path="etkinlikler/:id/duzenle" element={<EtkinliklerDuzenle />} />
