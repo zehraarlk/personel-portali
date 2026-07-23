@@ -218,6 +218,88 @@ export async function deleteYonetici(id) {
   return true;
 }
 
+export async function listVideolar() {
+  const response = await fetch(`${API_BASE}/admin/videolar/`);
+  return parseJson(response);
+}
+
+export async function getVideo(id) {
+  const response = await fetch(`${API_BASE}/admin/videolar/${id}/`);
+  return parseJson(response);
+}
+
+export async function createVideo(payload) {
+  const response = await fetch(`${API_BASE}/admin/videolar/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateVideo(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/videolar/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteVideo(id) {
+  const response = await fetch(`${API_BASE}/admin/videolar/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listVideoKategoriler() {
+  const response = await fetch(`${API_BASE}/admin/videolar-kategoriler/`);
+  return parseJson(response);
+}
+
+export async function listSizdenGelenler() {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/`);
+  return parseJson(response);
+}
+
+export async function getSizdenGelen(id) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`);
+  return parseJson(response);
+}
+
+export async function createSizdenGelen(payload) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateSizdenGelen(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteSizdenGelen(id) {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listSizdenGelenKategoriler() {
+  const response = await fetch(`${API_BASE}/admin/sizden-gelenler-kategoriler/`);
+  return parseJson(response);
+}
+
 export async function fetchProfile() {
   const response = await fetch(`${API_BASE}/admin/profile/`);
   if (!response.ok) {

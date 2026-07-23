@@ -16,6 +16,7 @@ import usePageTitle from '../../hooks/usePageTitle';
 import { BRAND_IMG } from '../../constants';
 import ImagePickerField from '../../components/ImagePickerField';
 import AdminRowActions from '../../components/AdminRowActions';
+import AdminAlert from '../../components/AdminAlert';
 
 export function PersonellerIndex() {
   usePageTitle('Personeller');
@@ -62,7 +63,11 @@ export function PersonellerIndex() {
         </div>
       </header>
 
-      {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+      {err && (
+        <AdminAlert type="danger" onClose={() => setErr('')}>
+          {err}
+        </AdminAlert>
+      )}
 
       <div className="admin-card admin-card--flush">
         <div className="admin-table-wrap">
@@ -131,7 +136,7 @@ export function PersonellerIndex() {
   );
 }
 
-function PersonelForm({ mode, initial, onSubmit, busy, err, msg }) {
+function PersonelForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
   const [sicilNo, setSicilNo] = useState(initial?.sicil_no || '');
   const [ad, setAd] = useState(initial?.ad || '');
   const [soyad, setSoyad] = useState(initial?.soyad || '');
@@ -173,8 +178,16 @@ function PersonelForm({ mode, initial, onSubmit, busy, err, msg }) {
       <div className="admin-crud-form-shell">
         <div className="admin-card">
           <div className="admin-card-body">
-            {msg && <div className="admin-alert admin-alert-success">{msg}</div>}
-            {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+            {msg && (
+              <AdminAlert key={`ok-${msg}`} type="success" onClose={onClearMsg}>
+                {msg}
+              </AdminAlert>
+            )}
+            {err && (
+              <AdminAlert key={`err-${err}`} type="danger" onClose={onClearErr}>
+                {err}
+              </AdminAlert>
+            )}
             <form
               className="admin-form admin-form--grid"
               onSubmit={(e) => {
@@ -287,6 +300,7 @@ export function PersonellerEkle() {
       mode="create"
       busy={busy}
       err={err}
+      onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
@@ -326,13 +340,15 @@ export function PersonellerDuzenle() {
       busy={busy}
       err={err}
       msg={msg}
+      onClearMsg={() => setMsg('')}
+      onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
         setMsg('');
         try {
           await updatePersonel(id, payload);
-          setMsg('Güncellendi.');
+          setMsg('Kayıt başarıyla güncellendi.');
         } catch (ex) {
           setErr(ex.message);
         } finally {
@@ -388,7 +404,11 @@ export function YoneticilerIndex() {
         </div>
       </header>
 
-      {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+      {err && (
+        <AdminAlert type="danger" onClose={() => setErr('')}>
+          {err}
+        </AdminAlert>
+      )}
 
       <div className="admin-card admin-card--flush">
         <div className="admin-table-wrap">
@@ -461,7 +481,7 @@ export function YoneticilerIndex() {
   );
 }
 
-function YoneticiForm({ mode, initial, onSubmit, busy, err, msg }) {
+function YoneticiForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
   const [kullaniciAdi, setKullaniciAdi] = useState(initial?.kullanici_adi || '');
   const [ad, setAd] = useState(initial?.ad || '');
   const [soyad, setSoyad] = useState(initial?.soyad || '');
@@ -499,8 +519,16 @@ function YoneticiForm({ mode, initial, onSubmit, busy, err, msg }) {
       <div className="admin-crud-form-shell">
         <div className="admin-card">
           <div className="admin-card-body">
-            {msg && <div className="admin-alert admin-alert-success">{msg}</div>}
-            {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+            {msg && (
+              <AdminAlert key={`ok-${msg}`} type="success" onClose={onClearMsg}>
+                {msg}
+              </AdminAlert>
+            )}
+            {err && (
+              <AdminAlert key={`err-${err}`} type="danger" onClose={onClearErr}>
+                {err}
+              </AdminAlert>
+            )}
             <form
               className="admin-form admin-form--grid"
               onSubmit={(e) => {
@@ -598,6 +626,7 @@ export function YoneticilerEkle() {
       mode="create"
       busy={busy}
       err={err}
+      onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
@@ -637,13 +666,15 @@ export function YoneticilerDuzenle() {
       busy={busy}
       err={err}
       msg={msg}
+      onClearMsg={() => setMsg('')}
+      onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
         setMsg('');
         try {
           await updateYonetici(id, payload);
-          setMsg('Güncellendi.');
+          setMsg('Kayıt başarıyla güncellendi.');
         } catch (ex) {
           setErr(ex.message);
         } finally {
