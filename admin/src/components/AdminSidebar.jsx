@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ADMIN_BASE, ADMIN_NAV } from '../navConfig';
+import { BRAND_IMG } from '../constants';
 
 function isActive(pathname, item) {
   const path = pathname.replace(/\/$/, '') || '/';
@@ -23,7 +24,9 @@ export default function AdminSidebar({ open, onClose }) {
       </button>
 
       <Link to={ADMIN_BASE} className="admin-sidebar__brand" onClick={onClose}>
-        <i className="fas fa-shield-halved" aria-hidden="true" />
+        <span className="admin-sidebar__brand-mark" aria-hidden="true">
+          <img src={BRAND_IMG} alt="" />
+        </span>
         <div>
           <strong>Yönetim Paneli</strong>
           <span>Gebze Belediyesi</span>
