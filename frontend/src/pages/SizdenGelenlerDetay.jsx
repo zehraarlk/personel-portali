@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import Layout from '../components/Layout';
+import { Link, useNavigate, useParams } from 'react-router-dom';import Layout from '../components/Layout';
 import { fetchSizdenGelenler, goruntulenmeArttir } from '../api/client';
 
 export default function SizdenGelenlerDetay() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [tumIcerikler, setTumIcerikler] = useState([]);
   const [icerik, setIcerik] = useState(null);
@@ -71,15 +71,15 @@ export default function SizdenGelenlerDetay() {
 
       {!loading && !error && icerik && (
         <div className="mx-auto max-w-6xl">
-          <Link
-            to="/sizden-gelenler"
+          <button
+            onClick={() => navigate(-1)}
             className="group mb-5 inline-flex items-center gap-2 rounded-full border border-[#022842]/10 bg-white px-4 py-2 text-sm font-bold text-[#022842] shadow-sm transition hover:-translate-x-0.5 hover:bg-[#eef1f3] hover:border-[#022842]/20"
           >
             <span className="material-symbols-outlined text-[18px] transition group-hover:-translate-x-0.5">
               arrow_back
             </span>
             Sizden Gelenler'e Dön
-          </Link>
+          </button>
 
           {/* Ana kart - tam genişlik */}
           <article className="overflow-hidden rounded-2xl border border-[#022842]/10 bg-white shadow-sm transition hover:shadow-md">
