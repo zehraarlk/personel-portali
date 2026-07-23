@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND_IMG } from '../constants';
-import { fetchProfile } from '../api/client';
+import { fetchProfile, logoutAdmin } from '../api/client';
+import { clearAdminSession, getYoneticiId } from '../auth/session';
 
 const PROFILE_MENU = [
   { to: '/admin/profil/sifre-degistir', label: 'Şifre Değiştir', icon: 'fas fa-key' },
@@ -10,12 +11,17 @@ const PROFILE_MENU = [
 
 export default function AdminTopbar({ title, onMenu }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
+    if (!getYoneticiId()) {
+      setProfile(null);
+      return undefined;
+    }
     fetchProfile()
       .then((data) => {
         if (!cancelled) setProfile(data);
@@ -24,7 +30,7 @@ export default function AdminTopbar({ title, onMenu }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     setOpen(false);
@@ -40,6 +46,17 @@ export default function AdminTopbar({ title, onMenu }) {
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
+
+  const handleLogout = async () => {
+    setOpen(false);
+    try {
+      await logoutAdmin();
+    } catch {
+      /* local clear */
+    }
+    clearAdminSession();
+    navigate('/admin/giris');
+  };
 
   const foto = profile?.foto || BRAND_IMG;
   const name = profile?.ad_soyad || profile?.kullanici_adi || 'Yönetici';
@@ -90,6 +107,15 @@ export default function AdminTopbar({ title, onMenu }) {
                 {item.label}
               </Link>
             ))}
+            <button
+              type="button"
+              role="menuitem"
+              className="admin-topbar__dropdown-item"
+              onClick={handleLogout}
+            >
+              <i className="fas fa-sign-out-alt" aria-hidden="true" />
+              Çıkış Yap
+            </button>
           </div>
         )}
       </div>

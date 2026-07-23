@@ -1,37 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  listDuyurular,
-  deleteDuyuru,
-  createDuyuru,
-  getDuyuru,
-  updateDuyuru,
+  listVideolar,
+  getVideo,
+  createVideo,
+  updateVideo,
+  deleteVideo,
+  listVideoKategoriler,
 } from '../../api/client';
 import usePageTitle from '../../hooks/usePageTitle';
 import { BRAND_IMG } from '../../constants';
-import ImagePickerField from '../../components/ImagePickerField';
 import AdminRowActions from '../../components/AdminRowActions';
 import AdminAlert from '../../components/AdminAlert';
 
-function formatDate(value) {
-  if (!value) return '—';
-  try {
-    return new Date(value).toLocaleDateString('tr-TR');
-  } catch {
-    return value;
-  }
-}
-
-/** etkinlikler_duyurular (sayfa_tipi=duyuru) */
-export function DuyurularIndex() {
-  usePageTitle('Duyurular');
+export function VideolarIndex() {
+  usePageTitle('Videolar');
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(true);
 
   const load = () => {
     setLoading(true);
-    listDuyurular()
+    listVideolar()
       .then((data) => setRows(Array.isArray(data) ? data : data.results || []))
       .catch((ex) => setErr(ex.message))
       .finally(() => setLoading(false));
@@ -39,10 +29,10 @@ export function DuyurularIndex() {
 
   useEffect(load, []);
 
-  const onDelete = async (rowId) => {
-    if (!window.confirm('Bu duyuruyu silmek istiyor musunuz?')) return;
+  const onDelete = async (id) => {
+    if (!window.confirm('Bu videoyu silmek istiyor musunuz?')) return;
     try {
-      await deleteDuyuru(rowId);
+      await deleteVideo(id);
       load();
     } catch (ex) {
       setErr(ex.message);
@@ -54,16 +44,16 @@ export function DuyurularIndex() {
       <header className="admin-page-head">
         <div className="admin-page-head__text">
           <h2>
-            <i className="fas fa-bullhorn" aria-hidden="true" />
-            Duyurular
+            <i className="fas fa-video" aria-hidden="true" />
+            Videolar
           </h2>
         </div>
         <div className="admin-page-head__actions">
           <span className="admin-count-pill">
             Toplam <strong>{rows.length}</strong>
           </span>
-          <Link to="/admin/duyurular/ekle" className="admin-btn admin-btn-primary">
-            <i className="fas fa-plus" aria-hidden="true" /> Yeni Duyuru
+          <Link to="/admin/videolar/ekle" className="admin-btn admin-btn-primary">
+            <i className="fas fa-plus" aria-hidden="true" /> Yeni Video
           </Link>
         </div>
       </header>
@@ -80,24 +70,26 @@ export function DuyurularIndex() {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Görsel</th>
-                <th>Duyuru</th>
-                <th>Tarih</th>
+                <th>Önizleme</th>
+                <th>Video</th>
+                <th>Kategori</th>
+                <th>Süre</th>
+                <th>Vitrin</th>
                 <th>İşlem</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={5} className="admin-empty">
+                  <td colSpan={7} className="admin-empty">
                     Yükleniyor…
                   </td>
                 </tr>
               )}
               {!loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="admin-empty">
-                    Henüz duyuru yok. Yeni kayıt ekleyin.
+                  <td colSpan={7} className="admin-empty">
+                    Henüz video yok. Yeni kayıt ekleyin.
                   </td>
                 </tr>
               )}
@@ -107,7 +99,7 @@ export function DuyurularIndex() {
                   <td className="admin-td-media">
                     <img
                       className="thumb"
-                      src={row.resim_display || BRAND_IMG}
+                      src={row.thumbnail || BRAND_IMG}
                       alt=""
                       onError={(e) => {
                         e.currentTarget.src = BRAND_IMG;
@@ -116,11 +108,18 @@ export function DuyurularIndex() {
                   </td>
                   <td>
                     <div className="admin-row-title">{row.baslik}</div>
+                    <div className="admin-row-meta">{row.youtube_id}</div>
                   </td>
-                  <td>{formatDate(row.tarih)}</td>
+                  <td>{row.kategori_ad || '—'}</td>
+                  <td>{row.sure || '—'}</td>
+                  <td>
+                    <span className={`admin-badge-status ${row.vitrin ? 'is-aktif' : 'is-pasif'}`}>
+                      {row.vitrin ? 'Evet' : 'Hayır'}
+                    </span>
+                  </td>
                   <td>
                     <AdminRowActions
-                      editTo={`/admin/duyurular/${row.id}/duzenle`}
+                      editTo={`/admin/videolar/${row.id}/duzenle`}
                       onDelete={() => onDelete(row.id)}
                     />
                   </td>
@@ -134,30 +133,49 @@ export function DuyurularIndex() {
   );
 }
 
-function DuyuruForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
+function VideoForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
+  const [youtubeId, setYoutubeId] = useState(initial?.youtube_id || '');
   const [baslik, setBaslik] = useState(initial?.baslik || '');
   const [aciklama, setAciklama] = useState(initial?.aciklama || '');
-  const [resimUrl, setResimUrl] = useState(initial?.resim_url || '');
-  const [tarih, setTarih] = useState(initial?.tarih || '');
+  const [sure, setSure] = useState(initial?.sure || '');
+  const [kategori, setKategori] = useState(initial?.kategori ? String(initial.kategori) : '');
+  const [vitrin, setVitrin] = useState(String(initial?.vitrin ?? 0));
+  const [vitrinBaslik, setVitrinBaslik] = useState(initial?.vitrin_baslik || '');
+  const [vitrinAciklama, setVitrinAciklama] = useState(initial?.vitrin_aciklama || '');
+  const [kategoriler, setKategoriler] = useState([]);
 
   useEffect(() => {
+    listVideoKategoriler()
+      .then((data) => setKategoriler(Array.isArray(data) ? data : []))
+      .catch(() => setKategoriler([]));
+  }, []);
+
+  useEffect(() => {
+    setYoutubeId(initial?.youtube_id || '');
     setBaslik(initial?.baslik || '');
     setAciklama(initial?.aciklama || '');
-    setResimUrl(initial?.resim_url || '');
-    setTarih(initial?.tarih || '');
+    setSure(initial?.sure || '');
+    setKategori(initial?.kategori ? String(initial.kategori) : '');
+    setVitrin(String(initial?.vitrin ?? 0));
+    setVitrinBaslik(initial?.vitrin_baslik || '');
+    setVitrinAciklama(initial?.vitrin_aciklama || '');
   }, [initial]);
+
+  const preview = youtubeId
+    ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+    : '';
 
   return (
     <div className="admin-module">
       <header className="admin-page-head">
         <div className="admin-page-head__text">
           <h2>
-            <i className="fas fa-bullhorn" aria-hidden="true" />
-            {mode === 'edit' ? 'Duyuru düzenle' : 'Yeni duyuru'}
+            <i className="fas fa-video" aria-hidden="true" />
+            {mode === 'edit' ? 'Video düzenle' : 'Yeni video'}
           </h2>
         </div>
         <div className="admin-page-head__actions">
-          <Link to="/admin/duyurular" className="admin-btn admin-btn-secondary">
+          <Link to="/admin/videolar" className="admin-btn admin-btn-secondary">
             <i className="fas fa-arrow-left" aria-hidden="true" /> Listeye dön
           </Link>
         </div>
@@ -181,11 +199,14 @@ function DuyuruForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onCle
               onSubmit={(e) => {
                 e.preventDefault();
                 onSubmit({
+                  youtube_id: youtubeId,
                   baslik,
-                  aciklama,
-                  resim_url: resimUrl || null,
-                  tarih: tarih || null,
-                  sayfa_tipi: 'duyuru',
+                  aciklama: aciklama || '',
+                  sure: sure || '00:00',
+                  kategori: kategori ? Number(kategori) : null,
+                  vitrin: Number(vitrin),
+                  vitrin_baslik: vitrinBaslik || null,
+                  vitrin_aciklama: vitrinAciklama || null,
                 });
               }}
             >
@@ -195,32 +216,93 @@ function DuyuruForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onCle
                   <input value={baslik} onChange={(e) => setBaslik(e.target.value)} required />
                 </label>
                 <label>
+                  YouTube ID
+                  <input
+                    value={youtubeId}
+                    onChange={(e) => setYoutubeId(e.target.value.trim())}
+                    required
+                    placeholder="örn. qLqYPQgUPEc"
+                  />
+                </label>
+                <label>
                   Açıklama
                   <textarea
                     value={aciklama}
                     onChange={(e) => setAciklama(e.target.value)}
-                    rows={7}
+                    rows={5}
                   />
                 </label>
+                <div className="admin-form__row-2">
+                  <label>
+                    Süre
+                    <input
+                      value={sure}
+                      onChange={(e) => setSure(e.target.value)}
+                      placeholder="00:30"
+                    />
+                  </label>
+                  <label>
+                    Kategori
+                    <select value={kategori} onChange={(e) => setKategori(e.target.value)}>
+                      <option value="">Seçiniz</option>
+                      {kategoriler.map((k) => (
+                        <option key={k.id} value={k.id}>
+                          {k.ad}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <div className="admin-form__row-2">
+                  <label>
+                    Vitrin
+                    <select value={vitrin} onChange={(e) => setVitrin(e.target.value)}>
+                      <option value="0">Hayır</option>
+                      <option value="1">Evet</option>
+                    </select>
+                  </label>
+                  <label>
+                    Vitrin başlık
+                    <input
+                      value={vitrinBaslik}
+                      onChange={(e) => setVitrinBaslik(e.target.value)}
+                    />
+                  </label>
+                </div>
                 <label>
-                  Tarih
-                  <input
-                    type="date"
-                    value={tarih || ''}
-                    onChange={(e) => setTarih(e.target.value)}
+                  Vitrin açıklama
+                  <textarea
+                    value={vitrinAciklama}
+                    onChange={(e) => setVitrinAciklama(e.target.value)}
+                    rows={3}
                   />
                 </label>
               </div>
 
               <div className="admin-form__side">
-                <ImagePickerField value={resimUrl} onChange={setResimUrl} label="Resim" />
+                <div className="admin-form-preview">
+                  {preview ? (
+                    <img
+                      src={preview}
+                      alt=""
+                      onError={(e) => {
+                        e.currentTarget.src = BRAND_IMG;
+                      }}
+                    />
+                  ) : (
+                    <div className="admin-form-preview__empty">
+                      <i className="fas fa-video" aria-hidden="true" />
+                      YouTube önizleme
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="admin-form__actions admin-form__span-2">
                 <button type="submit" className="admin-btn admin-btn-primary" disabled={busy}>
                   {busy ? 'Kaydediliyor…' : 'Kaydet'}
                 </button>
-                <Link to="/admin/duyurular" className="admin-btn admin-btn-secondary">
+                <Link to="/admin/videolar" className="admin-btn admin-btn-secondary">
                   İptal
                 </Link>
               </div>
@@ -232,28 +314,24 @@ function DuyuruForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onCle
   );
 }
 
-export function DuyurularEkle() {
-  usePageTitle('Duyuru Ekle');
+export function VideolarEkle() {
+  usePageTitle('Video Ekle');
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const [msg, setMsg] = useState('');
 
   return (
-    <DuyuruForm
+    <VideoForm
       mode="create"
       busy={busy}
       err={err}
-      msg={msg}
-      onClearMsg={() => setMsg('')}
       onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
-        setMsg('');
         try {
-          await createDuyuru(payload);
-          navigate('/admin/duyurular');
+          await createVideo(payload);
+          navigate('/admin/videolar');
         } catch (ex) {
           setErr(ex.message);
         } finally {
@@ -264,8 +342,8 @@ export function DuyurularEkle() {
   );
 }
 
-export function DuyurularDuzenle() {
-  usePageTitle('Duyuru Düzenle');
+export function VideolarDuzenle() {
+  usePageTitle('Video Düzenle');
   const { id } = useParams();
   const [initial, setInitial] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -273,7 +351,7 @@ export function DuyurularDuzenle() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    getDuyuru(id)
+    getVideo(id)
       .then(setInitial)
       .catch((ex) => setErr(ex.message));
   }, [id]);
@@ -281,7 +359,7 @@ export function DuyurularDuzenle() {
   if (!initial && !err) return <p className="admin-muted">Yükleniyor…</p>;
 
   return (
-    <DuyuruForm
+    <VideoForm
       mode="edit"
       initial={initial}
       busy={busy}
@@ -294,7 +372,7 @@ export function DuyurularDuzenle() {
         setErr('');
         setMsg('');
         try {
-          await updateDuyuru(id, payload);
+          await updateVideo(id, payload);
           setMsg('Kayıt başarıyla güncellendi.');
         } catch (ex) {
           setErr(ex.message);

@@ -11,6 +11,7 @@ import usePageTitle from '../../hooks/usePageTitle';
 import { BRAND_IMG } from '../../constants';
 import ImagePickerField from '../../components/ImagePickerField';
 import AdminRowActions from '../../components/AdminRowActions';
+import AdminAlert from '../../components/AdminAlert';
 
 function formatDate(value) {
   if (!value) return '—';
@@ -66,7 +67,11 @@ export function EtkinliklerIndex() {
         </div>
       </header>
 
-      {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+      {err && (
+        <AdminAlert type="danger" onClose={() => setErr('')}>
+          {err}
+        </AdminAlert>
+      )}
 
       <div className="admin-card admin-card--flush">
         <div className="admin-table-wrap">
@@ -143,7 +148,7 @@ export function EtkinliklerIndex() {
   );
 }
 
-function EtkinlikForm({ mode, initial, onSubmit, busy, err, msg }) {
+function EtkinlikForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
   const [baslik, setBaslik] = useState(initial?.baslik || '');
   const [aciklama, setAciklama] = useState(initial?.aciklama || '');
   const [tarih, setTarih] = useState(initial?.tarih || '');
@@ -181,8 +186,16 @@ function EtkinlikForm({ mode, initial, onSubmit, busy, err, msg }) {
       <div className="admin-crud-form-shell">
         <div className="admin-card">
           <div className="admin-card-body">
-            {msg && <div className="admin-alert admin-alert-success">{msg}</div>}
-            {err && <div className="admin-alert admin-alert-danger">{err}</div>}
+            {msg && (
+              <AdminAlert key={`ok-${msg}`} type="success" onClose={onClearMsg}>
+                {msg}
+              </AdminAlert>
+            )}
+            {err && (
+              <AdminAlert key={`err-${err}`} type="danger" onClose={onClearErr}>
+                {err}
+              </AdminAlert>
+            )}
             <form
               className="admin-form admin-form--grid"
               onSubmit={(e) => {
@@ -283,6 +296,8 @@ export function EtkinliklerEkle() {
       busy={busy}
       err={err}
       msg={msg}
+      onClearMsg={() => setMsg('')}
+      onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
@@ -323,13 +338,15 @@ export function EtkinliklerDuzenle() {
       busy={busy}
       err={err}
       msg={msg}
+      onClearMsg={() => setMsg('')}
+      onClearErr={() => setErr('')}
       onSubmit={async (payload) => {
         setBusy(true);
         setErr('');
         setMsg('');
         try {
           await updateEtkinlik(id, payload);
-          setMsg('Güncellendi.');
+          setMsg('Kayıt başarıyla güncellendi.');
         } catch (ex) {
           setErr(ex.message);
         } finally {
