@@ -1,0 +1,182 @@
+.etkinlikler-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+}
+
+.etkinlikler-header h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #022842;
+}
+
+.etkinlikler-header p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #5b6b78;
+}
+
+/* --- Durum sekmeleri --- */
+
+.etkinlikler-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.etkinlikler-tab {
+  border: 1px solid rgba(2, 40, 66, 0.15);
+  background: #ffffff;
+  color: #022842;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.etkinlikler-tab:hover {
+  border-color: #022842;
+}
+
+.etkinlikler-tab.is-active {
+  background: #022842;
+  border-color: #022842;
+  color: #ffffff;
+}
+
+.etkinlikler-state {
+  font-size: 14px;
+  color: #5b6b78;
+  padding: 24px 0;
+}
+
+.etkinlikler-state--error {
+  color: #b3261e;
+}
+
+.etkinlikler-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.etkinlik-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(2, 40, 66, 0.1);
+  box-shadow: 0 6px 18px rgba(2, 40, 66, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.etkinlik-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(2, 40, 66, 0.14);
+}
+
+.etkinlik-card-media {
+  position: relative;
+  height: 160px;
+  background: #022842;
+}
+
+.etkinlik-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.etkinlik-card-media--placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #022842, #0b3757);
+}
+
+.etkinlik-card-date {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  background: #f5a623;
+  color: #022842;
+  border-radius: 8px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.etkinlik-card-date-gun {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.etkinlik-card-date-ay {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.etkinlik-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(2, 40, 66, 0.85);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.etkinlik-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.etkinlik-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #022842;
+  line-height: 1.3;
+}
+
+.etkinlik-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #5b6b78;
+}
+
+.etkinlik-card-meta i {
+  color: #f5a623;
+  width: 14px;
+  text-align: center;
+}
+
+.etkinlik-card-desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3a4a57;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
