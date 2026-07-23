@@ -11,6 +11,8 @@ from .models import (
     normalize_image_path,
     Videolar,
     VideolarKategori,
+    Etkinlikler,
+    EtkinliklerDurum,
 )
 
 
@@ -115,3 +117,36 @@ class VideoSerializer(serializers.ModelSerializer):
 
     def get_embed_url(self, obj):
         return f'https://www.youtube.com/embed/{obj.youtube_id}'
+
+
+class EtkinliklerDurumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EtkinliklerDurum
+        fields = ['id', 'slug', 'ad']
+
+
+class EtkinlikSerializer(serializers.ModelSerializer):
+    durum_ref = serializers.StringRelatedField()
+    durum_ref_slug = serializers.SerializerMethodField()
+    resim = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Etkinlikler
+        fields = [
+            'id',
+            'baslik',
+            'aciklama',
+            'tarih',
+            'bitis_tarihi',
+            'view',
+            'resim',
+            'durum',
+            'durum_ref',
+            'durum_ref_slug',
+        ]
+
+    def get_resim(self, obj):
+        return normalize_image_path(obj.resim)
+
+    def get_durum_ref_slug(self, obj):
+        return obj.durum_ref.slug if obj.durum_ref else None
