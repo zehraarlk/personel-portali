@@ -104,6 +104,18 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173'
 ).split(',')
+CORS_ALLOW_HEADERS = list(
+    {
+        'accept',
+        'authorization',
+        'content-type',
+        'user-agent',
+        'x-csrftoken',
+        'x-requested-with',
+        'x-personel-id',
+        'x-yonetici-id',
+    }
+)
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

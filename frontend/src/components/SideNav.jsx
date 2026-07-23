@@ -1,7 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND_IMG, SITE_LOGO_WHITE } from '../constants';
-import { fetchSiteIcons, fetchProfile } from '../api/client';
+import {
+  fetchSiteIcons,
+  fetchProfile,
+  fetchAdminProfile,
+  logoutPersonel,
+  logoutAdmin,
+} from '../api/client';
+import {
+  canAccessPortal,
+  clearAuth,
+  clearPersonelAuth,
+  getPersonelId,
+  isYoneticiLoggedIn,
+} from '../auth/session';
 import '../styles/navbar.css';
 
 const NAV_SECTIONS = [
@@ -45,10 +58,16 @@ const NAV_SECTIONS = [
 const LEFT_SECTIONS = NAV_SECTIONS.slice(0, 2); // Anasayfa/Videolar, Etkinlikler
 const RIGHT_SECTIONS = NAV_SECTIONS.slice(2); // Kaynaklar, Diğer
 
-const PROFILE_MENU = [
+const PROFILE_MENU_PERSONEL = [
   { to: '/profil/sifre-degistir', label: 'Şifre Değiştir', iconKey: 'sifre_degistir' },
   { to: '/profil/eposta-degistir', label: 'E-posta Değiştir', iconKey: 'email_degistir' },
   { to: '/profil/oturum-kayitlari', label: 'Oturum Kayıtları', iconKey: 'oturum_bilgileri' },
+];
+
+const PROFILE_MENU_ADMIN = [
+  { to: '/admin', label: 'Yönetim Paneli', iconKey: 'yonetim_paneli' },
+  { to: '/admin/profil/sifre-degistir', label: 'Şifre Değiştir', iconKey: 'sifre_degistir' },
+  { to: '/admin/profil/oturum-kayitlari', label: 'Oturum Kayıtları', iconKey: 'oturum_bilgileri' },
 ];
 
 const FALLBACK_ICONS = {
@@ -69,12 +88,18 @@ const FALLBACK_ICONS = {
   sifre_degistir: 'fas fa-key',
   email_degistir: 'fas fa-envelope',
   oturum_bilgileri: 'fas fa-history',
+  giris: 'fas fa-sign-in-alt',
+  cikis: 'fas fa-sign-out-alt',
+  yonetim_paneli: 'fas fa-tachometer-alt',
 };
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [icons, setIcons] = useState(FALLBACK_ICONS);
   const [profile, setProfile] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(() => canAccessPortal());
+  const [isAdmin, setIsAdmin] = useState(() => isYoneticiLoggedIn());
   const [openMenu, setOpenMenu] = useState(null); // key of open desktop dropdown / 'profile'
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState(null); // key of expanded accordion on mobile
@@ -97,6 +122,9 @@ export default function Navbar() {
 
   useEffect(() => {
     let cancelled = false;
+    const admin = isYoneticiLoggedIn();
+    setLoggedIn(canAccessPortal());
+    setIsAdmin(admin);
     fetchSiteIcons()
       .then((data) => {
         if (!cancelled && data?.icons) {
@@ -104,15 +132,30 @@ export default function Navbar() {
         }
       })
       .catch(() => {});
-    fetchProfile()
-      .then((data) => {
-        if (!cancelled) setProfile(data);
-      })
-      .catch(() => {});
+
+    if (getPersonelId()) {
+      fetchProfile()
+        .then((data) => {
+          if (!cancelled) setProfile(data);
+        })
+        .catch(() => {
+          if (!cancelled) setProfile(null);
+        });
+    } else if (admin) {
+      fetchAdminProfile()
+        .then((data) => {
+          if (!cancelled) setProfile(data);
+        })
+        .catch(() => {
+          if (!cancelled) setProfile(null);
+        });
+    } else {
+      setProfile(null);
+    }
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!openMenu) return undefined;
@@ -125,6 +168,35 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', onDoc);
   }, [openMenu]);
 
+  const handleLogout = async () => {
+    setOpenMenu(null);
+    setMobileOpen(false);
+    const admin = isYoneticiLoggedIn();
+    try {
+      if (admin) {
+        await logoutAdmin();
+      } else {
+        await logoutPersonel();
+      }
+    } catch {
+      /* local clear yine de */
+    }
+    if (admin) {
+      clearAuth();
+      setLoggedIn(false);
+      setIsAdmin(false);
+      setProfile(null);
+      navigate('/admin/giris');
+      return;
+    }
+    clearPersonelAuth();
+    setLoggedIn(false);
+    setProfile(null);
+    navigate('/giris');
+  };
+
+  const profileMenu = isAdmin ? PROFILE_MENU_ADMIN : PROFILE_MENU_PERSONEL;
+
   const isActive = (item) => {
     if (item.end) return location.pathname === '/';
     return location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
@@ -135,8 +207,12 @@ export default function Navbar() {
 
   const iconClass = (key) => icons[key] || FALLBACK_ICONS[key] || 'fas fa-circle';
   const foto = profile?.foto || BRAND_IMG;
-  const adSoyad = profile?.ad_soyad || 'Personel';
-  const rol = profile?.rol || 'Personel';
+  const adSoyad = loggedIn
+    ? profile?.ad_soyad || profile?.kullanici_adi || (isAdmin ? 'Yönetici' : 'Personel')
+    : 'Misafir';
+  const rol = loggedIn
+    ? profile?.yetki || profile?.rol || (isAdmin ? 'Yönetici' : 'Personel')
+    : 'Giriş yapın';
 
   const toggleMenu = (key) => setOpenMenu((cur) => (cur === key ? null : key));
 
@@ -234,18 +310,41 @@ export default function Navbar() {
 
             {openMenu === 'profile' && (
               <div role="menu" className="navbar-dropdown navbar-dropdown--right">
-                {PROFILE_MENU.map((item) => (
+                {loggedIn ? (
+                  <>
+                    {profileMenu.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        role="menuitem"
+                        className="navbar-dropdown-link"
+                        onClick={() => setOpenMenu(null)}
+                      >
+                        <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="navbar-dropdown-link"
+                      onClick={handleLogout}
+                    >
+                      <i className={`${iconClass('cikis')} navbar-dropdown-icon`} aria-hidden="true" />
+                      Çıkış Yap
+                    </button>
+                  </>
+                ) : (
                   <Link
-                    key={item.to}
-                    to={item.to}
+                    to="/giris"
                     role="menuitem"
                     className="navbar-dropdown-link"
                     onClick={() => setOpenMenu(null)}
                   >
-                    <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
-                    {item.label}
+                    <i className={`${iconClass('giris')} navbar-dropdown-icon`} aria-hidden="true" />
+                    Giriş Yap
                   </Link>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -348,17 +447,34 @@ export default function Navbar() {
 
             <div className="navbar-mobile-group">
               <p className="navbar-mobile-caption">Hesap</p>
-              {PROFILE_MENU.map((item) => (
+              {loggedIn ? (
+                <>
+                  {profileMenu.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="navbar-mobile-link"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
+                      {item.label}
+                    </Link>
+                  ))}
+                  <button type="button" className="navbar-mobile-link" onClick={handleLogout}>
+                    <i className={`${iconClass('cikis')} navbar-dropdown-icon`} aria-hidden="true" />
+                    Çıkış Yap
+                  </button>
+                </>
+              ) : (
                 <Link
-                  key={item.to}
-                  to={item.to}
+                  to="/giris"
                   className="navbar-mobile-link"
                   onClick={() => setMobileOpen(false)}
                 >
-                  <i className={`${iconClass(item.iconKey)} navbar-dropdown-icon`} aria-hidden="true" />
-                  {item.label}
+                  <i className={`${iconClass('giris')} navbar-dropdown-icon`} aria-hidden="true" />
+                  Giriş Yap
                 </Link>
-              ))}
+              )}
             </div>
           </div>
         </>
