@@ -127,7 +127,7 @@ export default function SizdenGelenler() {
                       {item.kategori}
                     </span>
                     <h2 className="text-white text-xl sm:text-3xl font-bold drop-shadow-sm max-w-2xl">
-                      {item.baslik}
+                      {item.kategori}
                     </h2>
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export default function SizdenGelenler() {
                     {vurgula(item.kategori, arama)}
                   </span>
                   <h2 className="mt-1 text-base font-semibold text-on-surface transition-colors group-hover:text-primary line-clamp-2">
-                    {vurgula(item.baslik, arama)}
+                    {vurgula(item.kategori, arama)}
                   </h2>
                   <p className="mt-1 text-xs text-on-surface-variant">{item.tarih}</p>
                 </div>
@@ -291,7 +291,7 @@ export default function SizdenGelenler() {
               <span className="inline-block rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold mb-3">
                 {acikKart.kategori}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-on-surface">{acikKart.baslik}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-on-surface">{acikKart.kategori}</h2>
               <p className="mt-1 text-sm text-on-surface-variant">{acikKart.tarih}</p>
               <p className="mt-4 text-base leading-7 text-on-surface-variant">{acikKart.ozet}</p>
             </div>
