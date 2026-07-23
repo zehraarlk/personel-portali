@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Layout from '../components/Layout';
+import Footer from '../components/Footer';
 import { fetchVideos } from '../api/client';
 
 const EMPTY_DATA = {
@@ -10,6 +11,14 @@ const EMPTY_DATA = {
 };
 
 const VIDEOS_PER_PAGE = 9;
+
+const SORT_OPTIONS = [
+  { value: 'yeni', label: 'En Yeni', icon: 'new_releases' },
+  { value: 'eski', label: 'En Eski', icon: 'history' },
+  { value: 'az', label: 'A–Z', icon: 'sort_by_alpha' },
+  { value: 'kisa', label: 'Süresi Kısa', icon: 'schedule' },
+  { value: 'uzun', label: 'Süresi Uzun', icon: 'more_time' },
+];
 
 function getPaginationItems(currentPage, totalPages) {
   if (totalPages <= 7) {
@@ -198,30 +207,42 @@ export default function Videos() {
   const [data, setData] = useState(EMPTY_DATA);
   const [kategori, setKategori] = useState('');
   const [kategoriMenuAcik, setKategoriMenuAcik] = useState(false);
+  const [siralamaMenuAcik, setSiralamaMenuAcik] = useState(false);
   const [arama, setArama] = useState('');
   const [siralama, setSiralama] = useState('yeni');
   const [sayfa, setSayfa] = useState(1);
   const [acikVideo, setAcikVideo] = useState(null);
   const kategoriMenuRef = useRef(null);
+  const siralamaMenuRef = useRef(null);
   const videoListesiRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!kategoriMenuAcik) return undefined;
+    if (!kategoriMenuAcik && !siralamaMenuAcik) return undefined;
 
     function handleOutsidePointerDown(event) {
       if (
+        kategoriMenuAcik &&
         kategoriMenuRef.current &&
         !kategoriMenuRef.current.contains(event.target)
       ) {
         setKategoriMenuAcik(false);
+      }
+
+      if (
+        siralamaMenuAcik &&
+        siralamaMenuRef.current &&
+        !siralamaMenuRef.current.contains(event.target)
+      ) {
+        setSiralamaMenuAcik(false);
       }
     }
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
         setKategoriMenuAcik(false);
+        setSiralamaMenuAcik(false);
       }
     }
 
@@ -232,7 +253,7 @@ export default function Videos() {
       document.removeEventListener('pointerdown', handleOutsidePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [kategoriMenuAcik]);
+  }, [kategoriMenuAcik, siralamaMenuAcik]);
 
   useEffect(() => {
     if (!acikVideo) return undefined;
@@ -330,6 +351,16 @@ export default function Videos() {
         return parseVideoDuration(a.sure) - parseVideoDuration(b.sure);
       }
 
+      if (siralama === 'uzun') {
+        const aSuresi = parseVideoDuration(a.sure);
+        const bSuresi = parseVideoDuration(b.sure);
+
+        if (!Number.isFinite(aSuresi)) return 1;
+        if (!Number.isFinite(bSuresi)) return -1;
+
+        return bSuresi - aSuresi;
+      }
+
       return getVideoTimestamp(b) - getVideoTimestamp(a);
     });
   }, [arama, kartVideolari, siralama]);
@@ -383,6 +414,8 @@ export default function Videos() {
     data.kategoriler.find((item) => item.slug === kategori) ?? null;
 
   const aktifKategoriAdi = aktifKategori?.ad || 'Tüm Videolar';
+  const aktifSiralama =
+    SORT_OPTIONS.find((option) => option.value === siralama) ?? SORT_OPTIONS[0];
 
   return (
     <Layout videoPage>
@@ -450,8 +483,11 @@ export default function Videos() {
                       type="button"
                       aria-haspopup="menu"
                       aria-expanded={kategoriMenuAcik}
-                      onClick={() => setKategoriMenuAcik((acik) => !acik)}
-                      className="inline-flex h-[50px] w-full items-center justify-between gap-3 rounded-xl border border-[#022842] bg-[#022842] px-5 py-3 text-sm font-semibold text-white shadow-[0_5px_14px_rgba(2,40,66,0.18)] transition hover:bg-[#0a3a5c]"
+                      onClick={() => {
+                        setKategoriMenuAcik((acik) => !acik);
+                        setSiralamaMenuAcik(false);
+                      }}
+                      className="inline-flex h-[50px] w-full items-center justify-between gap-3 rounded-xl border border-[#cfd9e2] bg-white px-5 py-3 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
                     >
                       <span className="inline-flex items-center gap-2">
                         <span className="material-symbols-outlined text-[19px]">
@@ -484,7 +520,7 @@ export default function Videos() {
                           }}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
                             kategori === ''
-                              ? 'bg-[#022842] text-white'
+                              ? 'bg-[#e8f1f8] text-[#022842]'
                               : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
                           }`}
                         >
@@ -506,7 +542,7 @@ export default function Videos() {
                             }}
                             className={`mt-1 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
                               kategori === item.slug
-                                ? 'bg-[#022842] text-white'
+                                ? 'bg-[#e8f1f8] text-[#022842]'
                                 : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
                             }`}
                           >
@@ -521,31 +557,67 @@ export default function Videos() {
                   </nav>
                 )}
 
-                <div className="relative w-full lg:w-[190px] lg:shrink-0">
-                  <label htmlFor="video-sort" className="sr-only">
-                    Videoları sırala
-                  </label>
-
-                  <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[21px] text-[#61717d]">
-                    sort
-                  </span>
-
-                  <select
-                    id="video-sort"
-                    value={siralama}
-                    onChange={(event) => setSiralama(event.target.value)}
-                    className="h-[50px] w-full appearance-none rounded-xl border border-[#cfd9e2] bg-white pl-12 pr-11 text-sm font-semibold text-[#33495a] shadow-sm outline-none transition hover:border-[#022842]/35 focus:border-[#022842] focus:ring-4 focus:ring-[#022842]/10"
+                <nav
+                  ref={siralamaMenuRef}
+                  className="relative z-50 w-full lg:w-[190px] lg:shrink-0"
+                  aria-label="Video sıralama seçenekleri"
+                >
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={siralamaMenuAcik}
+                    onClick={() => {
+                      setSiralamaMenuAcik((acik) => !acik);
+                      setKategoriMenuAcik(false);
+                    }}
+                    className="inline-flex h-[50px] w-full items-center justify-between gap-3 rounded-xl border border-[#cfd9e2] bg-white px-5 py-3 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
                   >
-                    <option value="yeni">En Yeni</option>
-                    <option value="eski">En Eski</option>
-                    <option value="az">A–Z</option>
-                    <option value="kisa">Süresi Kısa</option>
-                  </select>
+                    <span className="inline-flex min-w-0 items-center gap-2">
+                      <span className="material-symbols-outlined text-[19px]">
+                        {aktifSiralama.icon}
+                      </span>
+                      <span className="truncate">{aktifSiralama.label}</span>
+                    </span>
 
-                  <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[21px] text-[#61717d]">
-                    expand_more
-                  </span>
-                </div>
+                    <span
+                      className={`material-symbols-outlined text-xl transition-transform duration-200 ${
+                        siralamaMenuAcik ? 'rotate-180' : ''
+                      }`}
+                    >
+                      expand_more
+                    </span>
+                  </button>
+
+                  {siralamaMenuAcik && (
+                    <div
+                      role="menu"
+                      className="absolute left-0 top-full mt-2 min-w-[230px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
+                    >
+                      {SORT_OPTIONS.map((option, index) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={siralama === option.value}
+                          onClick={() => {
+                            setSiralama(option.value);
+                            setSiralamaMenuAcik(false);
+                          }}
+                          className={`${index > 0 ? 'mt-1 ' : ''}flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
+                            siralama === option.value
+                              ? 'bg-[#e8f1f8] text-[#022842]'
+                              : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[19px]">
+                            {option.icon}
+                          </span>
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </nav>
 
 
                 <div className="relative w-full lg:max-w-[420px]">
@@ -553,7 +625,7 @@ export default function Videos() {
                     Video ara
                   </label>
 
-                  <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[22px] text-[#61717d]">
+                  <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[22px] text-[#022842]">
                     search
                   </span>
 
@@ -644,17 +716,17 @@ export default function Videos() {
 
                     {toplamSayfa > 1 && (
                       <nav
-                        className="mx-auto mt-10 flex w-fit max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-[#022842]/10 bg-white/90 p-2.5 shadow-[0_10px_28px_rgba(2,40,66,0.09)] backdrop-blur sm:gap-3 sm:p-3"
+                        className="mx-auto mt-8 flex w-fit max-w-full flex-wrap items-center justify-center gap-1.5 rounded-xl border border-[#022842]/10 bg-white/90 p-1.5 shadow-[0_6px_18px_rgba(2,40,66,0.08)] backdrop-blur sm:gap-2 sm:p-2"
                         aria-label="Video sayfaları"
                       >
                         <button
                           type="button"
                           onClick={() => sayfayaGit(sayfa - 1)}
                           disabled={sayfa === 1}
-                          className="inline-flex h-14 items-center justify-center gap-1.5 rounded-xl border border-[#d5dde5] bg-white px-4 text-sm font-semibold text-[#33495a] shadow-sm transition hover:border-[#f5a623] hover:bg-[#fffaf0] hover:text-[#022842] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#d5dde5] disabled:hover:bg-white sm:px-4"
+                          className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-[#d5dde5] bg-white px-3 text-xs font-semibold text-[#33495a] shadow-sm transition hover:border-[#f5a623] hover:bg-[#fffaf0] hover:text-[#022842] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#d5dde5] disabled:hover:bg-white sm:text-sm"
                           aria-label="Önceki sayfa"
                         >
-                          <span className="material-symbols-outlined text-xl">
+                          <span className="material-symbols-outlined text-lg">
                             chevron_left
                           </span>
                           <span className="hidden sm:inline">Önceki</span>
@@ -667,9 +739,9 @@ export default function Videos() {
                               type="button"
                               onClick={() => sayfayaGit(item)}
                               aria-current={sayfa === item ? 'page' : undefined}
-                              className={`relative inline-flex h-14 min-w-14 items-center justify-center overflow-hidden rounded-xl border px-4 text-base font-extrabold transition ${
+                              className={`relative inline-flex h-10 min-w-10 items-center justify-center overflow-hidden rounded-lg border px-3 text-sm font-extrabold transition ${
                                 sayfa === item
-                                  ? "border-[#022842] bg-[#022842] text-white shadow-[0_8px_22px_rgba(2,40,66,0.24)] after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-t-full after:bg-[#f5a623] after:content-['']"
+                                  ? "border-[#022842] bg-[#022842] text-white shadow-[0_5px_14px_rgba(2,40,66,0.22)] after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-t-full after:bg-[#f5a623] after:content-['']"
                                   : 'border-[#d5dde5] bg-white text-[#536575] shadow-sm hover:border-[#f5a623] hover:bg-[#fffaf0] hover:text-[#022842]'
                               }`}
                             >
@@ -678,7 +750,7 @@ export default function Videos() {
                           ) : (
                             <span
                               key={item}
-                              className="inline-flex h-14 min-w-8 items-center justify-center text-xl font-bold text-[#7a8994]"
+                              className="inline-flex h-10 min-w-6 items-center justify-center text-lg font-bold text-[#7a8994]"
                               aria-hidden="true"
                             >
                               …
@@ -690,11 +762,11 @@ export default function Videos() {
                           type="button"
                           onClick={() => sayfayaGit(sayfa + 1)}
                           disabled={sayfa === toplamSayfa}
-                          className="inline-flex h-14 items-center justify-center gap-1.5 rounded-xl border border-[#d5dde5] bg-white px-4 text-sm font-semibold text-[#33495a] shadow-sm transition hover:border-[#f5a623] hover:bg-[#fffaf0] hover:text-[#022842] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#d5dde5] disabled:hover:bg-white sm:px-4"
+                          className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-[#d5dde5] bg-white px-3 text-xs font-semibold text-[#33495a] shadow-sm transition hover:border-[#f5a623] hover:bg-[#fffaf0] hover:text-[#022842] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#d5dde5] disabled:hover:bg-white sm:text-sm"
                           aria-label="Sonraki sayfa"
                         >
                           <span className="hidden sm:inline">Sonraki</span>
-                          <span className="material-symbols-outlined text-xl">
+                          <span className="material-symbols-outlined text-lg">
                             chevron_right
                           </span>
                         </button>
@@ -755,6 +827,8 @@ export default function Videos() {
             </div>
           </>
         )}
+
+        <Footer />
 
         {acikVideo && (
           <div
