@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { changeEmail, fetchProfile } from '../api/client';
+import '../styles/profil.css';
 
 export default function ChangeEmail() {
   const [current, setCurrent] = useState('');
@@ -39,49 +40,61 @@ export default function ChangeEmail() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-lg">
-        <Link to="/" className="mb-4 inline-flex text-sm text-primary hover:underline">
-          ← Ana sayfa
+      <div className="profil-page">
+        <Link to="/" className="profil-back">
+          <i className="fas fa-arrow-left" aria-hidden="true" />
+          Ana sayfa
         </Link>
-        <h1 className="mb-1 text-2xl font-bold text-[#022842]">E-posta Değiştir</h1>
-        <p className="mb-6 text-sm text-on-surface-variant">
-          Mevcut: <strong>{current || '—'}</strong>
-        </p>
 
-        <form
-          onSubmit={onSubmit}
-          className="rounded-2xl border border-outline-variant/25 bg-white p-6 shadow-sm space-y-4"
-        >
-          <label className="block text-sm font-medium">
-            Yeni e-posta
-            <input
-              type="email"
-              className="mt-1 w-full rounded-lg border border-outline-variant/40 px-3 py-2"
-              value={yeni}
-              onChange={(e) => setYeni(e.target.value)}
-              required
-            />
-          </label>
-          <label className="block text-sm font-medium">
-            Onay için şifre
-            <input
-              type="password"
-              className="mt-1 w-full rounded-lg border border-outline-variant/40 px-3 py-2"
-              value={sifre}
-              onChange={(e) => setSifre(e.target.value)}
-              required
-            />
-          </label>
-          {err && <p className="text-sm text-red-600">{err}</p>}
-          {msg && <p className="text-sm text-green-700">{msg}</p>}
-          <button
-            type="submit"
-            disabled={busy}
-            className="rounded-lg bg-[#022842] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#033a5c] disabled:opacity-60"
-          >
-            {busy ? 'Kaydediliyor…' : 'E-postayı Güncelle'}
-          </button>
-        </form>
+        <header className="profil-head">
+          <span className="profil-head__icon" aria-hidden="true">
+            <i className="fas fa-envelope" />
+          </span>
+          <div className="profil-head__text">
+            <h1>E-posta Değiştir</h1>
+            <p>
+              Mevcut adres: <strong>{current || '—'}</strong>
+            </p>
+          </div>
+        </header>
+
+        <div className="profil-card">
+          <form onSubmit={onSubmit} className="profil-form">
+            <div className="profil-field">
+              <label htmlFor="yeni-email">Yeni e-posta</label>
+              <input
+                id="yeni-email"
+                type="email"
+                autoComplete="email"
+                value={yeni}
+                onChange={(e) => setYeni(e.target.value)}
+                required
+              />
+            </div>
+            <div className="profil-field">
+              <label htmlFor="email-sifre">Onay için şifre</label>
+              <input
+                id="email-sifre"
+                type="password"
+                autoComplete="current-password"
+                value={sifre}
+                onChange={(e) => setSifre(e.target.value)}
+                required
+              />
+              <p className="profil-hint">Değişikliği onaylamak için hesap şifrenizi girin.</p>
+            </div>
+
+            {err && <p className="profil-alert profil-alert--error">{err}</p>}
+            {msg && <p className="profil-alert profil-alert--ok">{msg}</p>}
+
+            <div className="profil-actions">
+              <button type="submit" className="profil-btn" disabled={busy}>
+                <i className="fas fa-save" aria-hidden="true" />
+                {busy ? 'Kaydediliyor…' : 'E-postayı Güncelle'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </Layout>
   );

@@ -9,6 +9,8 @@ import SizdenGelenler from './pages/SizdenGelenler';
 import SizdenGelenlerDetay from './pages/SizdenGelenlerDetay';
 import Videos from './pages/Videos';
 import Etkinlikler from './pages/Etkinlikler';
+import Duyurular from './pages/Duyurular';
+import Protokoller from './pages/Protokoller';
 import Login from './pages/auth/Login';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import AdminLogin from './pages/auth/AdminLogin';
@@ -16,8 +18,6 @@ import { RootEntry, RequirePortal, RequireYonetici } from './auth/RequireAuth';
 import AdminRoutes from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
-  'duyurular',
-  'protokoller',
   'dokumanlar',
   'mevzuatlar',
   'egitimler',
@@ -38,6 +38,8 @@ export default function App() {
       <Route element={<RequirePortal />}>
         <Route path="/videolar" element={<Videos />} />
         <Route path="/etkinlikler" element={<Etkinlikler />} />
+        <Route path="/duyurular" element={<Duyurular />} />
+        <Route path="/protokoller" element={<Protokoller />} />
         <Route path="/test" element={<Test />} />
         <Route path="/test/personel-db" element={<PersonelDb />} />
         <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
