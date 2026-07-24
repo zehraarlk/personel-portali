@@ -1,0 +1,354 @@
+/* ==========================================================================
+   Etkinlik Detay - Modern Layout
+   ========================================================================== */
+
+.etkinlik-detay-page {
+  --ek-primary: #022842;
+  --ek-primary-light: #0b3757;
+  --ek-accent: #f5a623;
+  --ek-accent-hover: #d98e18;
+  --ek-text-dark: #1e293b;
+  --ek-text-muted: #64748b;
+  --ek-border: #e2e8f0;
+  --ek-bg-card: #ffffff;
+  --ek-radius: 16px;
+  --ek-shadow: 0 10px 25px -5px rgba(2, 40, 66, 0.08), 0 8px 10px -6px rgba(2, 40, 66, 0.04);
+  color: var(--ek-text-dark);
+}
+
+/* --- Geri Butonu --- */
+
+.etkinlik-detay-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ek-border);
+  background: var(--ek-bg-card);
+  color: var(--ek-primary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.etkinlik-detay-back:hover {
+  background: var(--ek-primary);
+  border-color: var(--ek-primary);
+  color: #ffffff;
+  transform: translateX(-4px);
+}
+
+/* --- Skeleton Loading --- */
+
+@keyframes ekd-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.etkinlik-detay-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.etkinlik-detay-skeleton-hero,
+.etkinlik-detay-skeleton-row {
+  border-radius: var(--ek-radius);
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background-size: 200% 100%;
+  animation: ekd-shimmer 1.5s infinite;
+}
+
+.etkinlik-detay-skeleton-hero { height: 320px; }
+.etkinlik-detay-skeleton-row { height: 80px; }
+
+/* --- Ana Görsel & Hero --- */
+
+.etkinlik-detay-hero {
+  position: relative;
+  border-radius: var(--ek-radius);
+  overflow: hidden;
+  background: var(--ek-primary);
+  box-shadow: var(--ek-shadow);
+  margin-bottom: 32px;
+}
+
+.etkinlik-detay-media {
+  position: relative;
+  height: 380px;
+  width: 100%;
+}
+
+.etkinlik-detay-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.etkinlik-detay-media--placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--ek-primary), var(--ek-primary-light));
+}
+
+.etkinlik-detay-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2, 40, 66, 0.1) 0%, rgba(2, 40, 66, 0.85) 100%);
+}
+
+.etkinlik-detay-hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.etkinlik-detay-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #022842;
+  background: var(--ek-accent);
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(245, 166, 35, 0.3);
+}
+
+.etkinlik-detay-title {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* --- İki Sütunlu Sayfa Düzeni (Layout Grid) --- */
+
+.etkinlik-detay-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+.etkinlik-detay-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.etkinlik-detay-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 24px;
+}
+
+/* --- Kart Yapısı & İçerik --- */
+
+.etkinlik-detay-card {
+  background: var(--ek-bg-card);
+  border: 1px solid var(--ek-border);
+  border-radius: var(--ek-radius);
+  padding: 24px;
+  box-shadow: var(--ek-shadow);
+}
+
+.etkinlik-detay-card h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ek-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+.etkinlik-detay-aciklama {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #334155;
+  white-space: pre-line;
+}
+
+/* --- Sağ Sidebar Bilgi Blokları --- */
+
+.etkinlik-detay-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.etkinlik-detay-info-box:not(:last-child) {
+  border-bottom: 1px dashed var(--ek-border);
+}
+
+.etkinlik-detay-date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ek-primary);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+.etkinlik-detay-date-gun {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.etkinlik-detay-date-ay {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ek-accent);
+  margin-top: 4px;
+}
+
+.etkinlik-detay-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.etkinlik-detay-info-text strong {
+  font-size: 15px;
+  color: var(--ek-text-dark);
+}
+
+.etkinlik-detay-info-text span {
+  font-size: 13px;
+  color: var(--ek-text-muted);
+}
+
+.etkinlik-detay-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: var(--ek-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* --- Diğer Etkinlikler Kartları --- */
+
+.etkinlik-detay-diger-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.etkinlik-detay-diger-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ek-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ek-bg-card);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.etkinlik-detay-diger-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ek-primary-light);
+  box-shadow: var(--ek-shadow);
+}
+
+.etkinlik-detay-diger-media {
+  height: 110px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+.etkinlik-detay-diger-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.etkinlik-detay-diger-card:hover .etkinlik-detay-diger-media img {
+  transform: scale(1.05);
+}
+
+.etkinlik-detay-diger-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.etkinlik-detay-diger-tarih {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ek-accent);
+  text-transform: uppercase;
+}
+
+.etkinlik-detay-diger-body h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ek-text-dark);
+}
+
+/* ==========================================================================
+   Responsive Tasarım
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .etkinlik-detay-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .etkinlik-detay-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .etkinlik-detay-media {
+    height: 260px;
+  }
+
+  .etkinlik-detay-hero-overlay {
+    padding: 16px;
+  }
+
+  .etkinlik-detay-diger-list {
+    grid-template-columns: 1fr;
+  }
+}
