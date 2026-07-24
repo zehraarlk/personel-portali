@@ -195,14 +195,11 @@ export default function Navbar() {
     }
     if (admin) {
       clearAuth();
-      setLoggedIn(false);
-      setIsAdmin(false);
-      setProfile(null);
-      navigate('/admin/giris');
-      return;
+    } else {
+      clearPersonelAuth();
     }
-    clearPersonelAuth();
     setLoggedIn(false);
+    setIsAdmin(false);
     setProfile(null);
     navigate('/giris');
   };
