@@ -472,11 +472,11 @@ export default function Videos() {
             )}
 
             <div className="mx-auto w-full max-w-[1440px] px-4 pt-6 md:px-8 md:pt-8">
-              <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
                 {data.kategoriler.length > 0 && (
                   <nav
                     ref={kategoriMenuRef}
-                    className="relative z-50 w-full lg:w-[190px] lg:shrink-0"
+                    className="relative z-50 w-full lg:w-[180px] lg:shrink-0"
                     aria-label="Video kategorileri"
                   >
                     <button
@@ -487,17 +487,17 @@ export default function Videos() {
                         setKategoriMenuAcik((acik) => !acik);
                         setSiralamaMenuAcik(false);
                       }}
-                      className="inline-flex h-[50px] w-full items-center justify-between gap-3 rounded-xl border border-[#cfd9e2] bg-white px-5 py-3 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
+                      className="inline-flex h-[44px] w-full items-center justify-between gap-2.5 rounded-xl border border-[#cfd9e2] bg-white px-4 py-2 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
                     >
-                      <span className="inline-flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[19px]">
+                      <span className="inline-flex min-w-0 items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px] text-[#022842]">
                           {aktifKategori ? getCategoryIcon(aktifKategori) : 'grid_view'}
                         </span>
                         {kategori === '' ? 'Tümü' : aktifKategoriAdi}
                       </span>
 
                       <span
-                        className={`material-symbols-outlined text-xl transition-transform duration-200 ${
+                        className={`material-symbols-outlined text-[19px] text-[#022842] transition-transform duration-200 ${
                           kategoriMenuAcik ? 'rotate-180' : ''
                         }`}
                       >
@@ -508,7 +508,7 @@ export default function Videos() {
                     {kategoriMenuAcik && (
                       <div
                         role="menu"
-                        className="absolute left-0 top-full mt-2 min-w-[230px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
+                        className="absolute left-0 top-full mt-2 min-w-[250px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
                       >
                         <button
                           type="button"
@@ -524,7 +524,7 @@ export default function Videos() {
                               : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
                           }`}
                         >
-                          <span className="material-symbols-outlined text-[19px]">
+                          <span className="material-symbols-outlined text-[18px] text-[#022842]">
                             grid_view
                           </span>
                           Tümü
@@ -546,7 +546,7 @@ export default function Videos() {
                                 : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
                             }`}
                           >
-                            <span className="material-symbols-outlined text-[19px]">
+                            <span className="material-symbols-outlined text-[18px] text-[#022842]">
                               {getCategoryIcon(item)}
                             </span>
                             {item.ad}
@@ -559,7 +559,7 @@ export default function Videos() {
 
                 <nav
                   ref={siralamaMenuRef}
-                  className="relative z-50 w-full lg:w-[190px] lg:shrink-0"
+                  className="relative z-50 w-full lg:w-[180px] lg:shrink-0"
                   aria-label="Video sıralama seçenekleri"
                 >
                   <button
@@ -570,17 +570,17 @@ export default function Videos() {
                       setSiralamaMenuAcik((acik) => !acik);
                       setKategoriMenuAcik(false);
                     }}
-                    className="inline-flex h-[50px] w-full items-center justify-between gap-3 rounded-xl border border-[#cfd9e2] bg-white px-5 py-3 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
+                    className="inline-flex h-[44px] w-full items-center justify-between gap-2.5 rounded-xl border border-[#cfd9e2] bg-white px-4 py-2 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
                   >
                     <span className="inline-flex min-w-0 items-center gap-2">
-                      <span className="material-symbols-outlined text-[19px]">
+                      <span className="material-symbols-outlined text-[18px] text-[#022842]">
                         {aktifSiralama.icon}
                       </span>
                       <span className="truncate">{aktifSiralama.label}</span>
                     </span>
 
                     <span
-                      className={`material-symbols-outlined text-xl transition-transform duration-200 ${
+                      className={`material-symbols-outlined text-[19px] text-[#022842] transition-transform duration-200 ${
                         siralamaMenuAcik ? 'rotate-180' : ''
                       }`}
                     >
@@ -609,7 +609,7 @@ export default function Videos() {
                               : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
                           }`}
                         >
-                          <span className="material-symbols-outlined text-[19px]">
+                          <span className="material-symbols-outlined text-[18px]">
                             {option.icon}
                           </span>
                           {option.label}
@@ -620,12 +620,12 @@ export default function Videos() {
                 </nav>
 
 
-                <div className="relative w-full lg:max-w-[420px]">
+                <div className="relative w-full xl:w-[520px] xl:flex-none">
                   <label htmlFor="video-search" className="sr-only">
                     Video ara
                   </label>
 
-                  <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[22px] text-[#022842]">
+                  <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[19px] text-[#022842]">
                     search
                   </span>
 
@@ -638,17 +638,17 @@ export default function Videos() {
                     onChange={(event) => setArama(event.target.value)}
                     placeholder="Videolarda ara..."
                     autoComplete="off"
-                    className="h-[50px] w-full rounded-xl border border-[#cfd9e2] bg-white pl-12 pr-11 text-sm text-[#0b1c30] shadow-sm outline-none transition placeholder:text-[#7a8994] hover:border-[#022842]/35 focus:border-[#022842] focus:ring-4 focus:ring-[#022842]/10"
+                    className="h-[44px] w-full rounded-xl border border-[#cfd9e2] bg-white pl-10 pr-9 text-sm text-[#0b1c30] shadow-sm outline-none transition placeholder:text-[#7a8994] hover:border-[#022842]/35 focus:border-[#022842] focus:ring-4 focus:ring-[#022842]/10"
                   />
 
                   {arama && (
                     <button
                       type="button"
                       onClick={() => setArama('')}
-                      className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#61717d] transition hover:bg-[#eef5fa] hover:text-[#022842]"
+                      className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-[#022842] transition hover:bg-[#eef5fa] hover:text-[#0a3a5c]"
                       aria-label="Aramayı temizle"
                     >
-                      <span className="material-symbols-outlined text-[19px]">
+                      <span className="material-symbols-outlined text-[18px]">
                         close
                       </span>
                     </button>
@@ -657,23 +657,30 @@ export default function Videos() {
               </div>
 
               <section ref={videoListesiRef} className="scroll-mt-4 pb-10">
-                <div className="mb-5 flex items-center gap-3">
+                <div className="mb-5 flex items-center gap-2.5">
                   <span
                     aria-hidden="true"
-                    className="h-7 w-1 rounded-full bg-[#f5a623]"
+                    className="h-2.5 w-px shrink-0 bg-[#022842]/25"
                   />
 
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <h2 className="text-sm font-extrabold tracking-wide text-[#022842] md:text-base">
-                      {kategori === '' ? 'Video Arşivi' : aktifKategoriAdi}
-                    </h2>
-
-                    <span className="inline-flex items-center rounded-full bg-[#e8f1f8] px-2.5 py-1 text-xs font-semibold text-[#536575]">
-                      {filtrelenmisVideolar.length > 0
-                        ? `${filtrelenmisVideolar.length} video`
-                        : 'Video bulunamadı'}
+                  <h2 className="flex shrink-0 items-center gap-1.5 text-[13px] font-extrabold tracking-wide text-[#022842] md:text-sm">
+                    <span className="material-symbols-outlined text-[15px] text-[#f5a623]">
+                      video_library
                     </span>
-                  </div>
+                    {kategori === '' ? 'Video Arşivi' : aktifKategoriAdi}
+                  </h2>
+
+                  <div aria-hidden="true" className="h-px flex-1 bg-[#022842]/15" />
+                  <span
+                    aria-hidden="true"
+                    className="h-2.5 w-px shrink-0 bg-[#022842]/25"
+                  />
+
+                  <span className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[#022842]/15 bg-white px-2 py-0.5 text-[11px] font-semibold text-[#536575]">
+                    {filtrelenmisVideolar.length > 0
+                      ? `${filtrelenmisVideolar.length} video`
+                      : 'Video bulunamadı'}
+                  </span>
                 </div>
 
                 {data.videolar.length === 0 ? (
