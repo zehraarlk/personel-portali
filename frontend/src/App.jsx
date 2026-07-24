@@ -9,9 +9,16 @@ import SizdenGelenler from './pages/SizdenGelenler';
 import SizdenGelenlerDetay from './pages/SizdenGelenlerDetay';
 import Videos from './pages/Videos';
 import Etkinlikler from './pages/Etkinlikler';
+import EtkinlikDetay from './pages/EtkinlikDetay';
 import Duyurular from './pages/Duyurular';
 import Protokoller from './pages/Protokoller';
 import Mevzuatlar from './pages/Mevzuatlar';
+
+import Protokoller from './pages/kaynaklar/Protokoller';
+import Dokumanlar from './pages/kaynaklar/Dokumanlar';
+import Mevzuatlar from './pages/kaynaklar/Mevzuatlar';
+import Egitimler from './pages/kaynaklar/Egitimler';
+
 import Login from './pages/auth/Login';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import AdminLogin from './pages/auth/AdminLogin';
@@ -19,8 +26,11 @@ import { RootEntry, RequirePortal, RequireYonetici } from './auth/RequireAuth';
 import AdminRoutes from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
+
   'dokumanlar',
   'egitimler',
+
+
   'anketler',
   'yardimci-linkler',
   'vefat',
@@ -38,9 +48,16 @@ export default function App() {
       <Route element={<RequirePortal />}>
         <Route path="/videolar" element={<Videos />} />
         <Route path="/etkinlikler" element={<Etkinlikler />} />
+        <Route path="/etkinlikler/:id" element={<EtkinlikDetay />} />
         <Route path="/duyurular" element={<Duyurular />} />
         <Route path="/protokoller" element={<Protokoller />} />
+
         <Route path="/mevzuatlar" element={<Mevzuatlar />} />
+
+        <Route path="/dokumanlar" element={<Dokumanlar />} />
+        <Route path="/mevzuatlar" element={<Mevzuatlar />} />
+        <Route path="/egitimler" element={<Egitimler />} />
+
         <Route path="/test" element={<Test />} />
         <Route path="/test/personel-db" element={<PersonelDb />} />
         <Route path="/profil/sifre-degistir" element={<ChangePassword />} />

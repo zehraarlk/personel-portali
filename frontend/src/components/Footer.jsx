@@ -1,14 +1,19 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SITE_LOGO_WHITE } from '../constants';
 import '../styles/footer.css';
 
-// TODO: Gerçek iletişim bilgileri ve sosyal medya bağlantılarını buradan güncelleyin.
 const CONTACT = {
   address: 'Gebze Belediyesi, Hacı Halil Mah. İbni Sina Cad. No:2, 41400 Gebze/Kocaeli',
   phone: '0262 642 04 30',
-  phoneHref: 'tel:+902626420430',
   email: 'gebze@gebze.bel.tr',
 };
+
+const CONTACT_ITEMS = [
+  { key: 'address', icon: 'fas fa-location-dot', value: CONTACT.address, label: 'Adres' },
+  { key: 'phone', icon: 'fas fa-phone', value: CONTACT.phone, label: 'Telefon' },
+  { key: 'email', icon: 'fas fa-envelope', value: CONTACT.email, label: 'E-posta' },
+];
 
 const SOCIAL_LINKS = [
   { label: 'Facebook', icon: 'fab fa-facebook-f', href: 'https://www.facebook.com/gebzebelediye' },
@@ -31,8 +36,40 @@ const RESOURCE_LINKS = [
   { to: '/egitimler', label: 'Eğitimler' },
 ];
 
+async function copyText(value) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+  const input = document.createElement('textarea');
+  input.value = value;
+  input.setAttribute('readonly', '');
+  input.style.position = 'fixed';
+  input.style.left = '-9999px';
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand('copy');
+  document.body.removeChild(input);
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  useEffect(() => {
+    if (!copiedKey) return undefined;
+    const id = setTimeout(() => setCopiedKey(null), 1500);
+    return () => clearTimeout(id);
+  }, [copiedKey]);
+
+  const handleCopy = async (item) => {
+    try {
+      await copyText(item.value);
+      setCopiedKey(item.key);
+    } catch {
+      setCopiedKey(null);
+    }
+  };
 
   return (
     <footer className="site-footer">
@@ -87,22 +124,21 @@ export default function Footer() {
           <div>
             <h3 className="site-footer-col-title">İletişim</h3>
             <div>
-              <div className="site-footer-contact-item">
-                <i className="fas fa-location-dot site-footer-contact-icon" aria-hidden="true" />
-                <span>{CONTACT.address}</span>
-              </div>
-              <div className="site-footer-contact-item">
-                <i className="fas fa-phone site-footer-contact-icon" aria-hidden="true" />
-                <a href={CONTACT.phoneHref} className="site-footer-contact-link">
-                  {CONTACT.phone}
-                </a>
-              </div>
-              <div className="site-footer-contact-item">
-                <i className="fas fa-envelope site-footer-contact-icon" aria-hidden="true" />
-                <a href={`mailto:${CONTACT.email}`} className="site-footer-contact-link">
-                  {CONTACT.email}
-                </a>
-              </div>
+              {CONTACT_ITEMS.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`site-footer-contact-item${
+                    copiedKey === item.key ? ' is-copied' : ''
+                  }`}
+                  onClick={() => handleCopy(item)}
+                  title={`${item.label} kopyala`}
+                  aria-label={`${item.label}: ${item.value}. Kopyalamak için tıklayın.`}
+                >
+                  <i className={`${item.icon} site-footer-contact-icon`} aria-hidden="true" />
+                  <span>{item.value}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
