@@ -180,14 +180,7 @@ export default function SizdenGelenler() {
   return (
     <Layout>
       <div className="mx-auto w-full max-w-[1440px]">
-        <div className="mb-6">
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#0b1c30] md:text-3xl">
-            Sizden Gelenler
-          </h1>
-          <p className="mt-1 text-sm leading-6 text-[#61717d]">
-            Müdürlüklerimizden gelen haber, çalışma ve paylaşımlar.
-          </p>
-        </div>
+        
 
         {loading && (
           <div className="rounded-2xl border border-[#022842]/10 bg-white p-8 text-[#536575] shadow-sm">

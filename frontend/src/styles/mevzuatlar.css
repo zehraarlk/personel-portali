@@ -1,0 +1,88 @@
+/* Mevzuatlar — alt kategori filtre çubuğu (protokoller.css'i tamamlar) */
+
+.mevzuat-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.15rem;
+}
+
+.mevzuat-filter-bar__label {
+  font-size: 0.92rem;
+  color: var(--p-muted, #5b6b76);
+}
+
+.mevzuat-filter-bar__label strong {
+  color: var(--p-navy, #022842);
+}
+
+.mevzuat-menu {
+  position: relative;
+}
+
+.mevzuat-menu__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  border-radius: 12px;
+  border: 1px solid var(--p-line, rgba(2, 40, 66, 0.1));
+  background: #fff;
+  color: var(--p-navy, #022842);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 40, 66, 0.06);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.mevzuat-menu__btn:hover {
+  background: #eef4f8;
+  border-color: rgba(2, 40, 66, 0.2);
+}
+
+.mevzuat-menu__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.mevzuat-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 40;
+  width: 240px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--p-line, rgba(2, 40, 66, 0.1));
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(2, 40, 66, 0.14);
+}
+
+.mevzuat-menu__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--p-navy-2, #0a3a5c);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.mevzuat-menu__item:hover {
+  background: #f4f7fa;
+}
+
+.mevzuat-menu__item.is-active {
+  background: var(--p-navy, #022842);
+  color: #fff;
+}

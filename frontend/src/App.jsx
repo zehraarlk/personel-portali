@@ -11,6 +11,7 @@ import Videos from './pages/Videos';
 import Etkinlikler from './pages/Etkinlikler';
 import Duyurular from './pages/Duyurular';
 import Protokoller from './pages/Protokoller';
+import Mevzuatlar from './pages/Mevzuatlar';
 import Login from './pages/auth/Login';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import AdminLogin from './pages/auth/AdminLogin';
@@ -19,7 +20,6 @@ import AdminRoutes from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
   'dokumanlar',
-  'mevzuatlar',
   'egitimler',
   'anketler',
   'yardimci-linkler',
@@ -40,6 +40,7 @@ export default function App() {
         <Route path="/etkinlikler" element={<Etkinlikler />} />
         <Route path="/duyurular" element={<Duyurular />} />
         <Route path="/protokoller" element={<Protokoller />} />
+        <Route path="/mevzuatlar" element={<Mevzuatlar />} />
         <Route path="/test" element={<Test />} />
         <Route path="/test/personel-db" element={<PersonelDb />} />
         <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
