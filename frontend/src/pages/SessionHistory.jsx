@@ -27,7 +27,7 @@ export default function SessionHistory() {
 
   return (
     <Layout>
-      <div className="profil-page profil-page--wide">
+      <div className="profil-page">
         <Link to="/" className="profil-back">
           <i className="fas fa-arrow-left" aria-hidden="true" />
           Ana sayfa
