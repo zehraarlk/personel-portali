@@ -237,4 +237,33 @@ export async function fetchEtkinlikler(durum) {
   return response.json();
 }
 
+/** Etkinlikler > Duyurular — { kategoriler: [...], duyurular: [...] } */
+export async function fetchDuyurular(kategori = '') {
+  const qs = kategori
+    ? `?kategori=${encodeURIComponent(kategori)}`
+    : '';
+
+  const response = await fetch(`${API_BASE}/duyurular/${qs}`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    throw new Error(
+      errorData.detail || `Duyurular alınamadı (${response.status})`
+    );
+  }
+
+  return response.json();
+}
+
+/** protokoller — { protokoller: [...], toplam } (kaynaklar / Protokoller) */
+export async function fetchProtokoller(q) {
+  const qs = q ? `?q=${encodeURIComponent(q)}` : '';
+  const response = await fetch(`${API_BASE}/protokoller/${qs}`);
+  if (!response.ok) {
+    throw new Error('Protokoller alınamadı');
+  }
+  return response.json();
+}
+
 export { canAccessPortal, isPersonelLoggedIn, isYoneticiLoggedIn } from '../auth/session';

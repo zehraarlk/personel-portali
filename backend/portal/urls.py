@@ -7,6 +7,8 @@ from .views import (
     sizden_gelenler_goruntule,
     videos,
     etkinlikler_list,
+    etkinlik_duyurular_list,
+    protokoller_list,
 )
 from .profile_views import (
     profile_me,
@@ -37,6 +39,7 @@ from .admin_crud_views import (
     SizdenGelenViewSet,
     VideoKategoriViewSet,
     SizdenGelenKategoriViewSet,
+    ProtokolViewSet,
 )
 
 router = DefaultRouter()
@@ -54,6 +57,7 @@ router.register(
     SizdenGelenKategoriViewSet,
     basename='admin-sizden-gelenler-kategoriler',
 )
+router.register(r'admin/protokoller', ProtokolViewSet, basename='admin-protokoller')
 
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
@@ -77,6 +81,8 @@ urlpatterns = [
         name='sizden-gelenler-goruntule',
     ),
     path('etkinlikler/', etkinlikler_list, name='etkinlikler'),
+    path('duyurular/', etkinlik_duyurular_list, name='etkinlik-duyurular'),
+    path('protokoller/', protokoller_list, name='protokoller'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),
     path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),
