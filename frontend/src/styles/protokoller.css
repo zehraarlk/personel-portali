@@ -1,224 +1,501 @@
-/* Protokoller — ana site (lacivert / turuncu) */
+/* Protokoller — ana site, kurumsal lacivert / turuncu */
 
 .protokoller-page {
+  --p-navy: #022842;
+  --p-navy-2: #0a3a5c;
+  --p-accent: #f5a623;
+  --p-ink: #14212b;
+  --p-muted: #5b6b76;
+  --p-line: rgba(2, 40, 66, 0.1);
+  --p-paper: #ffffff;
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 8px 0 48px;
+  padding: 0.25rem 0 3rem;
 }
 
-.protokoller-header h1 {
-  margin: 0 0 8px;
-  font-size: clamp(1.6rem, 2.5vw, 1.85rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--navy, #022842);
-  line-height: 1.2;
-}
+/* --- Hero --- */
 
-.protokoller-header p {
-  margin: 0 0 1.5rem;
-  max-width: 42rem;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: var(--muted, #5b6b76);
-}
-
-/* --- Arama --- */
-
-.protokoller-search {
+.protokoller-hero {
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
-  gap: 0.65rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem;
-  background: var(--paper, #fff);
-  border: 1px solid var(--line, #e4e9ee);
-  border-radius: var(--radius, 18px);
-  box-shadow: var(--shadow-soft, 0 4px 14px rgba(2, 40, 66, 0.06));
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.35rem;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  border: 1px solid var(--p-line);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse 70% 120% at 100% 0%, rgba(245, 166, 35, 0.16), transparent 55%),
+    linear-gradient(145deg, #022842 0%, #0a3a5c 55%, #134a6e 100%);
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(2, 40, 66, 0.18);
+  position: relative;
+  overflow: hidden;
 }
 
-.protokoller-search__field {
-  flex: 1 1 220px;
+.protokoller-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto -10% -40% auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.protokoller-hero__text {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+}
+
+.protokoller-hero__eyebrow {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(245, 166, 35, 0.2);
+  color: #ffd28a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.protokoller-hero h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.protokoller-hero p {
+  margin: 0.7rem 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.protokoller-hero__stat {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  min-width: 7.5rem;
+}
+
+.protokoller-hero__stat strong {
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--p-accent);
+}
+
+.protokoller-hero__stat span {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* --- Toolbar + hızlı erişim --- */
+
+.protokoller-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 0.85rem;
+  margin-bottom: 1.15rem;
+}
+
+.protokoller-toolbar,
+.protokoller-quick {
+  min-width: 0;
+  min-height: 4.5rem;
+  padding: 0.75rem;
+  background: var(--p-paper);
+  border: 1px solid var(--p-line);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(2, 40, 66, 0.06);
+}
+
+.protokoller-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.protokoller-quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  align-content: stretch;
+}
+
+.protokoller-quick__btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  height: 100%;
+  min-height: 3rem;
+  padding: 0.45rem 0.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--p-line);
+  background: #f4f7fa;
+  color: var(--p-navy);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.protokoller-quick__btn span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.protokoller-quick__btn i {
+  font-size: 0.85rem;
+  color: var(--p-navy-2);
+}
+
+.protokoller-quick__btn:hover {
+  background: #e8f1f8;
+  border-color: rgba(2, 40, 66, 0.22);
+  transform: translateY(-1px);
+}
+
+.protokoller-quick__btn.is-active {
+  background: var(--p-navy);
+  border-color: var(--p-navy);
+  color: #fff;
+}
+
+.protokoller-quick__btn.is-active i {
+  color: var(--p-accent);
+}
+
+.protokoller-toolbar__field {
+  flex: 1 1 240px;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  min-height: 2.85rem;
-  padding: 0 0.95rem;
-  border: 1px solid var(--line, #e4e9ee);
-  border-radius: var(--radius-sm, 12px);
-  background: #f8fafc;
+  gap: 0.7rem;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border-radius: 12px;
+  background: #f4f7fa;
+  border: 1px solid transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.protokoller-search__field i {
-  color: var(--muted, #5b6b76);
+.protokoller-toolbar__field:focus-within {
+  background: #fff;
+  border-color: rgba(2, 40, 66, 0.22);
+  box-shadow: 0 0 0 3px rgba(2, 40, 66, 0.08);
+}
+
+.protokoller-toolbar__field i {
+  color: var(--p-muted);
   font-size: 0.9rem;
 }
 
-.protokoller-search__field input {
+.protokoller-toolbar__field input {
   flex: 1;
   min-width: 0;
   border: 0;
   background: transparent;
-  color: var(--ink, #14212b);
+  color: var(--p-ink);
   font-size: 0.95rem;
   outline: none;
 }
 
-.protokoller-search__btn,
-.protokoller-search__clear {
+.protokoller-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.protokoller-toolbar__btn,
+.protokoller-toolbar__ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.85rem;
+  min-height: 3rem;
   padding: 0 1.25rem;
-  border: 0;
-  border-radius: var(--radius-sm, 12px);
+  border-radius: 12px;
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.protokoller-search__btn {
-  background: var(--navy, #022842);
+.protokoller-toolbar__btn {
+  border: 0;
+  background: var(--p-navy);
   color: #fff;
 }
 
-.protokoller-search__btn:hover {
-  background: var(--navy-mid, #0a3a5c);
+.protokoller-toolbar__btn:hover {
+  background: var(--p-navy-2);
 }
 
-.protokoller-search__clear {
+.protokoller-toolbar__ghost {
   background: transparent;
-  color: var(--navy-mid, #0a3a5c);
-  border: 1px solid var(--line, #e4e9ee);
+  color: var(--p-navy-2);
+  border: 1px solid var(--p-line);
 }
 
-.protokoller-search__clear:hover {
-  background: var(--sky, #e8f1f8);
+.protokoller-toolbar__ghost:hover {
+  background: #e8f1f8;
+  border-color: rgba(2, 40, 66, 0.2);
 }
 
-.protokoller-results {
-  min-height: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.protokoller-results__count {
-  margin: 0;
+.protokoller-filter-note {
+  margin: -0.35rem 0 1rem;
   font-size: 0.9rem;
-  color: var(--muted, #5b6b76);
+  color: var(--p-muted);
 }
 
-.protokoller-results__count strong {
-  color: var(--navy, #022842);
-  font-weight: 800;
+.protokoller-filter-note strong {
+  color: var(--p-navy);
 }
 
-.protokoller-results__count span {
-  color: var(--navy, #022842);
-  font-weight: 700;
-}
+/* --- States --- */
 
 .protokoller-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin: 0;
-  padding: 2rem 0.25rem;
-  font-size: 0.98rem;
-  color: var(--muted, #5b6b76);
+  padding: 2.5rem 0.5rem;
+  font-size: 1rem;
+  color: var(--p-muted);
+}
+
+.protokoller-state__pulse {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--p-accent);
+  animation: protokol-pulse 1s ease infinite;
+}
+
+@keyframes protokol-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .protokoller-state--error {
   color: #b3261e;
 }
 
-/* --- Kart grid --- */
+.protokoller-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: var(--p-paper);
+  border: 1px dashed rgba(2, 40, 66, 0.18);
+  border-radius: 20px;
+}
+
+.protokoller-empty i {
+  font-size: 2rem;
+  color: var(--p-navy);
+  opacity: 0.35;
+  margin-bottom: 0.35rem;
+}
+
+.protokoller-empty h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--p-navy);
+}
+
+.protokoller-empty p {
+  margin: 0 0 0.75rem;
+  color: var(--p-muted);
+  font-size: 0.95rem;
+}
+
+/* --- Cards --- */
 
 .protokoller-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.35rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
 }
 
 .protokol-card {
+  --card-delay: 0ms;
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  padding: 1.35rem 1.35rem 1.25rem;
-  background: var(--paper, #fff);
-  border: 1px solid rgba(2, 40, 66, 0.1);
+  overflow: hidden;
+  background: var(--p-paper);
+  border: 1px solid var(--p-line);
   border-radius: 20px;
-  box-shadow: 0 6px 18px rgba(2, 40, 66, 0.07);
+  box-shadow: 0 8px 22px rgba(2, 40, 66, 0.06);
   color: inherit;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  animation: protokol-rise 0.45s ease both;
+  animation-delay: var(--card-delay);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+@keyframes protokol-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .protokol-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(2, 40, 66, 0.2);
-  box-shadow: 0 14px 28px rgba(2, 40, 66, 0.12);
+  transform: translateY(-4px);
+  border-color: rgba(2, 40, 66, 0.22);
+  box-shadow: 0 18px 36px rgba(2, 40, 66, 0.14);
+}
+
+.protokol-card:hover .protokol-card__accent {
+  height: 100%;
+}
+
+.protokol-card:hover .protokol-card__icon {
+  background: linear-gradient(145deg, #0a3a5c, #022842);
+  transform: scale(1.04);
 }
 
 .protokol-card:hover .protokol-card__cta {
-  background: var(--navy-mid, #0a3a5c);
+  background: linear-gradient(90deg, #0a3a5c, #022842);
 }
 
 .protokol-card:hover .protokol-card__cta i {
-  transform: translateX(3px);
+  transform: translateX(4px);
 }
+
+.protokol-card__accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 42%;
+  background: linear-gradient(180deg, var(--p-accent), #e08e10);
+  border-radius: 0 4px 4px 0;
+  transition: height 0.25s ease;
+}
+
+.protokol-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.35rem 1.35rem 1rem 1.45rem;
+}
+
 .protokol-card__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.85rem;
+  margin-bottom: 1.05rem;
 }
 
 .protokol-card__icon {
-  width: 3.15rem;
-  height: 3.15rem;
-  border-radius: 14px;
+  width: 3.35rem;
+  height: 3.35rem;
+  border-radius: 15px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
   background: linear-gradient(145deg, #022842, #0a3a5c);
   color: #fff;
   font-size: 1.2rem;
-  box-shadow: 0 8px 18px rgba(2, 40, 66, 0.22);
+  box-shadow: 0 10px 20px rgba(2, 40, 66, 0.22);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.protokol-card__meta {
+.protokol-card__chips {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 650;
-  color: var(--muted, #5b6b76);
-  text-align: right;
+  gap: 0.4rem;
 }
 
-.protokol-card__meta i {
-  margin-right: 0.35rem;
-  opacity: 0.75;
+.protokol-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: #eef4f8;
+  color: var(--p-navy-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.protokol-chip i {
+  opacity: 0.7;
+  font-size: 0.7rem;
 }
 
 .protokol-card__title {
   margin: 0 0 0.55rem;
-  font-size: 1.08rem;
+  font-size: 1.12rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.35;
-  color: var(--navy, #022842);
+  color: var(--p-navy);
 }
 
 .protokol-card__desc {
-  margin: 0 0 1.15rem;
+  margin: 0;
   flex: 1;
   font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--muted, #5b6b76);
+  line-height: 1.6;
+  color: var(--p-muted);
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
@@ -229,28 +506,92 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
+  gap: 0.6rem;
   width: 100%;
   margin-top: auto;
-  min-height: 2.75rem;
-  padding: 0.7rem 1rem;
-  border-radius: 12px;
-  background: var(--navy, #022842);
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  background: var(--p-navy);
   color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
   text-align: center;
-  transition: background-color 0.15s ease;
+  letter-spacing: 0.01em;
+  transition: background 0.2s ease;
 }
 
 .protokol-card__cta i {
   font-size: 0.78rem;
-  transition: transform 0.15s ease;
+  transition: transform 0.2s ease;
 }
 
-@media (max-width: 560px) {
-  .protokoller-search__btn,
-  .protokoller-search__clear {
-    flex: 1 1 auto;
+@media (max-width: 992px) {
+  .protokoller-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .protokoller-quick {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .protokoller-hero__stat {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .protokoller-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .protokoller-toolbar__field {
+    flex: 1 1 100%;
+  }
+
+  .protokoller-toolbar__actions {
+    width: 100%;
+  }
+
+  .protokoller-toolbar__btn,
+  .protokoller-toolbar__ghost {
+    flex: 1;
+  }
+
+  .protokoller-quick {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .protokoller-quick__btn {
+    flex-direction: row;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .protokoller-quick__btn span {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 380px) {
+  .protokoller-quick {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .protokoller-quick__btn {
+    font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .protokol-card,
+  .protokoller-state__pulse {
+    animation: none;
+  }
+
+  .protokol-card:hover {
+    transform: none;
   }
 }
