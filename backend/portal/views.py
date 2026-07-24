@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.db.models import F, Q
+from django.db.models import F
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -185,6 +185,23 @@ def etkinlik_duyurular_list(request):
     })
 
 
+def _tr_casefold(value):
+    """Türkçe büyük/küçük harf duyarsız karşılaştırma (İ/I dahil)."""
+    if not value:
+        return ''
+    return (
+        str(value)
+        .replace('İ', 'i')
+        .replace('I', 'ı')
+        .replace('Ş', 'ş')
+        .replace('Ğ', 'ğ')
+        .replace('Ü', 'ü')
+        .replace('Ö', 'ö')
+        .replace('Ç', 'ç')
+        .casefold()
+    )
+
+
 @api_view(['GET'])
 def protokoller_list(request):
     """Personel portali - kaynaklar (kategori: Protokoller)."""
@@ -195,7 +212,14 @@ def protokoller_list(request):
         .order_by('-id')
     )
     if q:
-        qs = qs.filter(Q(baslik__icontains=q) | Q(aciklama__icontains=q))
+        q_fold = _tr_casefold(q)
+        matched_ids = [
+            row.id
+            for row in qs
+            if q_fold in _tr_casefold(row.baslik)
+            or q_fold in _tr_casefold(row.aciklama)
+        ]
+        qs = qs.filter(id__in=matched_ids)
 
     items = [
         {
