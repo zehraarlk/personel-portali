@@ -114,16 +114,8 @@ function getCategoryIcon(category) {
   return 'campaign';
 }
 
-function getBelgeNo(duyuru) {
-  const numericId = Number(duyuru?.id);
-  const safeId = Number.isFinite(numericId) ? numericId : 0;
-  return String(safeId).padStart(4, '0');
-}
-
 function DuyuruCard({ duyuru }) {
   const kategoriIkon = getCategoryIcon({ ad: duyuru.kategori });
-  const belgeNo = getBelgeNo(duyuru);
-
   return (
     <article className="group relative flex h-full cursor-pointer select-none flex-col rounded-xl border border-[#022842]/10 bg-white shadow-[0_6px_20px_rgba(2,40,66,0.07)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:border-[#f5a623]/70 hover:shadow-[0_26px_52px_rgba(2,40,66,0.22),0_0_0_3px_rgba(245,166,35,0.16)]">
       {/* Hover sırasında kartın tamamını belirginleştiren ince sarı çerçeve */}
@@ -171,11 +163,6 @@ function DuyuruCard({ duyuru }) {
           </time>
         )}
 
-        {/* Koparılabilir bilet kenarı — fotoğraf ile gövde arasında delikli ayraç */}
-        <div className="absolute inset-x-0 -bottom-[7px] flex justify-between px-4">
-          <span className="h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-white" />
-          <span className="h-3.5 w-3.5 translate-x-1/2 rounded-full bg-white" />
-        </div>
         <div className="absolute inset-x-6 -bottom-px border-t border-dashed border-[#022842]/20" />
       </div>
 
@@ -197,9 +184,6 @@ function DuyuruCard({ duyuru }) {
           </span>
         )}
 
-        <span className="ml-auto mt-1.5 self-start text-[11px] font-semibold text-[#8a98a2]">
-          No {belgeNo}
-        </span>
       </div>
 
       <div className="flex flex-1 flex-col px-5 pb-5 pt-3">
