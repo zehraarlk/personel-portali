@@ -13,6 +13,8 @@ from .models import (
     VideolarKategori,
     Etkinlikler,
     EtkinliklerDurum,
+    EtkinliklerDuyurular,
+    DuyurularKategori,
 )
 
 
@@ -150,3 +152,34 @@ class EtkinlikSerializer(serializers.ModelSerializer):
 
     def get_durum_ref_slug(self, obj):
         return obj.durum_ref.slug if obj.durum_ref else None
+
+class DuyurularKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DuyurularKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class EtkinlikDuyuruSerializer(serializers.ModelSerializer):
+    kategori = serializers.StringRelatedField()
+    kategori_slug = serializers.SerializerMethodField()
+    resim = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EtkinliklerDuyurular
+        fields = [
+            'id',
+            'sayfa_tipi',
+            'baslik',
+            'aciklama',
+            'resim',
+            'tarih',
+            'kategori',
+            'kategori_slug',
+        ]
+
+    def get_resim(self, obj):
+        return normalize_image_path(obj.resim_url or '')
+
+    def get_kategori_slug(self, obj):
+        return obj.kategori.slug if obj.kategori else None
+
