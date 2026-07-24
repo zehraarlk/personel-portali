@@ -20,6 +20,7 @@ from .models import (
     EtkinliklerDuyurular,
     DuyurularKategori,
     Kaynaklar,
+    KaynaklarAltKategori,
 )
 from .serializers import (
     HaberSerializer,
@@ -236,3 +237,58 @@ def protokoller_list(request):
     ]
     return Response({'protokoller': items, 'toplam': len(items)})
 
+@api_view(['GET'])
+def mevzuatlar_list(request):
+    """Personel portali - kaynaklar (kategori: Mevzuatlar), alt kategori filtreli."""
+    q = (request.query_params.get('q') or '').strip()
+    alt_kategori_slug = request.query_params.get('alt_kategori')
+
+    qs = (
+        Kaynaklar.objects.select_related('kategori', 'alt_kategori')
+        .filter(kategori__slug='Mevzuatlar')
+        .order_by('-id')
+    )
+
+    if alt_kategori_slug:
+        qs = qs.filter(alt_kategori__slug=alt_kategori_slug)
+
+    if q:
+        q_fold = _tr_casefold(q)
+        matched_ids = [
+            row.id
+            for row in qs
+            if q_fold in _tr_casefold(row.baslik)
+            or q_fold in _tr_casefold(row.aciklama)
+        ]
+        qs = qs.filter(id__in=matched_ids)
+
+    items = [
+        {
+            'id': row.id,
+            'baslik': row.baslik,
+            'aciklama': row.aciklama,
+            'ikon': row.ikon or 'fas fa-balance-scale',
+            'dosya_yolu': row.dosya_yolu,
+            'resmi_sayfa': row.resmi_sayfa or '',
+            'boyut': row.boyut,
+            'tarih': row.tarih,
+            'alt_kategori': row.alt_kategori.ad if row.alt_kategori else None,
+            'alt_kategori_slug': row.alt_kategori.slug if row.alt_kategori else None,
+        }
+        for row in qs
+    ]
+
+    alt_kategoriler = (
+        KaynaklarAltKategori.objects
+        .filter(kaynak_kategori__slug='Mevzuatlar')
+        .order_by('id')
+    )
+    alt_kategoriler_data = [
+        {'id': k.id, 'slug': k.slug, 'ad': k.ad} for k in alt_kategoriler
+    ]
+
+    return Response({
+        'mevzuatlar': items,
+        'toplam': len(items),
+        'alt_kategoriler': alt_kategoriler_data,
+    })

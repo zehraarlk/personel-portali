@@ -106,17 +106,7 @@ export default function SizdenGelenlerDetay() {
               Tüm İçeriklere Dön
             </Link>
 
-            <nav className="flex flex-wrap items-center gap-1.5 text-sm text-[#8a98a2]">
-              <Link to="/" className="hover:text-[#022842] transition">
-                Anasayfa
-              </Link>
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-              <Link to={listeAdresi} className="hover:text-[#022842] transition">
-                Sizden Gelenler
-              </Link>
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-              <span className="text-[#536575]">İçerik Detayı</span>
-            </nav>
+            
           </div>
 
           <div className="grid gap-6 lg:grid-cols-12 items-start">

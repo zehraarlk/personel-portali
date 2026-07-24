@@ -267,3 +267,16 @@ export async function fetchProtokoller(q) {
 }
 
 export { canAccessPortal, isPersonelLoggedIn, isYoneticiLoggedIn } from '../auth/session';
+
+/** mevzuatlar — { mevzuatlar: [...], toplam, alt_kategoriler: [...] } (kaynaklar / Mevzuatlar) */
+export async function fetchMevzuatlar(q, altKategori) {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (altKategori) params.set('alt_kategori', altKategori);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  const response = await fetch(`${API_BASE}/mevzuatlar/${qs}`);
+  if (!response.ok) {
+    throw new Error('Mevzuatlar alınamadı');
+  }
+  return response.json();
+}

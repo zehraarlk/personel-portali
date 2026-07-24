@@ -2,13 +2,14 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     home_dashboard,
-    site_icons,
+    site_icons, 
     sizden_gelenler_list,
     sizden_gelenler_goruntule,
     videos,
     etkinlikler_list,
     etkinlik_duyurular_list,
     protokoller_list,
+    mevzuatlar_list,
 )
 from .profile_views import (
     profile_me,
@@ -83,6 +84,7 @@ urlpatterns = [
     path('etkinlikler/', etkinlikler_list, name='etkinlikler'),
     path('duyurular/', etkinlik_duyurular_list, name='etkinlik-duyurular'),
     path('protokoller/', protokoller_list, name='protokoller'),
+    path('mevzuatlar/', mevzuatlar_list, name='mevzuatlar'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),
     path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),
