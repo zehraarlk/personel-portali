@@ -215,7 +215,7 @@ export default function SizdenGelenler() {
         {!loading && !error && (
           <>
             {vitrin.length > 0 && (
-              <div className="mb-10 grid gap-6 lg:grid-cols-12">
+              <div className="mb-10 grid gap-6 lg:grid-cols-12 lg:items-start">
                 <div className="relative isolate overflow-hidden rounded-[28px] border border-[#022842]/10 bg-[#011f34] shadow-[0_18px_50px_rgba(2,40,66,0.12)] lg:col-span-8">
                   <div className="relative aspect-video">
                     {vitrin.map((item, i) => (
