@@ -9,6 +9,7 @@ import SizdenGelenler from './pages/SizdenGelenler';
 import SizdenGelenlerDetay from './pages/SizdenGelenlerDetay';
 import Videos from './pages/Videos';
 import Etkinlikler from './pages/Etkinlikler';
+import EtkinlikDetay from './pages/EtkinlikDetay';
 import Duyurular from './pages/Duyurular';
 import Protokoller from './pages/kaynaklar/Protokoller';
 import Dokumanlar from './pages/kaynaklar/Dokumanlar';
@@ -38,6 +39,7 @@ export default function App() {
       <Route element={<RequirePortal />}>
         <Route path="/videolar" element={<Videos />} />
         <Route path="/etkinlikler" element={<Etkinlikler />} />
+        <Route path="/etkinlikler/:id" element={<EtkinlikDetay />} />
         <Route path="/duyurular" element={<Duyurular />} />
         <Route path="/protokoller" element={<Protokoller />} />
         <Route path="/dokumanlar" element={<Dokumanlar />} />
