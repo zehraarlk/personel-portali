@@ -1,5 +1,7 @@
 from datetime import date
 
+from django.db.models import F, Q
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -15,6 +17,9 @@ from .models import (
     VideolarKategori,
     Etkinlikler,
     EtkinliklerDurum,
+    EtkinliklerDuyurular,
+    DuyurularKategori,
+    Kaynaklar,
 )
 from .serializers import (
     HaberSerializer,
@@ -28,6 +33,8 @@ from .serializers import (
     VideoKategoriSerializer,
     EtkinlikSerializer,
     EtkinliklerDurumSerializer,
+    EtkinlikDuyuruSerializer,
+    DuyurularKategoriSerializer,
 )
 
 
@@ -154,3 +161,54 @@ def etkinlikler_list(request):
         'durumlar': EtkinliklerDurumSerializer(durumlar, many=True).data,
         'etkinlikler': EtkinlikSerializer(etkinlikler, many=True).data,
     })
+
+
+@api_view(['GET'])
+def etkinlik_duyurular_list(request):
+    """Etkinlikler > Duyurular: kategori sekmeleri ve duyuru listesi."""
+    duyurular = (
+        EtkinliklerDuyurular.objects
+        .filter(sayfa_tipi='duyuru')
+        .select_related('kategori')
+        .order_by(F('tarih').desc(nulls_last=True), '-id')
+    )
+
+    kategori_slug = request.query_params.get('kategori')
+    if kategori_slug:
+        duyurular = duyurular.filter(kategori__slug=kategori_slug)
+
+    kategoriler = DuyurularKategori.objects.order_by('id')
+
+    return Response({
+        'kategoriler': DuyurularKategoriSerializer(kategoriler, many=True).data,
+        'duyurular': EtkinlikDuyuruSerializer(duyurular, many=True).data,
+    })
+
+
+@api_view(['GET'])
+def protokoller_list(request):
+    """Personel portali - kaynaklar (kategori: Protokoller)."""
+    q = (request.query_params.get('q') or '').strip()
+    qs = (
+        Kaynaklar.objects.select_related('kategori')
+        .filter(kategori__slug='Protokoller')
+        .order_by('-id')
+    )
+    if q:
+        qs = qs.filter(Q(baslik__icontains=q) | Q(aciklama__icontains=q))
+
+    items = [
+        {
+            'id': row.id,
+            'baslik': row.baslik,
+            'aciklama': row.aciklama,
+            'ikon': row.ikon or 'fas fa-file-signature',
+            'dosya_yolu': row.dosya_yolu,
+            'resmi_sayfa': row.resmi_sayfa or '',
+            'boyut': row.boyut,
+            'tarih': row.tarih,
+        }
+        for row in qs
+    ]
+    return Response({'protokoller': items, 'toplam': len(items)})
+
