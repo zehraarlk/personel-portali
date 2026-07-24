@@ -28,7 +28,7 @@ export default function Protokoller() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchProtokoller(search)
+    fetchProtokoller()
       .then((data) => {
         if (cancelled) return;
         setItems(data.protokoller ?? []);
@@ -43,9 +43,18 @@ export default function Protokoller() {
     return () => {
       cancelled = true;
     };
-  }, [search]);
+  }, []);
 
-  const filtered = useMemo(() => items, [items]);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLocaleLowerCase('tr-TR');
+    if (!q) return items;
+    return items.filter((item) => {
+      const haystack = `${item.baslik || ''} ${item.aciklama || ''}`.toLocaleLowerCase(
+        'tr-TR',
+      );
+      return haystack.includes(q);
+    });
+  }, [items, search]);
 
   const onSubmitSearch = (e) => {
     e.preventDefault();
