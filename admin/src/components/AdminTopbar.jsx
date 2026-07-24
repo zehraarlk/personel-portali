@@ -55,7 +55,7 @@ export default function AdminTopbar({ title, onMenu }) {
       /* local clear */
     }
     clearAdminSession();
-    navigate('/admin/giris');
+    navigate('/giris');
   };
 
   const foto = profile?.foto || BRAND_IMG;

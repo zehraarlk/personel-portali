@@ -256,4 +256,14 @@ export async function fetchDuyurular(kategori = '') {
   return response.json();
 }
 
+/** protokoller — { protokoller: [...], toplam } (kaynaklar / Protokoller) */
+export async function fetchProtokoller(q) {
+  const qs = q ? `?q=${encodeURIComponent(q)}` : '';
+  const response = await fetch(`${API_BASE}/protokoller/${qs}`);
+  if (!response.ok) {
+    throw new Error('Protokoller alınamadı');
+  }
+  return response.json();
+}
+
 export { canAccessPortal, isPersonelLoggedIn, isYoneticiLoggedIn } from '../auth/session';
