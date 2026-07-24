@@ -36,10 +36,10 @@ function vurgula(metin, sorgu) {
   );
 }
 
-function IcerikKarti({ item, arama }) {
+function IcerikKarti({ item, arama, sayfa }) {
   return (
     <Link
-      to={`/sizden-gelenler/detay/${item.id}`}
+      to={`/sizden-gelenler/detay/${item.id}?ref=${sayfa}`}
       className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] shadow-[0_6px_22px_rgba(2,40,66,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/25 hover:shadow-[0_16px_36px_rgba(2,40,66,0.14)]"
     >
       <div className="relative h-52 overflow-hidden bg-[#dce6ed]">
@@ -95,7 +95,7 @@ export default function SizdenGelenler() {
   const [searchParams, setSearchParams] = useSearchParams();
   const sayfa = Number(searchParams.get('sayfa') || 0);
 
-  function sayfaAyarla(deger) {
+  function sayfaAyarla(deger, kaydir = true) {
     setSearchParams(
       (prev) => {
         const yeniDeger = typeof deger === 'function' ? deger(sayfa) : deger;
@@ -109,6 +109,9 @@ export default function SizdenGelenler() {
       },
       { replace: true }
     );
+    if (kaydir) {
+      listeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   useEffect(() => {
@@ -132,7 +135,7 @@ export default function SizdenGelenler() {
       setSlide((s) => (s + 1) % vitrin.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [vitrin.length]);
+  }, [vitrin.length, slide]);
 
   const filtreliIcerikler = useMemo(() => {
     let sonuc = seciliKategori
@@ -157,7 +160,7 @@ export default function SizdenGelenler() {
       ilkYuklemeRef.current = false;
       return;
     }
-    sayfaAyarla(0);
+    sayfaAyarla(0, false);
   }, [seciliKategori, arama]);
 
   const toplamSayfa = Math.max(1, Math.ceil(filtreliIcerikler.length / SAYFA_BASI));
@@ -168,6 +171,7 @@ export default function SizdenGelenler() {
 
   function kategoriSecVeKaydir(slug) {
     setSeciliKategori(slug);
+    setArama('');
     listeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -176,7 +180,6 @@ export default function SizdenGelenler() {
   return (
     <Layout>
       <div className="mx-auto w-full max-w-[1440px]">
-        {/* Başlık - sade, kutusuz */}
         <div className="mb-6">
           <h1 className="text-2xl font-extrabold tracking-tight text-[#0b1c30] md:text-3xl">
             Sizden Gelenler
@@ -211,7 +214,6 @@ export default function SizdenGelenler() {
 
         {!loading && !error && (
           <>
-            {/* Öne çıkanlar: kayan ekran + filtre paneli, ayrı ayrı kutular */}
             {vitrin.length > 0 && (
               <div className="mb-10 grid gap-6 lg:grid-cols-12">
                 <div className="relative isolate overflow-hidden rounded-[28px] border border-[#022842]/10 bg-[#011f34] shadow-[0_18px_50px_rgba(2,40,66,0.12)] lg:col-span-8">
@@ -227,7 +229,7 @@ export default function SizdenGelenler() {
                         <img
                           src={item.resim}
                           alt={item.kategori}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full scale-105 object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/85 via-[#011f34]/25 to-transparent" />
                         <div className="absolute left-4 bottom-4 right-4 sm:left-6 sm:bottom-6 sm:right-24">
@@ -290,13 +292,23 @@ export default function SizdenGelenler() {
                   </h2>
 
                   <div className="relative mb-4">
-                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#8a98a2]">
-                      search
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => listeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#8a98a2] hover:text-[#022842] transition"
+                      aria-label="Ara ve listeye git"
+                    >
+                      <span className="material-symbols-outlined text-[19px]">search</span>
+                    </button>
                     <input
                       type="text"
                       value={arama}
                       onChange={(e) => setArama(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          listeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
                       placeholder="Başlık veya içerikte ara…"
                       className="w-full rounded-xl border border-[#022842]/10 bg-white py-2.5 pl-10 pr-4 text-sm text-[#0b1c30] shadow-sm transition focus:border-[#022842]/40 focus:outline-none focus:ring-2 focus:ring-[#022842]/10"
                     />
@@ -353,7 +365,7 @@ export default function SizdenGelenler() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {gosterilenler.map((item) => (
-                <IcerikKarti key={item.id} item={item} arama={arama} />
+                <IcerikKarti key={item.id} item={item} arama={arama} sayfa={sayfa} />
               ))}
 
               {!gosterilenler.length && (
