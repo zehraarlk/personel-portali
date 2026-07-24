@@ -17,7 +17,17 @@ import { BRAND_IMG } from '../../constants';
 import ImagePickerField from '../../components/ImagePickerField';
 import AdminRowActions from '../../components/AdminRowActions';
 import AdminAlert from '../../components/AdminAlert';
+import {
+  digitsOnly,
+  normalizePhone,
+  validatePersonelForm,
+  validateYoneticiForm,
+} from '../../utils/formRules';
 
+function FieldError({ message }) {
+  if (!message) return null;
+  return <span className="admin-field-error">{message}</span>;
+}
 export function PersonellerIndex() {
   usePageTitle('Personeller');
   const [rows, setRows] = useState([]);
@@ -146,6 +156,7 @@ function PersonelForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
   const [tcNo, setTcNo] = useState(initial?.tc_no || '');
   const [dogumTarihi, setDogumTarihi] = useState(initial?.dogum_tarihi || '');
   const [fotoUrl, setFotoUrl] = useState(initial?.foto_url || '');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     setSicilNo(initial?.sicil_no || '');
@@ -157,7 +168,17 @@ function PersonelForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
     setTcNo(initial?.tc_no || '');
     setDogumTarihi(initial?.dogum_tarihi || '');
     setFotoUrl(initial?.foto_url || '');
+    setFieldErrors({});
   }, [initial]);
+
+  const clearField = (key) => {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   return (
     <div className="admin-module">
@@ -190,15 +211,29 @@ function PersonelForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
             )}
             <form
               className="admin-form admin-form--grid"
+              noValidate
               onSubmit={(e) => {
                 e.preventDefault();
+                const values = {
+                  sicil_no: sicilNo.trim(),
+                  ad: ad.trim(),
+                  soyad: soyad.trim(),
+                  email: email.trim(),
+                  telefon,
+                  tc_no: tcNo,
+                  dogum_tarihi: dogumTarihi,
+                  sifre,
+                };
+                const errors = validatePersonelForm(values, { mode });
+                setFieldErrors(errors);
+                if (Object.keys(errors).length) return;
                 const payload = {
-                  sicil_no: sicilNo,
-                  ad,
-                  soyad,
-                  email,
-                  telefon: telefon || null,
-                  tc_no: tcNo || null,
+                  sicil_no: values.sicil_no,
+                  ad: values.ad,
+                  soyad: values.soyad,
+                  email: values.email.toLowerCase(),
+                  telefon: normalizePhone(telefon) || null,
+                  tc_no: digitsOnly(tcNo) || null,
                   dogum_tarihi: dogumTarihi,
                   foto_url: fotoUrl || '../images/gebze-logo.webp',
                 };
@@ -209,63 +244,123 @@ function PersonelForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
             >
               <div className="admin-form__main">
                 <div className="admin-form__row-2">
-                  <label>
+                  <label className={fieldErrors.ad ? 'is-invalid' : ''}>
                     Ad
-                    <input value={ad} onChange={(e) => setAd(e.target.value)} required />
+                    <input
+                      value={ad}
+                      onChange={(e) => {
+                        setAd(e.target.value);
+                        clearField('ad');
+                      }}
+                      autoComplete="given-name"
+                      required
+                    />
+                    <FieldError message={fieldErrors.ad} />
                   </label>
-                  <label>
+                  <label className={fieldErrors.soyad ? 'is-invalid' : ''}>
                     Soyad
-                    <input value={soyad} onChange={(e) => setSoyad(e.target.value)} required />
+                    <input
+                      value={soyad}
+                      onChange={(e) => {
+                        setSoyad(e.target.value);
+                        clearField('soyad');
+                      }}
+                      autoComplete="family-name"
+                      required
+                    />
+                    <FieldError message={fieldErrors.soyad} />
                   </label>
                 </div>
                 <div className="admin-form__row-2">
-                  <label>
+                  <label className={fieldErrors.sicil_no ? 'is-invalid' : ''}>
                     Sicil no
-                    <input value={sicilNo} onChange={(e) => setSicilNo(e.target.value)} required />
+                    <input
+                      value={sicilNo}
+                      onChange={(e) => {
+                        setSicilNo(e.target.value);
+                        clearField('sicil_no');
+                      }}
+                      required
+                    />
+                    <FieldError message={fieldErrors.sicil_no} />
                   </label>
-                  <label>
+                  <label className={fieldErrors.dogum_tarihi ? 'is-invalid' : ''}>
                     Doğum tarihi
                     <input
                       type="date"
                       value={dogumTarihi || ''}
-                      onChange={(e) => setDogumTarihi(e.target.value)}
+                      onChange={(e) => {
+                        setDogumTarihi(e.target.value);
+                        clearField('dogum_tarihi');
+                      }}
                       required
                     />
+                    <FieldError message={fieldErrors.dogum_tarihi} />
                   </label>
                 </div>
-                <label>
+                <label className={fieldErrors.email ? 'is-invalid' : ''}>
                   E-posta
                   <input
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      clearField('email');
+                    }}
                     required
                   />
+                  <FieldError message={fieldErrors.email} />
                 </label>
                 <div className="admin-form__row-2">
-                  <label>
+                  <label className={fieldErrors.sifre ? 'is-invalid' : ''}>
                     Şifre{mode === 'edit' ? ' (opsiyonel)' : ''}
                     <input
                       type="password"
                       value={sifre}
-                      onChange={(e) => setSifre(e.target.value)}
+                      onChange={(e) => {
+                        setSifre(e.target.value);
+                        clearField('sifre');
+                      }}
                       required={mode === 'create'}
-                      minLength={mode === 'create' ? 4 : undefined}
-                      placeholder={mode === 'edit' ? 'Değiştirmek için doldurun' : ''}
+                      minLength={6}
+                      placeholder={mode === 'edit' ? 'Değiştirmek için doldurun' : 'En az 6 karakter'}
+                      autoComplete="new-password"
                     />
+                    <FieldError message={fieldErrors.sifre} />
                   </label>
-                  <label>
+                  <label className={fieldErrors.telefon ? 'is-invalid' : ''}>
                     Telefon
-                    <input value={telefon} onChange={(e) => setTelefon(e.target.value)} />
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      value={telefon}
+                      onChange={(e) => {
+                        const next = digitsOnly(e.target.value).slice(0, 11);
+                        setTelefon(next);
+                        clearField('telefon');
+                      }}
+                      placeholder="05XXXXXXXXX"
+                      maxLength={11}
+                    />
+                    <FieldError message={fieldErrors.telefon} />
                   </label>
                 </div>
-                <label>
+                <label className={fieldErrors.tc_no ? 'is-invalid' : ''}>
                   T.C. kimlik no
                   <input
+                    inputMode="numeric"
                     value={tcNo}
-                    onChange={(e) => setTcNo(e.target.value)}
+                    onChange={(e) => {
+                      setTcNo(digitsOnly(e.target.value).slice(0, 11));
+                      clearField('tc_no');
+                    }}
                     maxLength={11}
+                    placeholder="11 haneli T.C. kimlik no"
                   />
+                  <FieldError message={fieldErrors.tc_no} />
                 </label>
               </div>
 
@@ -489,6 +584,7 @@ function YoneticiForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
   const [yetki, setYetki] = useState(initial?.yetki || 'yonetici');
   const [aktif, setAktif] = useState(String(initial?.aktif ?? 1));
   const [fotoUrl, setFotoUrl] = useState(initial?.foto_url || '');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     setKullaniciAdi(initial?.kullanici_adi || '');
@@ -498,7 +594,17 @@ function YoneticiForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
     setYetki(initial?.yetki || 'yonetici');
     setAktif(String(initial?.aktif ?? 1));
     setFotoUrl(initial?.foto_url || '');
+    setFieldErrors({});
   }, [initial]);
+
+  const clearField = (key) => {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   return (
     <div className="admin-module">
@@ -531,12 +637,22 @@ function YoneticiForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
             )}
             <form
               className="admin-form admin-form--grid"
+              noValidate
               onSubmit={(e) => {
                 e.preventDefault();
+                const values = {
+                  kullanici_adi: kullaniciAdi.trim(),
+                  ad: ad.trim(),
+                  soyad: soyad.trim(),
+                  sifre,
+                };
+                const errors = validateYoneticiForm(values, { mode });
+                setFieldErrors(errors);
+                if (Object.keys(errors).length) return;
                 const payload = {
-                  kullanici_adi: kullaniciAdi,
-                  ad,
-                  soyad,
+                  kullanici_adi: values.kullanici_adi,
+                  ad: values.ad,
+                  soyad: values.soyad,
                   yetki,
                   aktif: Number(aktif),
                   foto_url: fotoUrl || null,
@@ -548,33 +664,60 @@ function YoneticiForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
             >
               <div className="admin-form__main">
                 <div className="admin-form__row-2">
-                  <label>
+                  <label className={fieldErrors.ad ? 'is-invalid' : ''}>
                     Ad
-                    <input value={ad} onChange={(e) => setAd(e.target.value)} required />
+                    <input
+                      value={ad}
+                      onChange={(e) => {
+                        setAd(e.target.value);
+                        clearField('ad');
+                      }}
+                      required
+                    />
+                    <FieldError message={fieldErrors.ad} />
                   </label>
-                  <label>
+                  <label className={fieldErrors.soyad ? 'is-invalid' : ''}>
                     Soyad
-                    <input value={soyad} onChange={(e) => setSoyad(e.target.value)} required />
+                    <input
+                      value={soyad}
+                      onChange={(e) => {
+                        setSoyad(e.target.value);
+                        clearField('soyad');
+                      }}
+                      required
+                    />
+                    <FieldError message={fieldErrors.soyad} />
                   </label>
                 </div>
-                <label>
+                <label className={fieldErrors.kullanici_adi ? 'is-invalid' : ''}>
                   Kullanıcı adı
                   <input
                     value={kullaniciAdi}
-                    onChange={(e) => setKullaniciAdi(e.target.value)}
+                    onChange={(e) => {
+                      setKullaniciAdi(e.target.value.replace(/\s/g, ''));
+                      clearField('kullanici_adi');
+                    }}
                     required
+                    autoComplete="username"
+                    placeholder="ornek.kullanici"
                   />
+                  <FieldError message={fieldErrors.kullanici_adi} />
                 </label>
-                <label>
+                <label className={fieldErrors.sifre ? 'is-invalid' : ''}>
                   Şifre{mode === 'edit' ? ' (opsiyonel)' : ''}
                   <input
                     type="password"
                     value={sifre}
-                    onChange={(e) => setSifre(e.target.value)}
+                    onChange={(e) => {
+                      setSifre(e.target.value);
+                      clearField('sifre');
+                    }}
                     required={mode === 'create'}
-                    minLength={mode === 'create' ? 4 : undefined}
-                    placeholder={mode === 'edit' ? 'Değiştirmek için doldurun' : ''}
+                    minLength={6}
+                    placeholder={mode === 'edit' ? 'Değiştirmek için doldurun' : 'En az 6 karakter'}
+                    autoComplete="new-password"
                   />
+                  <FieldError message={fieldErrors.sifre} />
                 </label>
                 <div className="admin-form__row-2">
                   <label>
