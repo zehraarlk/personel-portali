@@ -32,9 +32,13 @@ import {
   SizdenGelenlerEkle,
   SizdenGelenlerDuzenle,
 } from './pages/sizden-gelenler/SizdenGelenlerPages';
+import {
+  ProtokollerIndex,
+  ProtokollerEkle,
+  ProtokollerDuzenle,
+} from './pages/protokoller/ProtokollerPages';
 
 const STUBS = [
-  'protokoller',
   'dokumanlar',
   'mevzuatlar',
   'egitimler',
@@ -68,6 +72,9 @@ export default function AdminRoutes() {
         <Route path="duyurular" element={<DuyurularIndex />} />
         <Route path="duyurular/ekle" element={<DuyurularEkle />} />
         <Route path="duyurular/:id/duzenle" element={<DuyurularDuzenle />} />
+        <Route path="protokoller" element={<ProtokollerIndex />} />
+        <Route path="protokoller/ekle" element={<ProtokollerEkle />} />
+        <Route path="protokoller/:id/duzenle" element={<ProtokollerDuzenle />} />
         <Route path="profil/sifre-degistir" element={<ChangePassword />} />
         <Route path="profil/oturum-kayitlari" element={<SessionHistory />} />
         {STUBS.map((slug) => (

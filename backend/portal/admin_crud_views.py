@@ -1,5 +1,6 @@
 """Admin CRUD — etkinlikler, etkinlikler_duyurular, personeller, yoneticiler."""
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import AllowAny
@@ -13,8 +14,25 @@ from .models import (
     VideolarKategori,
     SizdenGelenler,
     SizdengelenlerKategori,
+    Kaynaklar,
+    KaynaklarKategori,
     normalize_image_path,
 )
+from .validators import (
+    validate_birth_date,
+    validate_email_address,
+    validate_password,
+    validate_person_name,
+    validate_phone_optional,
+    validate_sicil,
+    validate_tc_optional,
+    validate_username,
+)
+
+
+def _django_to_drf(exc: DjangoValidationError):
+    messages = getattr(exc, "messages", None) or [str(exc)]
+    raise serializers.ValidationError(messages[0])
 
 
 class AdminEtkinlikSerializer(serializers.ModelSerializer):
@@ -86,6 +104,55 @@ class AdminPersonelSerializer(serializers.ModelSerializer):
     def get_foto(self, obj):
         return normalize_image_path(obj.foto_url)
 
+    def validate_ad(self, value):
+        try:
+            return validate_person_name(value, 'Ad')
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_soyad(self, value):
+        try:
+            return validate_person_name(value, 'Soyad')
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_sicil_no(self, value):
+        try:
+            return validate_sicil(value)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_email(self, value):
+        try:
+            return validate_email_address(value)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_tc_no(self, value):
+        try:
+            return validate_tc_optional(value)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_telefon(self, value):
+        try:
+            return validate_phone_optional(value)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_dogum_tarihi(self, value):
+        try:
+            return validate_birth_date(value)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_sifre(self, value):
+        required = self.instance is None
+        try:
+            return validate_password(value, required=required)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
     def create(self, validated_data):
         raw = validated_data.pop('sifre', None)
         if not raw:
@@ -129,6 +196,31 @@ class AdminYoneticiSerializer(serializers.ModelSerializer):
 
     def get_foto(self, obj):
         return normalize_image_path(obj.foto_url)
+
+    def validate_ad(self, value):
+        try:
+            return validate_person_name(value, 'Ad')
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_soyad(self, value):
+        try:
+            return validate_person_name(value, 'Soyad')
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_kullanici_adi(self, value):
+        try:
+            return validate_username(value)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
+
+    def validate_sifre(self, value):
+        required = self.instance is None
+        try:
+            return validate_password(value, required=required)
+        except DjangoValidationError as exc:
+            _django_to_drf(exc)
 
     def create(self, validated_data):
         raw = validated_data.pop('sifre', None)
@@ -301,3 +393,105 @@ class SizdenGelenKategoriViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     authentication_classes = []
     pagination_class = None
+
+
+PROTOKOL_KATEGORI_SLUG = 'Protokoller'
+
+
+def _protokol_kategori():
+    return KaynaklarKategori.objects.filter(slug=PROTOKOL_KATEGORI_SLUG).first()
+
+
+class AdminProtokolSerializer(serializers.ModelSerializer):
+    kategori_ad = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Kaynaklar
+        fields = [
+            'id',
+            'baslik',
+            'aciklama',
+            'ikon',
+            'dosya_yolu',
+            'resmi_sayfa',
+            'boyut',
+            'tarih',
+            'kategori',
+            'kategori_ad',
+            'alt_kategori',
+        ]
+        read_only_fields = ['kategori', 'alt_kategori']
+
+    def get_kategori_ad(self, obj):
+        return obj.kategori.ad if obj.kategori_id else None
+
+    def validate_baslik(self, value):
+        title = (value or '').strip()
+        if not title:
+            raise serializers.ValidationError('Başlık zorunludur.')
+        if len(title) > 255:
+            raise serializers.ValidationError('Başlık en fazla 255 karakter olabilir.')
+        return title
+
+    def validate_aciklama(self, value):
+        text = (value or '').strip()
+        if not text:
+            raise serializers.ValidationError('Açıklama zorunludur.')
+        return text
+
+    def validate_dosya_yolu(self, value):
+        path = (value or '').strip()
+        if not path:
+            raise serializers.ValidationError('Dosya yolu / bağlantı zorunludur.')
+        return path
+
+    def validate_boyut(self, value):
+        size = (value or '').strip()
+        if not size:
+            raise serializers.ValidationError('Boyut zorunludur. Örn: 1.7 MB')
+        return size
+
+    def validate_tarih(self, value):
+        tarih = (value or '').strip()
+        if not tarih:
+            raise serializers.ValidationError('Tarih zorunludur.')
+        return tarih
+
+    def create(self, validated_data):
+        kategori = _protokol_kategori()
+        if not kategori:
+            raise serializers.ValidationError(
+                {'kategori': 'Protokoller kategorisi bulunamadı (kaynaklar_kategori).'}
+            )
+        validated_data['kategori'] = kategori
+        validated_data['alt_kategori'] = None
+        if not validated_data.get('ikon'):
+            validated_data['ikon'] = 'fas fa-file-signature'
+        if validated_data.get('resmi_sayfa') == '':
+            validated_data['resmi_sayfa'] = None
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('kategori', None)
+        validated_data.pop('alt_kategori', None)
+        if validated_data.get('resmi_sayfa') == '':
+            validated_data['resmi_sayfa'] = None
+        if not validated_data.get('ikon'):
+            validated_data['ikon'] = instance.ikon or 'fas fa-file-signature'
+        return super().update(instance, validated_data)
+
+
+class ProtokolViewSet(viewsets.ModelViewSet):
+    """kaynaklar tablosu — yalnızca Protokoller kategorisi."""
+
+    serializer_class = AdminProtokolSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+    def get_queryset(self):
+        return (
+            Kaynaklar.objects.select_related('kategori', 'alt_kategori')
+            .filter(kategori__slug=PROTOKOL_KATEGORI_SLUG)
+            .order_by('-id')
+        )
