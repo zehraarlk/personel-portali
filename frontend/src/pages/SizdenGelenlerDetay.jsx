@@ -1,16 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';import Layout from '../components/Layout';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 import { fetchSizdenGelenler, goruntulenmeArttir } from '../api/client';
 
+function getDeptIcon(kategori) {
+  const value = `${kategori?.slug ?? ''} ${kategori?.ad ?? ''}`.toLocaleLowerCase('tr-TR');
+  if (value.includes('insan') || value.includes('kaynak')) return 'groups';
+  if (value.includes('fen')) return 'construction';
+  if (value.includes('temizlik')) return 'cleaning_services';
+  if (value.includes('veteriner')) return 'pets';
+  if (value.includes('park') || value.includes('bahce') || value.includes('bahçe')) return 'park';
+  if (value.includes('zabita') || value.includes('zabıta')) return 'shield';
+  return 'apartment';
+}
+
 export default function SizdenGelenlerDetay() {
-  const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const refSayfa = searchParams.get('ref');
+  const listeAdresi = refSayfa ? `/sizden-gelenler?sayfa=${refSayfa}` : '/sizden-gelenler';
+  const devamEki = refSayfa ? `?ref=${refSayfa}` : '';
+
+  const [kategoriler, setKategoriler] = useState([]);
   const [tumIcerikler, setTumIcerikler] = useState([]);
   const [icerik, setIcerik] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const seritRef = useRef(null);
-  const gonderilenIdler = useRef(new Set());
+  const [resimBuyuk, setResimBuyuk] = useState(false);
+  const [seciliMudurluk, setSeciliMudurluk] = useState(undefined);
 
   useEffect(() => {
     setLoading(true);
@@ -18,6 +35,7 @@ export default function SizdenGelenlerDetay() {
       .then((data) => {
         const liste = data.icerikler ?? [];
         setTumIcerikler(liste);
+        setKategoriler(data.kategoriler ?? []);
         const bulunan = liste.find((i) => String(i.id) === id);
         setIcerik(bulunan || null);
       })
@@ -26,19 +44,19 @@ export default function SizdenGelenlerDetay() {
   }, [id]);
 
   useEffect(() => {
-    if (gonderilenIdler.current.has(id)) return;
-    gonderilenIdler.current.add(id);
     goruntulenmeArttir(id).catch(() => {});
   }, [id]);
 
-  const digerIcerikler = useMemo(
-    () => tumIcerikler.filter((i) => String(i.id) !== id),
-    [tumIcerikler, id]
-  );
+  useEffect(() => {
+    setSeciliMudurluk(icerik ? icerik.kategori_slug : undefined);
+  }, [id, icerik]);
 
-  function seritKaydir(yon) {
-    seritRef.current?.scrollBy({ left: yon * 280, behavior: 'smooth' });
-  }
+  const digerIcerikler = useMemo(() => {
+    const sonuc = seciliMudurluk
+      ? tumIcerikler.filter((i) => i.kategori_slug === seciliMudurluk)
+      : tumIcerikler;
+    return sonuc.filter((i) => String(i.id) !== id).slice(0, 6);
+  }, [tumIcerikler, seciliMudurluk, id]);
 
   return (
     <Layout>
@@ -71,111 +89,167 @@ export default function SizdenGelenlerDetay() {
 
       {!loading && !error && icerik && (
         <div className="mx-auto max-w-6xl">
-          <button
-            onClick={() => navigate(-1)}
-            className="group mb-5 inline-flex items-center gap-2 rounded-full border border-[#022842]/10 bg-white px-4 py-2 text-sm font-bold text-[#022842] shadow-sm transition hover:-translate-x-0.5 hover:bg-[#eef1f3] hover:border-[#022842]/20"
-          >
-            <span className="material-symbols-outlined text-[18px] transition group-hover:-translate-x-0.5">
-              arrow_back
-            </span>
-            Sizden Gelenler'e Dön
-          </button>
+          {/* Üst gezinti */}
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <Link
+              to={listeAdresi}
+              className="group inline-flex items-center gap-2 rounded-full border border-[#022842]/10 bg-white px-4 py-2 text-sm font-bold text-[#022842] shadow-sm transition hover:-translate-x-0.5 hover:bg-[#eef1f3] hover:border-[#022842]/20"
+            >
+              <span className="material-symbols-outlined text-[18px] transition group-hover:-translate-x-0.5">
+                arrow_back
+              </span>
+              Tüm İçeriklere Dön
+            </Link>
 
-          {/* Ana kart - tam genişlik */}
-          <article className="overflow-hidden rounded-2xl border border-[#022842]/10 bg-white shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row">
-              <div className="relative h-56 w-full sm:h-auto sm:w-72 shrink-0 overflow-hidden bg-[#dce6ed]">
+            <nav className="flex flex-wrap items-center gap-1.5 text-sm text-[#8a98a2]">
+              <Link to="/" className="hover:text-[#022842] transition">
+                Anasayfa
+              </Link>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              <Link to={listeAdresi} className="hover:text-[#022842] transition">
+                Sizden Gelenler
+              </Link>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              <span className="text-[#536575]">İçerik Detayı</span>
+            </nav>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-12 items-start">
+            {/* Sol: ana içerik */}
+            <div className="lg:col-span-8">
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center rounded-full bg-[#022842]/10 px-3 py-1.5 text-xs font-bold text-[#022842]">
+                  {icerik.kategori}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-sm text-[#8a98a2]">
+                  <span className="material-symbols-outlined text-[17px]">calendar_today</span>
+                  {icerik.tarih}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-sm text-[#8a98a2]">
+                  <span className="material-symbols-outlined text-[17px]">visibility</span>
+                  {icerik.goruntulenme ?? 0}
+                </span>
+              </div>
+
+              <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-[#0b1c30] sm:text-4xl">
+                {icerik.baslik}
+              </h1>
+
+              <button
+                type="button"
+                onClick={() => setResimBuyuk(true)}
+                className="group relative mt-6 block h-[280px] w-full cursor-zoom-in overflow-hidden rounded-2xl bg-[#dce6ed] sm:h-[380px] md:h-[440px]"
+                aria-label="Görseli büyüt"
+              >
                 <img
                   src={icerik.resim}
                   alt={icerik.kategori}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full scale-105 object-cover transition duration-300 group-hover:scale-110"
                 />
-              </div>
-
-              <div className="flex flex-1 flex-col p-6 sm:p-8">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-[#a16207]">
-                  {icerik.kategori}
+                <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
+                  <span className="material-symbols-outlined text-[18px]">zoom_in</span>
                 </span>
+              </button>
 
-                <h1 className="mt-2 text-xl sm:text-2xl font-extrabold tracking-tight text-[#0b1c30]">
-                  {icerik.baslik}
-                </h1>
-                <p className="mt-4 text-sm leading-7 text-[#536575]">{icerik.ozet}</p>
-
-                <div className="mt-auto flex items-center gap-5 border-t border-[#022842]/10 pt-4 text-sm text-[#61717d]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-                    {icerik.tarih}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[18px]">visibility</span>
-                    {icerik.goruntulenme ?? 0}
-                  </span>
-                </div>
-              </div>
+              <article className="mt-6">
+                <p className="text-lg leading-8 text-[#33495a]">{icerik.ozet}</p>
+              </article>
             </div>
-          </article>
 
-          {/* Diğer içerikler: yatay kaydırmalı şerit */}
-          {digerIcerikler.length > 0 && (
-            <div className="mt-10">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-extrabold tracking-tight text-[#0b1c30]">
+            {/* Sağ: diğer içerikler + filtre tek panelde, sabit değil */}
+            <div className="lg:col-span-4">
+              <div className="rounded-2xl border border-[#022842]/10 border-t-4 border-t-[#f5a623] bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] p-5 shadow-sm">
+                <h2 className="mb-3 text-base font-extrabold tracking-tight text-[#0b1c30]">
                   Diğer İçerikler
                 </h2>
-                <div className="flex gap-2">
+
+                <div className="mb-5 flex flex-col gap-2">
+                  {digerIcerikler.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/sizden-gelenler/detay/${item.id}${devamEki}`}
+                      className="group flex items-center gap-3 rounded-xl bg-white/70 p-2 shadow-sm transition hover:bg-white"
+                    >
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
+                        <img
+                          src={item.resim}
+                          alt={item.kategori}
+                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="line-clamp-2 text-sm font-bold leading-snug text-[#0b1c30] group-hover:text-[#022842]">
+                          {item.baslik}
+                        </p>
+                        <p className="mt-0.5 text-xs text-[#94a3b0]">{item.tarih}</p>
+                      </div>
+                    </Link>
+                  ))}
+
+                  {!digerIcerikler.length && (
+                    <p className="px-2 py-3 text-sm text-[#8a98a2]">Bu müdürlükte başka içerik yok.</p>
+                  )}
+                </div>
+
+                <h3 className="mb-3 border-t border-[#022842]/10 pt-4 text-sm font-extrabold uppercase tracking-wide text-[#8a98a2]">
+                  Müdürlüğe Göre Filtrele
+                </h3>
+
+                <div className="flex flex-col gap-1.5">
                   <button
-                    onClick={() => seritKaydir(-1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#022842]/10 bg-white shadow-sm transition hover:border-[#022842]/30"
-                    aria-label="Sola kaydır"
+                    type="button"
+                    onClick={() => setSeciliMudurluk(null)}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold transition ${
+                      seciliMudurluk === null
+                        ? 'bg-[#022842] text-white'
+                        : 'text-[#33495a] hover:bg-white'
+                    }`}
                   >
-                    <span className="material-symbols-outlined text-[16px] leading-none">
-                      chevron_left
-                    </span>
+                    <span className="material-symbols-outlined text-[18px]">grid_view</span>
+                    Tümü
                   </button>
-                  <button
-                    onClick={() => seritKaydir(1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#022842]/10 bg-white shadow-sm transition hover:border-[#022842]/30"
-                    aria-label="Sağa kaydır"
-                  >
-                    <span className="material-symbols-outlined text-[16px] leading-none">
-                      chevron_right
-                    </span>
-                  </button>
+                  {kategoriler.map((k) => (
+                    <button
+                      type="button"
+                      key={k.id}
+                      onClick={() => setSeciliMudurluk(k.slug)}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold transition ${
+                        seciliMudurluk === k.slug
+                          ? 'bg-[#022842] text-white'
+                          : 'text-[#33495a] hover:bg-white'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {getDeptIcon(k)}
+                      </span>
+                      {k.ad}
+                    </button>
+                  ))}
                 </div>
               </div>
-
-              <div
-                ref={seritRef}
-                className="flex gap-4 overflow-x-auto pb-2 scroll-smooth"
-                style={{ scrollbarWidth: 'none' }}
-              >
-                {digerIcerikler.map((item) => (
-                  <Link
-                    key={item.id}
-                    to={`/sizden-gelenler/detay/${item.id}`}
-                    className="group w-60 shrink-0 overflow-hidden rounded-2xl border border-[#022842]/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-                  >
-                    <div className="h-32 overflow-hidden bg-[#dce6ed]">
-                      <img
-                        src={item.resim}
-                        alt={item.kategori}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-[#a16207]">
-                        {item.kategori}
-                      </span>
-                      <p className="mt-1 line-clamp-2 text-sm font-bold leading-snug text-[#0b1c30]">
-                        {item.baslik}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      {resimBuyuk && icerik && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setResimBuyuk(false)}
+        >
+          <button
+            onClick={() => setResimBuyuk(false)}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+            aria-label="Kapat"
+          >
+            <span className="material-symbols-outlined text-[22px]">close</span>
+          </button>
+          <img
+            src={icerik.resim}
+            alt={icerik.kategori}
+            className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </Layout>
