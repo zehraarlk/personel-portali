@@ -61,11 +61,17 @@ export async function fetchAdminDashboard() {
 async function parseJson(response) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const detail =
-      data.detail ||
-      (typeof data === 'object' ? Object.values(data).flat().join(' ') : null) ||
-      'İstek başarısız';
-    throw new Error(detail);
+    let detail = data.detail || data.message;
+    if (!detail && data && typeof data === 'object') {
+      const parts = [];
+      for (const [key, val] of Object.entries(data)) {
+        if (key === 'detail' || key === 'message') continue;
+        const text = Array.isArray(val) ? val.join(' ') : String(val);
+        if (text) parts.push(text);
+      }
+      detail = parts.join(' ') || null;
+    }
+    throw new Error(detail || 'İstek başarısız');
   }
   return data;
 }
@@ -296,6 +302,42 @@ export async function updateSizdenGelen(id, payload) {
 
 export async function deleteSizdenGelen(id) {
   const response = await fetch(`${API_BASE}/admin/sizden-gelenler/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listProtokoller() {
+  const response = await fetch(`${API_BASE}/admin/protokoller/`);
+  return parseJson(response);
+}
+
+export async function getProtokol(id) {
+  const response = await fetch(`${API_BASE}/admin/protokoller/${id}/`);
+  return parseJson(response);
+}
+
+export async function createProtokol(payload) {
+  const response = await fetch(`${API_BASE}/admin/protokoller/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateProtokol(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/protokoller/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteProtokol(id) {
+  const response = await fetch(`${API_BASE}/admin/protokoller/${id}/`, { method: 'DELETE' });
   if (!response.ok && response.status !== 204) {
     return parseJson(response);
   }
