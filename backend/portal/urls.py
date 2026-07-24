@@ -7,6 +7,7 @@ from .views import (
     sizden_gelenler_goruntule,
     videos,
     etkinlikler_list,
+    etkinlik_duyurular_list,
 )
 from .profile_views import (
     profile_me,
@@ -77,6 +78,7 @@ urlpatterns = [
         name='sizden-gelenler-goruntule',
     ),
     path('etkinlikler/', etkinlikler_list, name='etkinlikler'),
+    path('duyurular/', etkinlik_duyurular_list, name='etkinlik-duyurular'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),
     path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),
