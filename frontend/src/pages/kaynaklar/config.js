@@ -2,22 +2,22 @@ export const KAYNAK_QUICK_LINKS = [
   {
     to: '/protokoller',
     label: 'Protokoller',
-    icon: 'fas fa-file-signature',
+    iconKey: 'protokoller',
   },
   {
     to: '/dokumanlar',
     label: 'Dokümanlar',
-    icon: 'fas fa-file-alt',
+    iconKey: 'dokumanlar',
   },
   {
     to: '/mevzuatlar',
     label: 'Mevzuatlar',
-    icon: 'fas fa-balance-scale',
+    iconKey: 'mevzuatlar',
   },
   {
     to: '/egitimler',
     label: 'Eğitimler',
-    icon: 'fas fa-graduation-cap',
+    iconKey: 'egitimler',
   },
 ];
 
@@ -30,6 +30,7 @@ export const KAYNAK_PAGES = {
       'Kurum veya protokol adı ara…',
     searchId: 'protokol-ara',
     statLabel: 'aktif protokol',
+    iconKey: 'protokoller',
   },
 
   dokumanlar: {
@@ -39,6 +40,7 @@ export const KAYNAK_PAGES = {
     searchPlaceholder: 'Doküman adı ara…',
     searchId: 'dokuman-ara',
     statLabel: 'aktif doküman',
+    iconKey: 'dokumanlar',
   },
 
   mevzuatlar: {
@@ -48,6 +50,7 @@ export const KAYNAK_PAGES = {
     searchPlaceholder: 'Mevzuat adı ara…',
     searchId: 'mevzuat-ara',
     statLabel: 'aktif mevzuat',
+    iconKey: 'mevzuatlar',
   },
 
   egitimler: {
@@ -57,5 +60,6 @@ export const KAYNAK_PAGES = {
     searchPlaceholder: 'Eğitim adı ara…',
     searchId: 'egitim-ara',
     statLabel: 'aktif eğitim',
+    iconKey: 'egitimler',
   },
 };

@@ -11,4 +11,6 @@ export {
   isYoneticiLoggedIn,
   authHeaders as adminAuthHeaders,
   canAccessAdmin,
+  getProfileCache,
+  setProfileCache,
 } from '../../../frontend/src/auth/session.js';

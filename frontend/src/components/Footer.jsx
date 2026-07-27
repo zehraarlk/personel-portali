@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SITE_LOGO_WHITE } from '../constants';
+import useSiteIcons from '../hooks/useSiteIcons';
 import '../styles/footer.css';
 
 const CONTACT = {
@@ -10,16 +11,16 @@ const CONTACT = {
 };
 
 const CONTACT_ITEMS = [
-  { key: 'address', icon: 'fas fa-location-dot', value: CONTACT.address, label: 'Adres' },
-  { key: 'phone', icon: 'fas fa-phone', value: CONTACT.phone, label: 'Telefon' },
-  { key: 'email', icon: 'fas fa-envelope', value: CONTACT.email, label: 'E-posta' },
+  { key: 'address', iconKey: 'adres', value: CONTACT.address, label: 'Adres' },
+  { key: 'phone', iconKey: 'telefon', value: CONTACT.phone, label: 'Telefon' },
+  { key: 'email', iconKey: 'eposta', value: CONTACT.email, label: 'E-posta' },
 ];
 
 const SOCIAL_LINKS = [
-  { label: 'Facebook', icon: 'fab fa-facebook-f', href: 'https://www.facebook.com/gebzebelediye' },
-  { label: 'X (Twitter)', icon: 'fab fa-x-twitter', href: 'https://x.com/gebze_belediye' },
-  { label: 'Instagram', icon: 'fab fa-instagram', href: 'https://www.instagram.com/gebze_belediyesi' },
-  { label: 'YouTube', icon: 'fab fa-youtube', href: 'https://www.youtube.com/channel/UCj2OaUgzp76dOS2jTlz2frg' },
+  { label: 'Facebook', iconKey: 'facebook', href: 'https://www.facebook.com/gebzebelediye' },
+  { label: 'X (Twitter)', iconKey: 'twitter', href: 'https://x.com/gebze_belediye' },
+  { label: 'Instagram', iconKey: 'instagram', href: 'https://www.instagram.com/gebze_belediyesi' },
+  { label: 'YouTube', iconKey: 'youtube', href: 'https://www.youtube.com/channel/UCj2OaUgzp76dOS2jTlz2frg' },
 ];
 
 const QUICK_LINKS = [
@@ -54,6 +55,7 @@ async function copyText(value) {
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { icon } = useSiteIcons();
   const [copiedKey, setCopiedKey] = useState(null);
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function Footer() {
                   className="site-footer-social-link"
                   aria-label={s.label}
                 >
-                  <i className={s.icon} aria-hidden="true" />
+                  <i className={icon(s.iconKey)} aria-hidden="true" />
                 </a>
               ))}
             </div>
@@ -135,7 +137,10 @@ export default function Footer() {
                   title={`${item.label} kopyala`}
                   aria-label={`${item.label}: ${item.value}. Kopyalamak için tıklayın.`}
                 >
-                  <i className={`${item.icon} site-footer-contact-icon`} aria-hidden="true" />
+                  <i
+                    className={`${icon(item.iconKey, item.key === 'address' ? 'fas fa-location-dot' : undefined)} site-footer-contact-icon`}
+                    aria-hidden="true"
+                  />
                   <span>{item.value}</span>
                 </button>
               ))}

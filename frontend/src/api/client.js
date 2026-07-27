@@ -246,6 +246,44 @@ export async function logoutAdmin(options = {}) {
     .catch(() => ({ status: 'ok' }));
 }
 
+/** DB'de oturum hâlâ açık mı? */
+export async function checkAuthSession() {
+  const response = await fetch(`${API_BASE}/auth/session-check/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({
+      personel_id: getPersonelId() || undefined,
+      oturum_id: getOturumId() || undefined,
+      yonetici_id: getYoneticiId() || undefined,
+      yonetici_oturum_id: getYoneticiOturumId() || undefined,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Oturum doğrulanamadı');
+  }
+
+  return response.json();
+}
+
+/** Sayfa yenilemede kısa süreli oturum yeniden açma */
+export async function resumeAuthSession() {
+  const response = await fetch(`${API_BASE}/auth/session-resume/`, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({
+      personel_id: getPersonelId() || undefined,
+      yonetici_id: getYoneticiId() || undefined,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.status === 'error') {
+    throw new Error(data.message || data.detail || 'Oturum yenilenemedi');
+  }
+  return data;
+}
+
 export async function fetchProfile() {
   const response = await fetch(
     `${API_BASE}/profile/`,

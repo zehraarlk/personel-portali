@@ -3,7 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../../components/AuthShell';
 import PasswordField from '../../components/PasswordField';
 import { loginAdmin } from '../../api/client';
-import { getYoneticiId, setPersonelId, setYoneticiId, setYoneticiOturumId, setOturumId } from '../../auth/session';
+import {
+  clearPendingSessionClose,
+  getYoneticiId,
+  setPersonelId,
+  setYoneticiId,
+  setYoneticiOturumId,
+  setOturumId,
+  setProfileCache,
+} from '../../auth/session';
 
 /** Yönetici giriş — orijinal yonetim_giris.php */
 export default function AdminLogin() {
@@ -40,10 +48,12 @@ export default function AdminLogin() {
         sifre,
       });
       if (data?.yonetici?.id) {
+        clearPendingSessionClose();
         setPersonelId('');
         setOturumId('');
         setYoneticiId(data.yonetici.id);
         setYoneticiOturumId(data.oturum_id || '');
+        setProfileCache(data.yonetici);
       }
       navigate('/admin', { replace: true });
     } catch (err) {

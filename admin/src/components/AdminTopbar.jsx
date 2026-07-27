@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND_IMG } from '../constants';
 import { fetchProfile, logoutAdmin } from '../api/client';
-import { clearAdminSession, getYoneticiId } from '../auth/session';
+import { clearAdminSession, getProfileCache, getYoneticiId, setProfileCache } from '../auth/session';
 import useMediaFit from '../../../frontend/src/hooks/useMediaFit.js';
 
 const PROFILE_MENU = [
@@ -13,7 +13,7 @@ const PROFILE_MENU = [
 export default function AdminTopbar({ title, onMenu }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => getProfileCache());
   const [open, setOpen] = useState(false);
   const [fit, setFit] = useMediaFit();
   const menuRef = useRef(null);
@@ -24,9 +24,14 @@ export default function AdminTopbar({ title, onMenu }) {
       setProfile(null);
       return undefined;
     }
+    const cached = getProfileCache();
+    if (cached) setProfile(cached);
     fetchProfile()
       .then((data) => {
-        if (!cancelled) setProfile(data);
+        if (!cancelled) {
+          setProfile(data);
+          setProfileCache(data);
+        }
       })
       .catch(() => {});
     return () => {

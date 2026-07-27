@@ -30,6 +30,8 @@ from .auth_views import (
     auth_login,
     auth_admin_login,
     auth_forgot_password,
+    auth_session_check,
+    auth_session_resume,
     auth_logout,
     auth_admin_logout,
 )
@@ -78,6 +80,8 @@ urlpatterns = [
     path('auth/forgot-password/', auth_forgot_password, name='auth-forgot-password'),
     path('auth/logout/', auth_logout, name='auth-logout'),
     path('auth/admin-logout/', auth_admin_logout, name='auth-admin-logout'),
+    path('auth/session-check/', auth_session_check, name='auth-session-check'),
+    path('auth/session-resume/', auth_session_resume, name='auth-session-resume'),
 
     path('profile/', profile_me, name='profile-me'),
     path('profile/sessions/', profile_sessions, name='profile-sessions'),

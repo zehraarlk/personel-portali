@@ -1,14 +1,22 @@
 import {
+  clearPendingSessionClose,
   getOturumId,
   getPersonelId,
   getYoneticiId,
   getYoneticiOturumId,
+  markPendingSessionClose,
+  peekPendingSessionClose,
+  setOturumId,
+  setProfileCache,
+  setYoneticiOturumId,
 } from './session';
+import { resumeAuthSession } from '../api/client';
 
 const TABS_KEY = 'portal_alive_tabs';
 const TAB_ID_KEY = 'portal_tab_id';
 const HEARTBEAT_MS = 2000;
-const STALE_MS = 8000;
+/** Arka plan sekmelerinde timer throttle olduğu için geniş tut */
+const STALE_MS = 60000;
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -61,20 +69,30 @@ function otherLiveTabs(selfId) {
   return Object.keys(tabs).filter((id) => id !== selfId);
 }
 
-function beaconJson(url, payload) {
+/**
+ * sendBeacon + FormData: JSON Content-Type CORS preflight tetiklemez.
+ */
+function beaconForm(url, fields) {
   try {
-    const body = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    const fd = new FormData();
+    Object.entries(fields).forEach(([k, v]) => {
+      if (v != null && v !== '') fd.append(k, String(v));
+    });
     if (typeof navigator.sendBeacon === 'function') {
-      return navigator.sendBeacon(url, body);
+      return navigator.sendBeacon(url, fd);
     }
   } catch {
     /* fall through */
   }
   try {
+    const body = new URLSearchParams();
+    Object.entries(fields).forEach(([k, v]) => {
+      if (v != null && v !== '') body.append(k, String(v));
+    });
     fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
       keepalive: true,
     });
     return true;
@@ -85,7 +103,6 @@ function beaconJson(url, payload) {
 
 /**
  * Son sekme kapanırken DB oturum satırını kapat (kapanis_tipi=sekme).
- * sendBeacon özel header gönderemez → id'ler body'de.
  */
 export function beaconCloseDbSession() {
   const personelId = getPersonelId();
@@ -94,25 +111,59 @@ export function beaconCloseDbSession() {
   const yoneticiOturumId = getYoneticiOturumId();
 
   if (oturumId && personelId) {
-    beaconJson(`${API_BASE}/auth/logout/`, {
-      oturum_id: Number(oturumId),
-      personel_id: Number(personelId),
+    beaconForm(`${API_BASE}/auth/logout/`, {
+      oturum_id: oturumId,
+      personel_id: personelId,
       kapanis_tipi: 'sekme',
     });
   }
 
   if (yoneticiOturumId && yoneticiId) {
-    beaconJson(`${API_BASE}/auth/admin-logout/`, {
-      oturum_id: Number(yoneticiOturumId),
-      yonetici_id: Number(yoneticiId),
+    beaconForm(`${API_BASE}/auth/admin-logout/`, {
+      oturum_id: yoneticiOturumId,
+      yonetici_id: yoneticiId,
       kapanis_tipi: 'sekme',
     });
   }
 }
 
+let resumeInFlight = null;
+
 /**
- * Sekme canlılık kaydı + son sekme kapanışında DB logout.
- * Ek sekmeler kapanınca (ana/kardeş duruyorsa) DB oturumu kapanmaz.
+ * Yanlışlıkla kapanan DB oturumunu, hâlâ açık bir sekme varsa geri aç.
+ */
+export function recoverSessionIfNeeded() {
+  if (!getPersonelId() && !getYoneticiId()) return Promise.resolve(false);
+
+  const pending = peekPendingSessionClose();
+  if (!pending) return Promise.resolve(false);
+
+  clearPendingSessionClose();
+
+  if (resumeInFlight) return resumeInFlight;
+
+  resumeInFlight = resumeAuthSession()
+    .then((data) => {
+      if (data?.type === 'personel' && data.oturum_id) {
+        setOturumId(data.oturum_id);
+        if (data.personel) setProfileCache(data.personel);
+      } else if (data?.type === 'yonetici' && data.oturum_id) {
+        setYoneticiOturumId(data.oturum_id);
+        if (data.yonetici) setProfileCache(data.yonetici);
+      }
+      return true;
+    })
+    .catch(() => false)
+    .finally(() => {
+      resumeInFlight = null;
+    });
+
+  return resumeInFlight;
+}
+
+/**
+ * Sekme canlılık + son sekme kapanışı.
+ * Kardeş sekme varken kapanış iptal edilir (heartbeat recover).
  */
 export function startSessionLifecycle() {
   if (typeof window === 'undefined') {
@@ -127,6 +178,11 @@ export function startSessionLifecycle() {
     const tabs = pruneAndList(readTabs(), tabId);
     tabs[tabId] = now();
     writeTabs(tabs);
+
+    // Başka sekme "son sekme" sanıp kapattıysa geri al
+    if (getPersonelId() || getYoneticiId()) {
+      recoverSessionIfNeeded();
+    }
   };
 
   heartbeat();
@@ -134,7 +190,6 @@ export function startSessionLifecycle() {
 
   const onPageHide = (event) => {
     if (stopped) return;
-    // bfcache'e alınıyorsa kapatma
     if (event?.persisted) return;
 
     const tabs = pruneAndList(readTabs(), tabId);
@@ -142,18 +197,39 @@ export function startSessionLifecycle() {
     writeTabs(tabs);
 
     const others = Object.keys(tabs);
-    // Başka canlı sekme yoksa → tarayıcı/son sekme kapanıyor
-    if (others.length === 0 && (getPersonelId() || getYoneticiId())) {
-      beaconCloseDbSession();
+    // Başka canlı sekme varsa DB oturumuna dokunma
+    if (others.length > 0) return;
+    if (!getPersonelId() && !getYoneticiId()) return;
+
+    markPendingSessionClose({
+      personelId: getPersonelId(),
+      yoneticiId: getYoneticiId(),
+      oturumId: getOturumId(),
+      yoneticiOturumId: getYoneticiOturumId(),
+    });
+    beaconCloseDbSession();
+  };
+
+  const onStorage = (event) => {
+    if (stopped) return;
+    if (event.key !== 'gebze_pending_session_close') return;
+    if (!event.newValue) return;
+    if (getPersonelId() || getYoneticiId()) {
+      recoverSessionIfNeeded();
     }
   };
 
-  // pagehide yeterli (beforeunload ile çift istek olmasın)
   window.addEventListener('pagehide', onPageHide);
+  window.addEventListener('storage', onStorage);
 
   return () => {
     stopped = true;
     window.clearInterval(timer);
     window.removeEventListener('pagehide', onPageHide);
+    window.removeEventListener('storage', onStorage);
+    // React StrictMode / HMR cleanup: bu sekmeyi listeden düşürme —
+    // aksi halde "son sekme" sanılıp oturum kapanır.
   };
 }
+
+export { otherLiveTabs };

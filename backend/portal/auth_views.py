@@ -139,6 +139,158 @@ def auth_admin_login(request):
     )
 
 
+def _int_or_none(raw):
+    try:
+        return int(raw) if raw not in (None, '') else None
+    except (TypeError, ValueError):
+        return None
+
+
+@api_view(['GET', 'POST'])
+def auth_session_check(request):
+    """Tarayıcıda kalan id'lerin DB'de hâlâ açık oturum olup olmadığını doğrular."""
+    src = request.data if request.method == 'POST' else request.query_params
+    oturum_id = _int_or_none(
+        src.get('oturum_id') or request.headers.get('X-Oturum-Id')
+    )
+    personel_id = _int_or_none(
+        src.get('personel_id') or request.headers.get('X-Personel-Id')
+    )
+    yonetici_oturum_id = _int_or_none(
+        src.get('yonetici_oturum_id') or request.headers.get('X-Yonetici-Oturum-Id')
+    )
+    yonetici_id = _int_or_none(
+        src.get('yonetici_id') or request.headers.get('X-Yonetici-Id')
+    )
+
+    if oturum_id and personel_id:
+        valid = OturumKayitlari.objects.filter(
+            pk=oturum_id, personel_id=personel_id, cikis_zamani__isnull=True
+        ).exists()
+        return Response({'valid': valid, 'type': 'personel'})
+
+    if yonetici_oturum_id and yonetici_id:
+        valid = YoneticiOturumKayitlari.objects.filter(
+            pk=yonetici_oturum_id, yonetici_id=yonetici_id, cikis_zamani__isnull=True
+        ).exists()
+        return Response({'valid': valid, 'type': 'yonetici'})
+
+    return Response({'valid': False, 'type': None})
+
+
+@api_view(['POST'])
+def auth_session_resume(request):
+    """
+    Tek sekme yenilemede pagehide oturumu kapatmışsa kısa sürede yeniden açar.
+    Şifre istemez; yalnızca tarayıcıda hâlâ personel/yönetici id varsa.
+    """
+    personel_id = _int_or_none(
+        request.data.get('personel_id') or request.headers.get('X-Personel-Id')
+    )
+    yonetici_id = _int_or_none(
+        request.data.get('yonetici_id') or request.headers.get('X-Yonetici-Id')
+    )
+    now = timezone.now()
+    ip, ua = _client_meta(request)
+
+    if personel_id:
+        personel = Personeller.objects.filter(pk=personel_id).first()
+        if not personel:
+            return Response(
+                {'status': 'error', 'message': 'Personel bulunamadı.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        recent = (
+            OturumKayitlari.objects.filter(personel_id=personel_id, kapanis_tipi='sekme')
+            .order_by('-cikis_zamani')
+            .first()
+        )
+        if (
+            recent
+            and recent.cikis_zamani
+            and (now - recent.cikis_zamani).total_seconds() <= 20
+        ):
+            recent.cikis_zamani = None
+            recent.kapanis_tipi = None
+            recent.son_aktivite = now
+            recent.save(update_fields=['cikis_zamani', 'kapanis_tipi', 'son_aktivite'])
+            oturum = recent
+        else:
+            open_one = OturumKayitlari.objects.filter(
+                personel_id=personel_id, cikis_zamani__isnull=True
+            ).order_by('-giris_zamani').first()
+            if open_one:
+                oturum = open_one
+            else:
+                oturum = OturumKayitlari.objects.create(
+                    personel=personel,
+                    giris_zamani=now,
+                    ip_adresi=ip or None,
+                    user_agent=ua or None,
+                    son_aktivite=now,
+                )
+        return Response(
+            {
+                'status': 'ok',
+                'type': 'personel',
+                'oturum_id': oturum.id,
+                'personel': personel_payload(personel),
+            }
+        )
+
+    if yonetici_id:
+        yonetici = Yoneticiler.objects.filter(pk=yonetici_id, aktif=1).first()
+        if not yonetici:
+            return Response(
+                {'status': 'error', 'message': 'Yönetici bulunamadı.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        recent = (
+            YoneticiOturumKayitlari.objects.filter(
+                yonetici_id=yonetici_id, kapanis_tipi='sekme'
+            )
+            .order_by('-cikis_zamani')
+            .first()
+        )
+        if (
+            recent
+            and recent.cikis_zamani
+            and (now - recent.cikis_zamani).total_seconds() <= 20
+        ):
+            recent.cikis_zamani = None
+            recent.kapanis_tipi = None
+            recent.son_aktivite = now
+            recent.save(update_fields=['cikis_zamani', 'kapanis_tipi', 'son_aktivite'])
+            oturum = recent
+        else:
+            open_one = YoneticiOturumKayitlari.objects.filter(
+                yonetici_id=yonetici_id, cikis_zamani__isnull=True
+            ).order_by('-giris_zamani').first()
+            if open_one:
+                oturum = open_one
+            else:
+                oturum = YoneticiOturumKayitlari.objects.create(
+                    yonetici=yonetici,
+                    giris_zamani=now,
+                    ip_adresi=ip or None,
+                    user_agent=ua or None,
+                    son_aktivite=now,
+                )
+        return Response(
+            {
+                'status': 'ok',
+                'type': 'yonetici',
+                'oturum_id': oturum.id,
+                'yonetici': yonetici_payload(yonetici),
+            }
+        )
+
+    return Response(
+        {'status': 'error', 'message': 'Oturum bilgisi yok.'},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
 @api_view(['POST'])
 def auth_forgot_password(request):
     tc_no = ''.join(c for c in (request.data.get('tc_no') or '') if c.isdigit())

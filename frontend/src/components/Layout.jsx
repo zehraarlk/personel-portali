@@ -1,5 +1,9 @@
 import Navbar from './SideNav';
 import Footer from './Footer';
+import { loadSiteIcons } from '../icons/siteIcons';
+
+// Ana site ikonlarını site_ikonlari API'sinden önceden yükle
+loadSiteIcons();
 
 export default function Layout({ children, videoPage = false }) {
   if (videoPage) {

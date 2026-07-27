@@ -9,17 +9,14 @@ from .profile_views import verify_sifre
 
 
 def resolve_yonetici(request):
-    """Giriş yokken: ?yonetici_id= veya X-Yonetici-Id, yoksa ilk aktif kayıt."""
+    """Yalnızca X-Yonetici-Id / ?yonetici_id ile; yoksa None (ilk kayda düşme)."""
     raw = request.query_params.get('yonetici_id') or request.headers.get('X-Yonetici-Id')
     if raw:
         try:
             return Yoneticiler.objects.filter(pk=int(raw)).first()
         except (TypeError, ValueError):
             pass
-    return (
-        Yoneticiler.objects.filter(aktif=1).order_by('id').first()
-        or Yoneticiler.objects.order_by('id').first()
-    )
+    return None
 
 
 def yonetici_payload(y: Yoneticiler) -> dict:

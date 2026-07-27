@@ -3,7 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../../components/AuthShell';
 import PasswordField from '../../components/PasswordField';
 import { loginPersonel } from '../../api/client';
-import { getPersonelId, getYoneticiId, setPersonelId, setYoneticiId, setOturumId } from '../../auth/session';
+import {
+  clearPendingSessionClose,
+  getPersonelId,
+  getYoneticiId,
+  setPersonelId,
+  setYoneticiId,
+  setOturumId,
+  setProfileCache,
+} from '../../auth/session';
 
 /** Personel giriş — orijinal login.php mantığı (yalnızca personel) */
 export default function Login() {
@@ -37,9 +45,11 @@ export default function Login() {
     try {
       const data = await loginPersonel({ sicil_no: sicilNo.trim(), sifre: sifre.trim() });
       if (data?.personel?.id) {
+        clearPendingSessionClose();
         setYoneticiId('');
         setPersonelId(data.personel.id);
         setOturumId(data.oturum_id || '');
+        setProfileCache(data.personel);
       }
       navigate('/', { replace: true });
     } catch (err) {
