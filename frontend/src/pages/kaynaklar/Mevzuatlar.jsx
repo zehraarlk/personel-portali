@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { useEffect, useMemo, useRef, useState } from 'react';
-=======
-import { useEffect, useState } from 'react';
->>>>>>> 5cd6898c26bdfe0745d82eb22e53b0589b3bffdd
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchMevzuatlar } from '../../api/client';
@@ -10,47 +6,26 @@ import '../../styles/protokoller.css';
 import '../../styles/mevzuatlar.css';
 
 const QUICK_LINKS = [
-  {
-    to: '/protokoller',
-    label: 'Protokoller',
-    icon: 'fas fa-file-signature',
-  },
-  {
-    to: '/dokumanlar',
-    label: 'Dokümanlar',
-    icon: 'fas fa-file-alt',
-  },
-  {
-    to: '/mevzuatlar',
-    label: 'Mevzuatlar',
-    icon: 'fas fa-balance-scale',
-  },
-  {
-    to: '/egitimler',
-    label: 'Eğitimler',
-    icon: 'fas fa-graduation-cap',
-  },
+  { to: '/protokoller', label: 'Protokoller', icon: 'fas fa-file-signature' },
+  { to: '/dokumanlar', label: 'Dokümanlar', icon: 'fas fa-file-alt' },
+  { to: '/mevzuatlar', label: 'Mevzuatlar', icon: 'fas fa-balance-scale' },
+  { to: '/egitimler', label: 'Eğitimler', icon: 'fas fa-graduation-cap' },
 ];
 
 const SAYFA_BASI = 9;
 
 function normalizeIcon(ikon) {
   const raw = (ikon || 'fas fa-balance-scale').trim();
-
   if (raw.startsWith('fa-') && !raw.includes(' ')) {
     return `fas ${raw}`;
   }
-
   return raw;
 }
 
 export default function Mevzuatlar() {
   const location = useLocation();
-<<<<<<< HEAD
   const filtreRef = useRef(null);
-=======
 
->>>>>>> 5cd6898c26bdfe0745d82eb22e53b0589b3bffdd
   const [items, setItems] = useState([]);
   const [altKategoriler, setAltKategoriler] = useState([]);
   const [altKategori, setAltKategori] = useState(null);
@@ -63,11 +38,8 @@ export default function Mevzuatlar() {
   useEffect(() => {
     setAltKategori(null);
     setQuery('');
-<<<<<<< HEAD
     setSayfa(0);
-=======
     setMenuAcik(false);
->>>>>>> 5cd6898c26bdfe0745d82eb22e53b0589b3bffdd
   }, [location.key]);
 
   useEffect(() => {
@@ -80,21 +52,17 @@ export default function Mevzuatlar() {
       fetchMevzuatlar(query.trim(), altKategori)
         .then((data) => {
           if (cancelled) return;
-
           setItems(data?.mevzuatlar ?? []);
           setAltKategoriler(data?.alt_kategoriler ?? []);
           setError(null);
         })
         .catch(() => {
           if (cancelled) return;
-
           setItems([]);
           setError('Mevzuatlar yüklenirken bir sorun oluştu.');
         })
         .finally(() => {
-          if (!cancelled) {
-            setLoading(false);
-          }
+          if (!cancelled) setLoading(false);
         });
     }, 300);
 
@@ -118,35 +86,27 @@ export default function Mevzuatlar() {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [menuAcik]);
 
-  const toplamSayfa = Math.max(
-    1,
-    Math.ceil(items.length / SAYFA_BASI),
-  );
+  const filtered = useMemo(() => items, [items]);
 
-  const gosterilenler = items.slice(
-    sayfa * SAYFA_BASI,
-    sayfa * SAYFA_BASI + SAYFA_BASI,
-  );
-
-  const sayfaNumaralari = Array.from(
-    { length: toplamSayfa },
-    (_, index) => index,
-  );
+  const toplamSayfa = Math.max(1, Math.ceil(filtered.length / SAYFA_BASI));
+  const gosterilenler = filtered.slice(sayfa * SAYFA_BASI, sayfa * SAYFA_BASI + SAYFA_BASI);
+  const sayfaNumaralari = Array.from({ length: toplamSayfa }, (_, i) => i);
 
   const clearSearch = () => {
     setQuery('');
   };
 
+  const scrollToFiltre = () => {
+    filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const aktifAltKategoriAdi = altKategori
-    ? altKategoriler.find(
-        (kategori) => kategori.slug === altKategori,
-      )?.ad ?? 'Seçili kategori'
+    ? altKategoriler.find((kategori) => kategori.slug === altKategori)?.ad ?? 'Seçili kategori'
     : 'Tümü';
 
   return (
@@ -154,24 +114,16 @@ export default function Mevzuatlar() {
       <div className="protokoller-page">
         <header className="protokoller-hero">
           <div className="protokoller-hero__text">
-            <span className="protokoller-hero__eyebrow">
-              Kaynaklar
-            </span>
-
+            <span className="protokoller-hero__eyebrow">Kaynaklar</span>
             <h1>Mevzuatlar</h1>
-
             <p>
-              Personelimizi ilgilendiren kanun, yönetmelik ve
-              mevzuat metinlerine buradan ulaşabilirsiniz.
+              Personelimizi ilgilendiren kanun, yönetmelik ve mevzuat metinlerine buradan
+              ulaşabilirsiniz.
             </p>
           </div>
-
           {!loading && !error ? (
-            <div
-              className="protokoller-hero__stat"
-              aria-live="polite"
-            >
-              <strong>{items.length}</strong>
+            <div className="protokoller-hero__stat" aria-live="polite">
+              <strong>{filtered.length}</strong>
               <span>mevzuat</span>
             </div>
           ) : null}
@@ -179,66 +131,39 @@ export default function Mevzuatlar() {
 
         <div className="protokoller-bar">
           <div className="protokoller-toolbar">
-            <label
-              className="protokoller-toolbar__field"
-              htmlFor="mevzuat-ara"
-            >
-              <i
-                className="fas fa-search"
-                aria-hidden="true"
-              />
-
+            <label className="protokoller-toolbar__field" htmlFor="mevzuat-ara">
+              <i className="fas fa-search" aria-hidden="true" />
               <input
                 id="mevzuat-ara"
                 type="search"
                 value={query}
-                onChange={(event) =>
-                  setQuery(event.target.value)
-                }
+                onChange={(event) => setQuery(event.target.value)}
                 placeholder="Kanun veya mevzuat adı ara…"
                 autoComplete="off"
               />
             </label>
-
             {query ? (
               <div className="protokoller-toolbar__actions">
-                <button
-                  type="button"
-                  className="protokoller-toolbar__ghost"
-                  onClick={clearSearch}
-                >
+                <button type="button" className="protokoller-toolbar__ghost" onClick={clearSearch}>
                   Temizle
                 </button>
               </div>
             ) : null}
           </div>
 
-          <nav
-            className="protokoller-quick"
-            aria-label="Hızlı erişim"
-          >
+          <nav className="protokoller-quick" aria-label="Hızlı erişim">
             {QUICK_LINKS.map((item) => {
               const active =
                 location.pathname === item.to ||
-                location.pathname.startsWith(
-                  `${item.to}/`,
-                );
-
+                location.pathname.startsWith(`${item.to}/`);
               return (
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`protokoller-quick__btn${
-                    active ? ' is-active' : ''
-                  }`}
-                  aria-current={
-                    active ? 'page' : undefined
-                  }
+                  className={`protokoller-quick__btn${active ? ' is-active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
                 >
-                  <i
-                    className={item.icon}
-                    aria-hidden="true"
-                  />
+                  <i className={item.icon} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -248,26 +173,18 @@ export default function Mevzuatlar() {
 
         <div className="mevzuat-filter-bar" ref={filtreRef}>
           <p className="mevzuat-filter-bar__label">
-            Kategori:{' '}
-            <strong>{aktifAltKategoriAdi}</strong>
+            Kategori: <strong>{aktifAltKategoriAdi}</strong>
           </p>
 
           <div className="mevzuat-menu">
             <button
               type="button"
               className="mevzuat-menu__btn"
-              onClick={() =>
-                setMenuAcik(
-                  (oncekiDeger) => !oncekiDeger,
-                )
-              }
+              onClick={() => setMenuAcik((oncekiDeger) => !oncekiDeger)}
               aria-expanded={menuAcik}
               aria-controls="mevzuat-kategori-listesi"
             >
-              <i
-                className="fas fa-bars"
-                aria-hidden="true"
-              />
+              <i className="fas fa-bars" aria-hidden="true" />
               Kategoriler
             </button>
 
@@ -280,27 +197,17 @@ export default function Mevzuatlar() {
                   onClick={() => setMenuAcik(false)}
                 />
 
-                <div
-                  id="mevzuat-kategori-listesi"
-                  className="mevzuat-menu__list"
-                >
+                <div id="mevzuat-kategori-listesi" className="mevzuat-menu__list">
                   <button
                     type="button"
-                    className={`mevzuat-menu__item${
-                      altKategori === null
-                        ? ' is-active'
-                        : ''
-                    }`}
+                    className={`mevzuat-menu__item${altKategori === null ? ' is-active' : ''}`}
                     onClick={() => {
                       setAltKategori(null);
                       setQuery('');
                       setMenuAcik(false);
                     }}
                   >
-                    <i
-                      className="fas fa-list"
-                      aria-hidden="true"
-                    />
+                    <i className="fas fa-list" aria-hidden="true" />
                     Tümü
                   </button>
 
@@ -308,21 +215,14 @@ export default function Mevzuatlar() {
                     <button
                       key={kategori.id}
                       type="button"
-                      className={`mevzuat-menu__item${
-                        altKategori === kategori.slug
-                          ? ' is-active'
-                          : ''
-                      }`}
+                      className={`mevzuat-menu__item${altKategori === kategori.slug ? ' is-active' : ''}`}
                       onClick={() => {
                         setAltKategori(kategori.slug);
                         setQuery('');
                         setMenuAcik(false);
                       }}
                     >
-                      <i
-                        className="fas fa-balance-scale"
-                        aria-hidden="true"
-                      />
+                      <i className="fas fa-balance-scale" aria-hidden="true" />
                       {kategori.ad}
                     </button>
                   ))}
@@ -334,73 +234,41 @@ export default function Mevzuatlar() {
 
         {query && !loading && !error ? (
           <p className="protokoller-filter-note">
-            “<strong>{query}</strong>” için{' '}
-            {items.length} sonuç
+            “<strong>{query}</strong>” için {filtered.length} sonuç
           </p>
         ) : null}
 
         {loading ? (
-          <div
-            className="protokoller-state"
-            role="status"
-          >
-            <span
-              className="protokoller-state__pulse"
-              aria-hidden="true"
-            />
+          <div className="protokoller-state" role="status">
+            <span className="protokoller-state__pulse" aria-hidden="true" />
             Mevzuatlar yükleniyor…
           </div>
         ) : null}
 
         {!loading && error ? (
-          <p
-            className="protokoller-state protokoller-state--error"
-            role="alert"
-          >
+          <p className="protokoller-state protokoller-state--error" role="alert">
             {error}
           </p>
         ) : null}
 
-        {!loading &&
-        !error &&
-        items.length === 0 ? (
+        {!loading && !error && filtered.length === 0 ? (
           <div className="protokoller-empty">
-            <i
-              className="fas fa-balance-scale"
-              aria-hidden="true"
-            />
-
+            <i className="fas fa-balance-scale" aria-hidden="true" />
             <h2>Sonuç bulunamadı</h2>
-
-            <p>
-              Aramanızı veya kategori seçiminizi
-              değiştirerek tekrar deneyebilirsiniz.
-            </p>
-
+            <p>Aramanızı veya kategori seçiminizi değiştirerek tekrar deneyebilirsiniz.</p>
             {query ? (
-              <button
-                type="button"
-                className="protokoller-toolbar__btn"
-                onClick={clearSearch}
-              >
+              <button type="button" className="protokoller-toolbar__btn" onClick={clearSearch}>
                 Aramayı temizle
               </button>
             ) : null}
           </div>
         ) : null}
 
-        {!loading &&
-        !error &&
-        gosterilenler.length > 0 ? (
-          <div className="protokoller-grid">
-            {gosterilenler.map((item, index) => {
-              const href =
-                item.dosya_yolu ||
-                item.resmi_sayfa ||
-                undefined;
-
+        {!loading && !error && gosterilenler.length > 0 ? (
+          <div className="mevzuat-grid">
+            {gosterilenler.map((item) => {
+              const href = item.dosya_yolu || item.resmi_sayfa || undefined;
               const CardTag = href ? 'a' : 'article';
-
               const cardProps = href
                 ? {
                     href,
@@ -411,114 +279,62 @@ export default function Mevzuatlar() {
                 : {};
 
               return (
-                <CardTag
-                  key={item.id}
-                  className="protokol-card"
-                  style={{
-                    '--card-delay': `${
-                      Math.min(index, 8) * 40
-                    }ms`,
-                  }}
-                  {...cardProps}
-                >
-                  <span
-                    className="protokol-card__accent"
-                    aria-hidden="true"
-                  />
-
-                  <div className="protokol-card__body">
-                    <div className="protokol-card__top">
-                      <span
-                        className="protokol-card__icon"
-                        aria-hidden="true"
-                      >
-                        <i
-                          className={normalizeIcon(
-                            item.ikon,
-                          )}
-                        />
-                      </span>
-
-                      <div className="protokol-card__chips">
-                        <span className="protokol-chip">
-                          <i
-                            className="far fa-calendar-alt"
-                            aria-hidden="true"
-                          />
-                          {item.tarih || '—'}
-                        </span>
-
-                        <span className="protokol-chip">
-                          <i
-                            className="far fa-file-alt"
-                            aria-hidden="true"
-                          />
-                          {item.boyut || '—'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <h2 className="protokol-card__title">
-                      {item.baslik}
-                    </h2>
-
-                    <p className="protokol-card__desc">
-                      {item.aciklama ||
-                        'Açıklama bulunmuyor.'}
-                    </p>
+                <CardTag key={item.id} className="mevzuat-card" {...cardProps}>
+                  <div className="mevzuat-card__head">
+                    <span className="mevzuat-card__icon" aria-hidden="true">
+                      <i className={normalizeIcon(item.ikon)} />
+                    </span>
+                    <h2 className="mevzuat-card__title">{item.baslik}</h2>
                   </div>
 
-                  {href ? (
-                    <span className="protokol-card__cta">
-                      Detaylı bilgi için tıklayınız
-                      <i
-                        className="fas fa-arrow-right"
-                        aria-hidden="true"
-                      />
+                  <p className="mevzuat-card__desc">
+                    {item.aciklama || 'Açıklama bulunmuyor.'}
+                  </p>
+
+                  <div className="mevzuat-card__foot">
+                    <span className="mevzuat-card__meta">
+                      <i className="far fa-calendar-alt" aria-hidden="true" />
+                      {item.tarih || '—'}
                     </span>
-                  ) : null}
+                    <span className="mevzuat-card__meta">
+                      <i className="far fa-file-alt" aria-hidden="true" />
+                      {item.boyut || '—'}
+                    </span>
+                    {href ? (
+                      <span className="mevzuat-card__link">
+                        Görüntüle
+                        <i className="fas fa-arrow-right" aria-hidden="true" />
+                      </span>
+                    ) : null}
+                  </div>
                 </CardTag>
               );
             })}
           </div>
         ) : null}
 
-        {!loading &&
-        !error &&
-        toplamSayfa > 1 ? (
+        {!loading && !error && toplamSayfa > 1 ? (
           <div className="mevzuat-pagination">
             <button
               type="button"
-<<<<<<< HEAD
               onClick={() => {
                 setSayfa((s) => Math.max(0, s - 1));
-                filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                scrollToFiltre();
               }}
-=======
-              onClick={() =>
-                setSayfa((oncekiSayfa) =>
-                  Math.max(0, oncekiSayfa - 1),
-                )
-              }
->>>>>>> 5cd6898c26bdfe0745d82eb22e53b0589b3bffdd
               disabled={sayfa === 0}
               className="mevzuat-pagination__arrow"
               aria-label="Önceki sayfa"
             >
-              <i
-                className="fas fa-chevron-left"
-                aria-hidden="true"
-              />
+              <i className="fas fa-chevron-left" aria-hidden="true" />
             </button>
 
-<<<<<<< HEAD
             {sayfaNumaralari.map((n) => (
               <button
                 key={n}
                 type="button"
                 onClick={() => {
                   setSayfa(n);
-                  filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  scrollToFiltre();
                 }}
                 aria-current={sayfa === n ? 'page' : undefined}
                 className={`mevzuat-pagination__num${sayfa === n ? ' is-active' : ''}`}
@@ -531,55 +347,13 @@ export default function Mevzuatlar() {
               type="button"
               onClick={() => {
                 setSayfa((s) => Math.min(toplamSayfa - 1, s + 1));
-                filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                scrollToFiltre();
               }}
               disabled={sayfa >= toplamSayfa - 1}
-=======
-            {sayfaNumaralari.map(
-              (sayfaNumarasi) => (
-                <button
-                  key={sayfaNumarasi}
-                  type="button"
-                  onClick={() =>
-                    setSayfa(sayfaNumarasi)
-                  }
-                  aria-current={
-                    sayfa === sayfaNumarasi
-                      ? 'page'
-                      : undefined
-                  }
-                  className={`mevzuat-pagination__num${
-                    sayfa === sayfaNumarasi
-                      ? ' is-active'
-                      : ''
-                  }`}
-                >
-                  {sayfaNumarasi + 1}
-                </button>
-              ),
-            )}
-
-            <button
-              type="button"
-              onClick={() =>
-                setSayfa((oncekiSayfa) =>
-                  Math.min(
-                    toplamSayfa - 1,
-                    oncekiSayfa + 1,
-                  ),
-                )
-              }
-              disabled={
-                sayfa >= toplamSayfa - 1
-              }
->>>>>>> 5cd6898c26bdfe0745d82eb22e53b0589b3bffdd
               className="mevzuat-pagination__arrow"
               aria-label="Sonraki sayfa"
             >
-              <i
-                className="fas fa-chevron-right"
-                aria-hidden="true"
-              />
+              <i className="fas fa-chevron-right" aria-hidden="true" />
             </button>
           </div>
         ) : null}
