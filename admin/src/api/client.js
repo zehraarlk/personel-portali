@@ -344,6 +344,48 @@ export async function deleteProtokol(id) {
   return true;
 }
 
+// ─── Genel Kaynaklar CRUD (Dökümanlar, Mevzuatlar, Eğitimler) ───
+
+function _kaynakApi(slug) {
+  return {
+    list: async () => {
+      const response = await fetch(`${API_BASE}/admin/${slug}/`);
+      return parseJson(response);
+    },
+    get: async (id) => {
+      const response = await fetch(`${API_BASE}/admin/${slug}/${id}/`);
+      return parseJson(response);
+    },
+    create: async (payload) => {
+      const response = await fetch(`${API_BASE}/admin/${slug}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return parseJson(response);
+    },
+    update: async (id, payload) => {
+      const response = await fetch(`${API_BASE}/admin/${slug}/${id}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return parseJson(response);
+    },
+    delete: async (id) => {
+      const response = await fetch(`${API_BASE}/admin/${slug}/${id}/`, { method: 'DELETE' });
+      if (!response.ok && response.status !== 204) {
+        return parseJson(response);
+      }
+      return true;
+    },
+  };
+}
+
+export const dokumanlarApi = _kaynakApi('dokumanlar');
+export const mevzuatlarApi = _kaynakApi('mevzuatlar');
+export const egitimlerApi = _kaynakApi('egitimler');
+
 export async function listSizdenGelenKategoriler() {
   const response = await fetch(`${API_BASE}/admin/sizden-gelenler-kategoriler/`);
   return parseJson(response);

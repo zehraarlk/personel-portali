@@ -170,8 +170,10 @@ export function authHeaders(extra = {}) {
   const headers = { ...extra };
   const personelId = getPersonelId();
   const yoneticiId = getYoneticiId();
+  const oturumId = getOturumId();
   if (personelId) headers['X-Personel-Id'] = personelId;
   if (yoneticiId) headers['X-Yonetici-Id'] = yoneticiId;
+  if (oturumId) headers['X-Oturum-Id'] = oturumId;
   return headers;
 }
 

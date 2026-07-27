@@ -306,7 +306,7 @@ class AdminVideoSerializer(serializers.ModelSerializer):
     def get_thumbnail(self, obj):
         if not obj.youtube_id:
             return ''
-        return f'https://img.youtube.com/vi/{obj.youtube_id}/hqdefault.jpg'
+        return f'https://i.ytimg.com/vi/{obj.youtube_id}/maxresdefault.jpg'
 
     def create(self, validated_data):
         if validated_data.get('vitrin') is None:
@@ -495,3 +495,103 @@ class ProtokolViewSet(viewsets.ModelViewSet):
             .filter(kategori__slug=PROTOKOL_KATEGORI_SLUG)
             .order_by('-id')
         )
+
+
+# ───────────────────── Genel Kaynak ViewSet (Dökümanlar, Mevzuatlar, Eğitimler) ─────────────────────
+
+def _kaynak_viewset_factory(kategori_slug, default_icon):
+    """Verilen kategori slug için ViewSet üretir (Protokoller ile aynı model/serializer)."""
+
+    class _Serializer(serializers.ModelSerializer):
+        kategori_ad = serializers.SerializerMethodField(read_only=True)
+        alt_kategori_ad = serializers.SerializerMethodField(read_only=True)
+
+        class Meta:
+            model = Kaynaklar
+            fields = [
+                'id', 'baslik', 'aciklama', 'ikon', 'dosya_yolu',
+                'resmi_sayfa', 'boyut', 'tarih', 'kategori', 'kategori_ad',
+                'alt_kategori', 'alt_kategori_ad',
+            ]
+            read_only_fields = ['kategori']
+
+        def get_kategori_ad(self, obj):
+            return obj.kategori.ad if obj.kategori_id else None
+
+        def get_alt_kategori_ad(self, obj):
+            return obj.alt_kategori.ad if obj.alt_kategori_id else None
+
+        def validate_baslik(self, value):
+            title = (value or '').strip()
+            if not title:
+                raise serializers.ValidationError('Başlık zorunludur.')
+            if len(title) > 255:
+                raise serializers.ValidationError('Başlık en fazla 255 karakter olabilir.')
+            return title
+
+        def validate_aciklama(self, value):
+            text = (value or '').strip()
+            if not text:
+                raise serializers.ValidationError('Açıklama zorunludur.')
+            return text
+
+        def validate_dosya_yolu(self, value):
+            path = (value or '').strip()
+            if not path:
+                raise serializers.ValidationError('Dosya yolu / bağlantı zorunludur.')
+            return path
+
+        def validate_boyut(self, value):
+            size = (value or '').strip()
+            if not size:
+                raise serializers.ValidationError('Boyut zorunludur. Örn: 1.7 MB')
+            return size
+
+        def validate_tarih(self, value):
+            tarih = (value or '').strip()
+            if not tarih:
+                raise serializers.ValidationError('Tarih zorunludur.')
+            return tarih
+
+        def create(self, validated_data):
+            kategori = KaynaklarKategori.objects.filter(slug=kategori_slug).first()
+            if not kategori:
+                raise serializers.ValidationError(
+                    {'kategori': f'{kategori_slug} kategorisi bulunamadı.'}
+                )
+            validated_data['kategori'] = kategori
+            if not validated_data.get('ikon'):
+                validated_data['ikon'] = default_icon
+            if validated_data.get('resmi_sayfa') == '':
+                validated_data['resmi_sayfa'] = None
+            return super().create(validated_data)
+
+        def update(self, instance, validated_data):
+            validated_data.pop('kategori', None)
+            if validated_data.get('resmi_sayfa') == '':
+                validated_data['resmi_sayfa'] = None
+            if not validated_data.get('ikon'):
+                validated_data['ikon'] = instance.ikon or default_icon
+            return super().update(instance, validated_data)
+
+    class _ViewSet(viewsets.ModelViewSet):
+        serializer_class = _Serializer
+        permission_classes = [AllowAny]
+        authentication_classes = []
+        pagination_class = None
+
+        def get_queryset(self):
+            return (
+                Kaynaklar.objects.select_related('kategori', 'alt_kategori')
+                .filter(kategori__slug=kategori_slug)
+                .order_by('-id')
+            )
+
+    _Serializer.__name__ = f'Admin{kategori_slug.replace("ö","o").replace("ü","u").replace("ı","i").replace("İ","I")}Serializer'
+    _ViewSet.__name__ = f'{kategori_slug.replace("ö","o").replace("ü","u").replace("ı","i").replace("İ","I")}ViewSet'
+    return _ViewSet
+
+
+DokumanlarViewSet = _kaynak_viewset_factory('Dökümanlar', 'fas fa-file-alt')
+MevzuatlarViewSet = _kaynak_viewset_factory('Mevzuatlar', 'fas fa-folder-open')
+EgitimlerViewSet = _kaynak_viewset_factory('Eğitimler', 'fas fa-graduation-cap')

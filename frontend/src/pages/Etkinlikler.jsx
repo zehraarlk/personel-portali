@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchEtkinlikler } from '../api/client';
 import Layout from '../components/Layout';
+import MediaFrame from '../components/MediaFrame';
 import '../styles/etkinlikler.css';
 
 const PAGE_SIZE = 8;
@@ -145,7 +146,12 @@ export default function Etkinlikler() {
               <Link to={`/etkinlikler/${featured.id}`} className="etkinlik-hero">
                 <div className="etkinlik-hero-media">
                   {featured.resim ? (
-                    <img src={featured.resim} alt={featured.baslik} />
+                    <MediaFrame
+                      src={featured.resim}
+                      alt={featured.baslik}
+                      dark
+                      className="absolute inset-0"
+                    />
                   ) : (
                     <div className="etkinlik-hero-media--placeholder" />
                   )}
@@ -287,7 +293,12 @@ export default function Etkinlikler() {
                         >
                           {e.resim && (
                             <div className="etkinlik-timeline-card-media">
-                              <img src={e.resim} alt={e.baslik} />
+                              <MediaFrame
+                                src={e.resim}
+                                alt={e.baslik}
+                                soft
+                                className="absolute inset-0"
+                              />
                             </div>
                           )}
                           <div className="etkinlik-timeline-card-body">

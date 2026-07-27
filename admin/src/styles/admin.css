@@ -97,7 +97,8 @@
 
 .admin-sidebar__brand-mark img {
   width: 100%;
-  height: 100%;
+  height: 100% !important;
+  max-width: none;
   object-fit: contain;
   display: block;
 }
@@ -281,7 +282,8 @@
 
 .admin-topbar__badge img {
   width: 34px;
-  height: 34px;
+  height: 34px !important;
+  max-width: none;
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25);
@@ -1402,6 +1404,222 @@
   font-size: 2.75rem;
   opacity: 0.9;
   margin-bottom: 0.75rem;
+}
+
+.admin-form-preview--pdf {
+  min-height: 140px;
+}
+
+.admin-icon-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.admin-icon-select {
+  position: relative;
+}
+
+.admin-icon-select__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 52px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--admin-text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-icon-select.is-open .admin-icon-select__trigger,
+.admin-icon-select__trigger:hover {
+  border-color: color-mix(in srgb, var(--admin-primary) 45%, var(--admin-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-primary) 14%, transparent);
+}
+
+.admin-icon-select__current,
+.admin-icon-select__option {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.admin-icon-select__current > i,
+.admin-icon-select__option > i:first-child {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--admin-primary) 10%, #fff);
+  color: var(--admin-primary);
+  font-size: 1rem;
+}
+
+.admin-icon-select__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.admin-icon-select__text strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-icon-select__text small {
+  font-size: 0.72rem;
+  color: var(--admin-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-icon-select__chevron {
+  color: var(--admin-muted);
+  font-size: 0.75rem;
+}
+
+.admin-icon-select__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(44, 46, 72, 0.16);
+}
+
+.admin-icon-select__search {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.admin-icon-select__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 260px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-icon-select__option {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.admin-icon-select__option:hover,
+.admin-icon-select__option.is-active {
+  background: color-mix(in srgb, var(--admin-primary) 10%, #fff);
+}
+
+.admin-icon-select__check {
+  margin-left: auto;
+  color: var(--admin-primary);
+  font-size: 0.8rem;
+}
+
+.admin-icon-select__empty {
+  padding: 0.85rem 0.6rem;
+  color: var(--admin-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.admin-pdf-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.admin-pdf-picker__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.admin-pdf-picker__preview i {
+  font-size: 2rem;
+  color: #c0392b;
+}
+
+.admin-form-preview--doc.is-pdf .admin-pdf-picker__preview i {
+  color: #c0392b;
+}
+
+.admin-form-preview--doc.is-word .admin-pdf-picker__preview i {
+  color: #2b579a;
+}
+
+.admin-form-preview--doc.is-excel .admin-pdf-picker__preview i {
+  color: #217346;
+}
+
+.admin-form-preview--doc.is-file .admin-pdf-picker__preview i {
+  color: var(--admin-primary);
+}
+
+.admin-pdf-picker__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--admin-primary) 10%, #fff);
+  color: var(--admin-text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.admin-pdf-picker__preview strong {
+  font-size: 0.82rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-pdf-picker__url {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem;
+}
+
+.admin-pdf-picker__url input {
+  width: 100%;
+  min-width: 0;
 }
 
 .admin-form__actions {

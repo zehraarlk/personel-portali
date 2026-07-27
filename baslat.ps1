@@ -1,26 +1,12 @@
 ﻿# Personel Portali - backend + frontend
-# Admin paneli: http://127.0.0.1:5173/admin/ (frontend icinde, ayni CSS)
+# Admin paneli: http://127.0.0.1:5173/admin/ (frontend icinde)
+# Gorseller: proje kokundeki images/ — Vite root-images eklentisi ile /images
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
 $OutputEncoding = [Console]::OutputEncoding
 try { chcp 65001 | Out-Null } catch {}
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Images = Join-Path $Root "images"
-
-function Ensure-ImagesJunction($AppDir) {
-    $pub = Join-Path $AppDir "public"
-    $link = Join-Path $pub "images"
-    if (-not (Test-Path $pub)) {
-        New-Item -ItemType Directory -Path $pub | Out-Null
-    }
-    if (Test-Path $link) {
-        $item = Get-Item $link -Force
-        if ($item.LinkType -eq "Junction") { return }
-        Remove-Item $link -Recurse -Force -ErrorAction SilentlyContinue
-    }
-    cmd /c "mklink /J `"$link`" `"$Images`"" | Out-Null
-    Write-Host "images baglandi: $link" -ForegroundColor Yellow
-}
 
 if (-not (Test-Path "$Root\backend\venv\Scripts\python.exe")) {
     Write-Host "Backend venv yok." -ForegroundColor Red
@@ -36,8 +22,24 @@ if (-not (Test-Path "$Root\frontend\.env")) {
     Copy-Item "$Root\frontend\.env.example" "$Root\frontend\.env"
 }
 
-# Tablodaki ../images/... yollari -> /images/... (kok images klasoru)
-Ensure-ImagesJunction (Join-Path $Root "frontend")
+if (-not (Test-Path $Images)) {
+    Write-Host "Kok images klasoru yok: $Images" -ForegroundColor Red
+    exit 1
+}
+
+# Eski public/images kopya veya junction varsa kaldir (tek kaynak: kok/images)
+foreach ($app in @("frontend", "admin")) {
+    $legacy = Join-Path $Root "$app\public\images"
+    if (Test-Path $legacy) {
+        Remove-Item $legacy -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "Kaldirildi: $legacy" -ForegroundColor Yellow
+    }
+    $legacyFiles = Join-Path $Root "$app\public\files"
+    if (Test-Path $legacyFiles) {
+        Remove-Item $legacyFiles -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "Kaldirildi: $legacyFiles" -ForegroundColor Yellow
+    }
+}
 
 foreach ($port in 8000, 5173) {
     $pids = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue |
@@ -71,7 +73,7 @@ Write-Host "Test         -> http://127.0.0.1:5173/test" -ForegroundColor Green
 Write-Host "Admin panel  -> http://127.0.0.1:5173/admin/" -ForegroundColor Green
 Write-Host "Backend API  -> http://127.0.0.1:8000/api/" -ForegroundColor Green
 Write-Host "Django Admin -> http://127.0.0.1:8000/admin/" -ForegroundColor Green
-Write-Host "Gorseller    -> $Images (public/images junction)" -ForegroundColor Green
+Write-Host "Gorseller    -> $Images (/images)" -ForegroundColor Green
 Write-Host ""
 Write-Host "Iki pencere acildi. Durdurmak icin pencereleri kapatin."
 Write-Host "Tarayici anasayfa ile aciliyor..."

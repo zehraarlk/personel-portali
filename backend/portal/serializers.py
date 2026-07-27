@@ -112,7 +112,7 @@ class VideoSerializer(serializers.ModelSerializer):
         ]
 
     def get_thumbnail(self, obj):
-        return f'https://img.youtube.com/vi/{obj.youtube_id}/hqdefault.jpg'
+        return f'https://i.ytimg.com/vi/{obj.youtube_id}/maxresdefault.jpg'
 
     def get_youtube_url(self, obj):
         return f'https://www.youtube.com/watch?v={obj.youtube_id}'

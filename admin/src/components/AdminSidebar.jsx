@@ -15,6 +15,8 @@ export default function AdminSidebar({ open, onClose }) {
 
   useEffect(() => {
     onClose();
+    // Mobil menü: rota değişince kapat
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- yalnızca pathname
   }, [location.pathname]);
 
   return (

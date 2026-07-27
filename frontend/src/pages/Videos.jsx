@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Layout from '../components/Layout';
 import Footer from '../components/Footer';
+import YoutubeThumb from '../components/YoutubeThumb';
 import { fetchVideos } from '../api/client';
 
 const EMPTY_DATA = {
@@ -135,11 +136,12 @@ function VideoCard({ video, onOpen }) {
         className="flex h-full w-full flex-col text-left"
         aria-label={`${video.baslik} videosunu sayfada oynat`}
       >
-        <div className="relative aspect-video overflow-hidden bg-[#dce6ed]">
-          <img
-            src={video.thumbnail}
+        <div className="relative aspect-video overflow-hidden bg-[#0f172a]">
+          <YoutubeThumb
+            youtubeId={video.youtube_id}
+            thumbnail={video.thumbnail}
             alt={video.baslik}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+            className="absolute inset-0"
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/55 via-transparent to-black/5 opacity-80 transition duration-300 group-hover:opacity-100" />

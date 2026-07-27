@@ -1,19 +1,36 @@
+/**
+ * Genel Kaynaklar CRUD — Dökümanlar, Mevzuatlar, Eğitimler
+ * Protokoller yapısının genelleştirilmiş hali.
+ */
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import {
-  listProtokoller,
-  getProtokol,
-  createProtokol,
-  updateProtokol,
-  deleteProtokol,
-} from '../../api/client';
 import usePageTitle from '../../hooks/usePageTitle';
 import AdminRowActions from '../../components/AdminRowActions';
 import AdminAlert from '../../components/AdminAlert';
 import PdfPickerField from '../../components/PdfPickerField';
 import IconSelectField from '../../components/IconSelectField';
 
-/** DB tarih alanı: "04.10.2023" ↔ date input "2023-10-04" */
+const META = {
+  dokumanlar: {
+    title: 'Dokümanlar',
+    icon: 'fas fa-file-alt',
+    base: '/admin/dokumanlar',
+    defaultIcon: 'fas fa-file-alt',
+  },
+  mevzuatlar: {
+    title: 'Mevzuatlar',
+    icon: 'fas fa-balance-scale',
+    base: '/admin/mevzuatlar',
+    defaultIcon: 'fas fa-folder-open',
+  },
+  egitimler: {
+    title: 'Eğitimler',
+    icon: 'fas fa-graduation-cap',
+    base: '/admin/egitimler',
+    defaultIcon: 'fas fa-graduation-cap',
+  },
+};
+
 function toDateInput(value) {
   if (!value) return '';
   const raw = String(value).trim();
@@ -54,15 +71,18 @@ function shortLink(url) {
   }
 }
 
-export function ProtokollerIndex() {
-  usePageTitle('Protokoller');
+// ─── Index ───
+
+export function KaynakIndex({ slug, api }) {
+  const meta = META[slug];
+  usePageTitle(meta.title);
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(true);
 
   const load = () => {
     setLoading(true);
-    listProtokoller()
+    api.list()
       .then((data) => setRows(Array.isArray(data) ? data : data.results || []))
       .catch((ex) => setErr(ex.message))
       .finally(() => setLoading(false));
@@ -71,9 +91,9 @@ export function ProtokollerIndex() {
   useEffect(load, []);
 
   const onDelete = async (id) => {
-    if (!window.confirm('Bu protokolü silmek istiyor musunuz?')) return;
+    if (!window.confirm('Bu kaydı silmek istiyor musunuz?')) return;
     try {
-      await deleteProtokol(id);
+      await api.delete(id);
       load();
     } catch (ex) {
       setErr(ex.message);
@@ -85,16 +105,16 @@ export function ProtokollerIndex() {
       <header className="admin-page-head">
         <div className="admin-page-head__text">
           <h2>
-            <i className="fas fa-file-signature" aria-hidden="true" />
-            Protokoller
+            <i className={meta.icon} aria-hidden="true" />
+            {meta.title}
           </h2>
         </div>
         <div className="admin-page-head__actions">
           <span className="admin-count-pill">
             Toplam <strong>{rows.length}</strong>
           </span>
-          <Link to="/admin/protokoller/ekle" className="admin-btn admin-btn-primary">
-            <i className="fas fa-plus" aria-hidden="true" /> Yeni Protokol
+          <Link to={`${meta.base}/ekle`} className="admin-btn admin-btn-primary">
+            <i className="fas fa-plus" aria-hidden="true" /> Yeni Kayıt
           </Link>
         </div>
       </header>
@@ -112,7 +132,7 @@ export function ProtokollerIndex() {
               <tr>
                 <th>#</th>
                 <th>İkon</th>
-                <th>Protokol</th>
+                <th>Başlık</th>
                 <th>Dosya</th>
                 <th>Boyut</th>
                 <th>Tarih</th>
@@ -122,16 +142,12 @@ export function ProtokollerIndex() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={7} className="admin-empty">
-                    Yükleniyor…
-                  </td>
+                  <td colSpan={7} className="admin-empty">Yükleniyor…</td>
                 </tr>
               )}
               {!loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="admin-empty">
-                    Henüz protokol yok. Yeni kayıt ekleyin.
-                  </td>
+                  <td colSpan={7} className="admin-empty">Henüz kayıt yok. Yeni ekleyin.</td>
                 </tr>
               )}
               {rows.map((row, index) => (
@@ -139,7 +155,7 @@ export function ProtokollerIndex() {
                   <td className="admin-td-index">{index + 1}</td>
                   <td className="admin-td-media">
                     <span className="admin-icon-pill" title={row.ikon || ''}>
-                      <i className={row.ikon || 'fas fa-file-signature'} aria-hidden="true" />
+                      <i className={row.ikon || meta.defaultIcon} aria-hidden="true" />
                     </span>
                   </td>
                   <td>
@@ -162,15 +178,13 @@ export function ProtokollerIndex() {
                       >
                         {shortLink(row.dosya_yolu)}
                       </a>
-                    ) : (
-                      '—'
-                    )}
+                    ) : '—'}
                   </td>
                   <td>{row.boyut || '—'}</td>
                   <td>{displayDate(row.tarih)}</td>
                   <td>
                     <AdminRowActions
-                      editTo={`/admin/protokoller/${row.id}/duzenle`}
+                      editTo={`${meta.base}/${row.id}/duzenle`}
                       onDelete={() => onDelete(row.id)}
                     />
                   </td>
@@ -184,10 +198,13 @@ export function ProtokollerIndex() {
   );
 }
 
-function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
+// ─── Form ───
+
+function KaynakForm({ slug, mode, initial, onSubmit, busy, err, msg, onClearMsg, onClearErr }) {
+  const meta = META[slug];
   const [baslik, setBaslik] = useState(initial?.baslik || '');
   const [aciklama, setAciklama] = useState(initial?.aciklama || '');
-  const [ikon, setIkon] = useState(initial?.ikon || 'fas fa-file-signature');
+  const [ikon, setIkon] = useState(initial?.ikon || meta.defaultIcon);
   const [dosyaYolu, setDosyaYolu] = useState(initial?.dosya_yolu || '');
   const [resmiSayfa, setResmiSayfa] = useState(initial?.resmi_sayfa || '');
   const [boyut, setBoyut] = useState(initial?.boyut || '');
@@ -197,7 +214,7 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
   useEffect(() => {
     setBaslik(initial?.baslik || '');
     setAciklama(initial?.aciklama || '');
-    setIkon(initial?.ikon || 'fas fa-file-signature');
+    setIkon(initial?.ikon || meta.defaultIcon);
     setDosyaYolu(initial?.dosya_yolu || '');
     setResmiSayfa(initial?.resmi_sayfa || '');
     setBoyut(initial?.boyut || '');
@@ -210,12 +227,12 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
       <header className="admin-page-head">
         <div className="admin-page-head__text">
           <h2>
-            <i className="fas fa-file-signature" aria-hidden="true" />
-            {mode === 'edit' ? 'Protokol düzenle' : 'Yeni protokol'}
+            <i className={meta.icon} aria-hidden="true" />
+            {mode === 'edit' ? `${meta.title} — Düzenle` : `${meta.title} — Yeni`}
           </h2>
         </div>
         <div className="admin-page-head__actions">
-          <Link to="/admin/protokoller" className="admin-btn admin-btn-secondary">
+          <Link to={meta.base} className="admin-btn admin-btn-secondary">
             <i className="fas fa-arrow-left" aria-hidden="true" /> Listeye dön
           </Link>
         </div>
@@ -233,10 +250,7 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
               <AdminAlert
                 key={`err-${err || localErr}`}
                 type="danger"
-                onClose={() => {
-                  setLocalErr('');
-                  onClearErr?.();
-                }}
+                onClose={() => { setLocalErr(''); onClearErr?.(); }}
               >
                 {err || localErr}
               </AdminAlert>
@@ -246,14 +260,14 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!dosyaYolu.trim()) {
-                  setLocalErr('PDF dosyası zorunludur. Sağdaki alandan seçin veya URL yapıştırın.');
+                  setLocalErr('Dosya zorunludur. Sağdaki alandan seçin veya URL yapıştırın.');
                   return;
                 }
                 setLocalErr('');
                 onSubmit({
                   baslik: baslik.trim(),
                   aciklama: aciklama.trim(),
-                  ikon: ikon || 'fas fa-file-signature',
+                  ikon: ikon || meta.defaultIcon,
                   dosya_yolu: dosyaYolu.trim(),
                   resmi_sayfa: resmiSayfa.trim() || null,
                   boyut: boyut.trim(),
@@ -269,7 +283,7 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
                     onChange={(e) => setBaslik(e.target.value)}
                     required
                     maxLength={255}
-                    placeholder="Örn: Gebze MedicalPark Hastanesi"
+                    placeholder="Kaynak başlığı"
                   />
                 </label>
                 <label>
@@ -277,9 +291,9 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
                   <textarea
                     value={aciklama}
                     onChange={(e) => setAciklama(e.target.value)}
-                    rows={6}
+                    rows={5}
                     required
-                    placeholder="Protokol / anlaşma özeti"
+                    placeholder="Açıklama / özet"
                   />
                 </label>
                 <div className="admin-form__row-2">
@@ -316,7 +330,7 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
                 <IconSelectField
                   value={ikon}
                   onChange={setIkon}
-                  defaultIcon="fas fa-file-signature"
+                  defaultIcon={meta.defaultIcon}
                   label="İkon değiştir"
                 />
 
@@ -326,8 +340,8 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
                   onUploaded={({ size_label: sizeLabel }) => {
                     if (sizeLabel) setBoyut(sizeLabel);
                   }}
-                  mode="pdf"
-                  label="PDF değiştir"
+                  mode="document"
+                  label="Dosya değiştir"
                 />
               </div>
 
@@ -335,7 +349,7 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
                 <button type="submit" className="admin-btn admin-btn-primary" disabled={busy}>
                   {busy ? 'Kaydediliyor…' : 'Kaydet'}
                 </button>
-                <Link to="/admin/protokoller" className="admin-btn admin-btn-secondary">
+                <Link to={meta.base} className="admin-btn admin-btn-secondary">
                   İptal
                 </Link>
               </div>
@@ -347,14 +361,18 @@ function ProtokolForm({ mode, initial, onSubmit, busy, err, msg, onClearMsg, onC
   );
 }
 
-export function ProtokollerEkle() {
-  usePageTitle('Protokol Ekle');
+// ─── Ekle ───
+
+export function KaynakEkle({ slug, api }) {
+  const meta = META[slug];
+  usePageTitle(`${meta.title} Ekle`);
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
   return (
-    <ProtokolForm
+    <KaynakForm
+      slug={slug}
       mode="create"
       busy={busy}
       err={err}
@@ -363,8 +381,8 @@ export function ProtokollerEkle() {
         setBusy(true);
         setErr('');
         try {
-          await createProtokol(payload);
-          navigate('/admin/protokoller');
+          await api.create(payload);
+          navigate(meta.base);
         } catch (ex) {
           setErr(ex.message);
         } finally {
@@ -375,8 +393,11 @@ export function ProtokollerEkle() {
   );
 }
 
-export function ProtokollerDuzenle() {
-  usePageTitle('Protokol Düzenle');
+// ─── Düzenle ───
+
+export function KaynakDuzenle({ slug, api }) {
+  const meta = META[slug];
+  usePageTitle(`${meta.title} Düzenle`);
   const { id } = useParams();
   const [initial, setInitial] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -384,7 +405,7 @@ export function ProtokollerDuzenle() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    getProtokol(id)
+    api.get(id)
       .then(setInitial)
       .catch((ex) => setErr(ex.message));
   }, [id]);
@@ -399,7 +420,8 @@ export function ProtokollerDuzenle() {
   }
 
   return (
-    <ProtokolForm
+    <KaynakForm
+      slug={slug}
       mode="edit"
       initial={initial}
       busy={busy}
@@ -412,7 +434,7 @@ export function ProtokollerDuzenle() {
         setErr('');
         setMsg('');
         try {
-          const updated = await updateProtokol(id, payload);
+          const updated = await api.update(id, payload);
           setInitial(updated);
           setMsg('Kayıt başarıyla güncellendi.');
         } catch (ex) {

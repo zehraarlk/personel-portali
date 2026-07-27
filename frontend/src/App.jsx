@@ -21,7 +21,8 @@ import Login from './pages/auth/Login';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import AdminLogin from './pages/auth/AdminLogin';
 import { RootEntry, RequirePortal, RequireYonetici } from './auth/RequireAuth';
-import AdminRoutes from '@admin/AdminRoutes.jsx';
+import AdminLayout from '@admin/components/AdminLayout.jsx';
+import { adminChildRoutes } from '@admin/AdminRoutes.jsx';
 
 const PLACEHOLDER_PATHS = [
   'anketler',
@@ -61,7 +62,9 @@ export default function App() {
       </Route>
 
       <Route element={<RequireYonetici />}>
-        <Route path="/admin/*" element={<AdminRoutes />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          {adminChildRoutes}
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

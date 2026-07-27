@@ -43,6 +43,9 @@ from .admin_crud_views import (
     VideoKategoriViewSet,
     SizdenGelenKategoriViewSet,
     ProtokolViewSet,
+    DokumanlarViewSet,
+    MevzuatlarViewSet,
+    EgitimlerViewSet,
 )
 
 router = DefaultRouter()
@@ -61,6 +64,9 @@ router.register(
     basename='admin-sizden-gelenler-kategoriler',
 )
 router.register(r'admin/protokoller', ProtokolViewSet, basename='admin-protokoller')
+router.register(r'admin/dokumanlar', DokumanlarViewSet, basename='admin-dokumanlar')
+router.register(r'admin/mevzuatlar', MevzuatlarViewSet, basename='admin-mevzuatlar')
+router.register(r'admin/egitimler', EgitimlerViewSet, basename='admin-egitimler')
 
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
