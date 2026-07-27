@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { fetchEtkinlikler } from '../api/client';
 import Layout from '../components/Layout';
+import MediaFrame from '../components/MediaFrame';
 import '../styles/etkinlik-detay.css';
 
 function formatTarih(iso) {
@@ -114,7 +115,13 @@ export default function EtkinlikDetay() {
               <article className="etkinlik-detay-hero">
                 <div className="etkinlik-detay-media">
                   {etkinlik.resim ? (
-                    <img src={etkinlik.resim} alt={etkinlik.baslik} />
+                    <MediaFrame
+                      src={etkinlik.resim}
+                      alt={etkinlik.baslik}
+                      dark
+                      className="absolute inset-0"
+                      eager
+                    />
                   ) : (
                     <div className="etkinlik-detay-media--placeholder" />
                   )}
@@ -205,7 +212,11 @@ export default function EtkinlikDetay() {
                       >
                         {e.resim && (
                           <div className="etkinlik-detay-diger-media">
-                            <img src={e.resim} alt={e.baslik} />
+                            <MediaFrame
+                              src={e.resim}
+                              alt={e.baslik}
+                              className="absolute inset-0"
+                            />
                           </div>
                         )}
                         <div className="etkinlik-detay-diger-body">

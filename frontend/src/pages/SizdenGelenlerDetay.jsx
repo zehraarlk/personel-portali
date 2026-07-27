@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import MediaFrame from '../components/MediaFrame';
 import { fetchSizdenGelenler, goruntulenmeArttir } from '../api/client';
 
 function getDeptIcon(kategori) {
@@ -117,12 +118,13 @@ export default function SizdenGelenlerDetay() {
               className="group relative block h-[280px] w-full cursor-zoom-in overflow-hidden rounded-2xl bg-[#dce6ed] sm:h-[380px] md:h-[440px] lg:col-span-8"
               aria-label="Görseli büyüt"
             >
-              <img
+              <MediaFrame
                 src={icerik.resim}
                 alt={icerik.kategori}
-                className="h-full w-full scale-105 object-cover transition duration-300 group-hover:scale-110"
+                className="absolute inset-0"
+                eager
               />
-              <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
+              <span className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
                 <span className="material-symbols-outlined text-[18px]">zoom_in</span>
               </span>
             </button>
@@ -199,11 +201,11 @@ export default function SizdenGelenlerDetay() {
                     to={`/sizden-gelenler/detay/${item.id}${devamEki}`}
                     className="group flex items-center gap-3 rounded-xl bg-white/70 p-2 shadow-sm transition hover:bg-white"
                   >
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
-                      <img
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
+                      <MediaFrame
                         src={item.resim}
                         alt={item.kategori}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                        className="absolute inset-0"
                       />
                     </div>
                     <div className="min-w-0">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Layout from '../components/Layout';
 import Footer from '../components/Footer';
+import MediaFrame from '../components/MediaFrame';
 import { fetchDuyurular } from '../api/client';
 
 const EMPTY_DATA = {
@@ -135,14 +136,10 @@ function DuyuruCard({ duyuru }) {
         </div>
 
         {duyuru.resim && (
-          <img
+          <MediaFrame
             src={duyuru.resim}
             alt={duyuru.baslik}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.08]"
-            onError={(event) => {
-              event.currentTarget.style.display = 'none';
-            }}
+            className="absolute inset-0 transition duration-500 group-hover:scale-[1.03]"
           />
         )}
 

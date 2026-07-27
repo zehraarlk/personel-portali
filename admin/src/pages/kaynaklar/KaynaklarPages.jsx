@@ -9,6 +9,7 @@ import AdminRowActions from '../../components/AdminRowActions';
 import AdminAlert from '../../components/AdminAlert';
 import PdfPickerField from '../../components/PdfPickerField';
 import IconSelectField from '../../components/IconSelectField';
+import { dokumanlarApi, mevzuatlarApi, egitimlerApi } from '../../api/client';
 
 const META = {
   dokumanlar: {
@@ -71,6 +72,16 @@ function shortLink(url) {
   }
 }
 
+/** ../images/... → /images/... (admin/portal kökünden açılsın) */
+function fileHref(path) {
+  if (!path) return '';
+  const raw = String(path).trim();
+  if (!raw) return '';
+  if (/^(https?:|blob:|data:)/i.test(raw)) return raw;
+  const clean = raw.replace(/^\.\.\//, '');
+  return clean.startsWith('/') ? clean : `/${clean}`;
+}
+
 // ─── Index ───
 
 export function KaynakIndex({ slug, api }) {
@@ -80,28 +91,46 @@ export function KaynakIndex({ slug, api }) {
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const load = () => {
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    api.list()
-      .then((data) => setRows(Array.isArray(data) ? data : data.results || []))
-      .catch((ex) => setErr(ex.message))
-      .finally(() => setLoading(false));
-  };
+    setErr('');
+    setRows([]);
 
-  useEffect(load, []);
+    api
+      .list()
+      .then((data) => {
+        if (cancelled) return;
+        setRows(Array.isArray(data) ? data : data.results || []);
+      })
+      .catch((ex) => {
+        if (!cancelled) setErr(ex.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, api]);
 
   const onDelete = async (id) => {
     if (!window.confirm('Bu kaydı silmek istiyor musunuz?')) return;
     try {
       await api.delete(id);
-      load();
+      setLoading(true);
+      const data = await api.list();
+      setRows(Array.isArray(data) ? data : data.results || []);
     } catch (ex) {
       setErr(ex.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="admin-module">
+    <div className="admin-module" key={slug}>
       <header className="admin-page-head">
         <div className="admin-page-head__text">
           <h2>
@@ -127,7 +156,7 @@ export function KaynakIndex({ slug, api }) {
 
       <div className="admin-card admin-card--flush">
         <div className="admin-table-wrap">
-          <table className="admin-table admin-table--crud">
+          <table className="admin-table admin-table--crud admin-table--kaynak">
             <thead>
               <tr>
                 <th>#</th>
@@ -150,46 +179,49 @@ export function KaynakIndex({ slug, api }) {
                   <td colSpan={7} className="admin-empty">Henüz kayıt yok. Yeni ekleyin.</td>
                 </tr>
               )}
-              {rows.map((row, index) => (
-                <tr key={row.id}>
-                  <td className="admin-td-index">{index + 1}</td>
-                  <td className="admin-td-media">
-                    <span className="admin-icon-pill" title={row.ikon || ''}>
-                      <i className={row.ikon || meta.defaultIcon} aria-hidden="true" />
-                    </span>
-                  </td>
-                  <td>
-                    <div className="admin-row-title">{row.baslik}</div>
-                    {row.aciklama ? (
-                      <div className="admin-row-meta">
-                        {row.aciklama.length > 110
-                          ? `${row.aciklama.slice(0, 108)}…`
-                          : row.aciklama}
-                      </div>
-                    ) : null}
-                  </td>
-                  <td>
-                    {row.dosya_yolu ? (
-                      <a
-                        href={row.dosya_yolu}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="admin-link-muted"
-                      >
-                        {shortLink(row.dosya_yolu)}
-                      </a>
-                    ) : '—'}
-                  </td>
-                  <td>{row.boyut || '—'}</td>
-                  <td>{displayDate(row.tarih)}</td>
-                  <td>
-                    <AdminRowActions
-                      editTo={`${meta.base}/${row.id}/duzenle`}
-                      onDelete={() => onDelete(row.id)}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {!loading &&
+                rows.map((row, index) => (
+                  <tr key={`${slug}-${row.id}`}>
+                    <td className="admin-td-index">{index + 1}</td>
+                    <td className="admin-td-media">
+                      <span className="admin-icon-pill" title={row.ikon || ''}>
+                        <i className={row.ikon || meta.defaultIcon} aria-hidden="true" />
+                      </span>
+                    </td>
+                    <td>
+                      <div className="admin-row-title">{row.baslik}</div>
+                      {row.aciklama ? (
+                        <div className="admin-row-meta">
+                          {row.aciklama.length > 110
+                            ? `${row.aciklama.slice(0, 108)}…`
+                            : row.aciklama}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td>
+                      {row.dosya_yolu ? (
+                        <a
+                          href={fileHref(row.dosya_yolu)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="admin-link-muted"
+                        >
+                          {shortLink(row.dosya_yolu)}
+                        </a>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td className="admin-td-nowrap">{row.boyut || '—'}</td>
+                    <td className="admin-td-nowrap">{displayDate(row.tarih)}</td>
+                    <td>
+                      <AdminRowActions
+                        editTo={`${meta.base}/${row.id}/duzenle`}
+                        onDelete={() => onDelete(row.id)}
+                      />
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -220,7 +252,7 @@ function KaynakForm({ slug, mode, initial, onSubmit, busy, err, msg, onClearMsg,
     setBoyut(initial?.boyut || '');
     setTarih(toDateInput(initial?.tarih));
     setLocalErr('');
-  }, [initial]);
+  }, [initial, meta.defaultIcon, slug]);
 
   return (
     <div className="admin-module">
@@ -405,10 +437,22 @@ export function KaynakDuzenle({ slug, api }) {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    api.get(id)
-      .then(setInitial)
-      .catch((ex) => setErr(ex.message));
-  }, [id]);
+    let cancelled = false;
+    setInitial(null);
+    setErr('');
+    setMsg('');
+    api
+      .get(id)
+      .then((data) => {
+        if (!cancelled) setInitial(data);
+      })
+      .catch((ex) => {
+        if (!cancelled) setErr(ex.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, slug, api]);
 
   if (!initial && !err) return <p className="admin-muted">Yükleniyor…</p>;
   if (!initial && err) {
@@ -446,3 +490,41 @@ export function KaynakDuzenle({ slug, api }) {
     />
   );
 }
+
+/**
+ * Kalıcı çözüm: her modül ayrı bileşen tipi.
+ * Aynı KaynakIndex’i 3 rotada paylaşmak React’in instance’ı yeniden
+ * kullanmasına yol açıyordu (eski tablo verisi kalıyordu).
+ * Bu sarmalayıcılar farklı function identity ile her geçişte remount eder.
+ */
+function makeKaynakPages(slug, api) {
+  function IndexPage() {
+    return <KaynakIndex slug={slug} api={api} />;
+  }
+  function EklePage() {
+    return <KaynakEkle slug={slug} api={api} />;
+  }
+  function DuzenlePage() {
+    return <KaynakDuzenle slug={slug} api={api} />;
+  }
+  IndexPage.displayName = `KaynakIndex_${slug}`;
+  EklePage.displayName = `KaynakEkle_${slug}`;
+  DuzenlePage.displayName = `KaynakDuzenle_${slug}`;
+  return { IndexPage, EklePage, DuzenlePage };
+}
+
+const dokumanlarPages = makeKaynakPages('dokumanlar', dokumanlarApi);
+const mevzuatlarPages = makeKaynakPages('mevzuatlar', mevzuatlarApi);
+const egitimlerPages = makeKaynakPages('egitimler', egitimlerApi);
+
+export const DokumanlarIndex = dokumanlarPages.IndexPage;
+export const DokumanlarEkle = dokumanlarPages.EklePage;
+export const DokumanlarDuzenle = dokumanlarPages.DuzenlePage;
+
+export const MevzuatlarIndex = mevzuatlarPages.IndexPage;
+export const MevzuatlarEkle = mevzuatlarPages.EklePage;
+export const MevzuatlarDuzenle = mevzuatlarPages.DuzenlePage;
+
+export const EgitimlerIndex = egitimlerPages.IndexPage;
+export const EgitimlerEkle = egitimlerPages.EklePage;
+export const EgitimlerDuzenle = egitimlerPages.DuzenlePage;

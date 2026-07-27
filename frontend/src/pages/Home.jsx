@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Layout from '../components/Layout';
+import MediaFrame from '../components/MediaFrame';
 import { fetchHomeDashboard } from '../api/client';
 import { BRAND_IMG } from '../constants';
 import '../styles/home.css';
@@ -77,10 +78,12 @@ export default function Home() {
               {aktif ? (
                 <>
                   <div className="relative flex-1 bg-slate-950 overflow-hidden">
-                    <img
-                       src={aktif.resim}
-                       alt={aktif.baslik}
-                       className="absolute inset-0 h-full w-full object-cover object-center transition-all duration-700"
+                    <MediaFrame
+                      src={aktif.resim}
+                      alt={aktif.baslik}
+                      dark
+                      className="absolute inset-0"
+                      eager
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     
@@ -149,13 +152,7 @@ export default function Home() {
                       {i + 1}
                     </span>
                     <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-200">
-                      <img
-                        src={h.resim}
-                        alt=""
-                        className={`absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 ${
-                          i === haberIndex ? '' : 'group-hover/thumb:scale-110'
-                        }`}
-                      />
+                      <MediaFrame src={h.resim} alt="" className="absolute inset-0" />
                       {i !== haberIndex && <div className="absolute inset-0 bg-white/40" />}
                     </div>
                     <span
@@ -202,11 +199,7 @@ export default function Home() {
                   >
                     <div className="relative h-16 w-full shrink-0 overflow-hidden rounded-lg border border-white/20">
                       {d.resim ? (
-                        <img
-                          src={d.resim}
-                          alt=""
-                          className="absolute inset-0 h-full w-full object-cover object-center"
-                        />
+                        <MediaFrame src={d.resim} alt="" dark className="absolute inset-0" />
                       ) : (
                         <div className="absolute inset-0 grid place-items-center bg-white/10">
                           <span className="material-symbols-outlined text-white/50 text-base">campaign</span>

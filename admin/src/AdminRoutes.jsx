@@ -37,8 +37,17 @@ import {
   ProtokollerEkle,
   ProtokollerDuzenle,
 } from './pages/protokoller/ProtokollerPages';
-import { KaynakIndex, KaynakEkle, KaynakDuzenle } from './pages/kaynaklar/KaynaklarPages';
-import { dokumanlarApi, mevzuatlarApi, egitimlerApi } from './api/client';
+import {
+  DokumanlarIndex,
+  DokumanlarEkle,
+  DokumanlarDuzenle,
+  MevzuatlarIndex,
+  MevzuatlarEkle,
+  MevzuatlarDuzenle,
+  EgitimlerIndex,
+  EgitimlerEkle,
+  EgitimlerDuzenle,
+} from './pages/kaynaklar/KaynaklarPages';
 
 const STUBS = ['anketler', 'yardimci-linkler', 'vefat', 'dogum-gunu'];
 
@@ -46,6 +55,10 @@ const STUBS = ['anketler', 'yardimci-linkler', 'vefat', 'dogum-gunu'];
  * /admin altındaki sayfa rotaları.
  * Fragment olarak export — RR createRoutesFromChildren Fragment'i açar;
  * özel bir bileşen (<AdminChildRoutes />) kullanmayın, rotalar kayıt olmaz.
+ *
+ * Kaynaklar (doküman/mevzuat/eğitim): her modül AYRI bileşen tipi olmalı
+ * (DokumanlarIndex …). Ortak KaynakIndex’i 3 rotaya props ile vermeyin —
+ * React instance’ı yeniden kullanır, tablo eski veride kalır.
  */
 export const adminChildRoutes = (
   <>
@@ -71,24 +84,17 @@ export const adminChildRoutes = (
     <Route path="protokoller" element={<ProtokollerIndex />} />
     <Route path="protokoller/ekle" element={<ProtokollerEkle />} />
     <Route path="protokoller/:id/duzenle" element={<ProtokollerDuzenle />} />
-    <Route path="dokumanlar" element={<KaynakIndex slug="dokumanlar" api={dokumanlarApi} />} />
-    <Route path="dokumanlar/ekle" element={<KaynakEkle slug="dokumanlar" api={dokumanlarApi} />} />
-    <Route
-      path="dokumanlar/:id/duzenle"
-      element={<KaynakDuzenle slug="dokumanlar" api={dokumanlarApi} />}
-    />
-    <Route path="mevzuatlar" element={<KaynakIndex slug="mevzuatlar" api={mevzuatlarApi} />} />
-    <Route path="mevzuatlar/ekle" element={<KaynakEkle slug="mevzuatlar" api={mevzuatlarApi} />} />
-    <Route
-      path="mevzuatlar/:id/duzenle"
-      element={<KaynakDuzenle slug="mevzuatlar" api={mevzuatlarApi} />}
-    />
-    <Route path="egitimler" element={<KaynakIndex slug="egitimler" api={egitimlerApi} />} />
-    <Route path="egitimler/ekle" element={<KaynakEkle slug="egitimler" api={egitimlerApi} />} />
-    <Route
-      path="egitimler/:id/duzenle"
-      element={<KaynakDuzenle slug="egitimler" api={egitimlerApi} />}
-    />
+
+    <Route path="dokumanlar" element={<DokumanlarIndex />} />
+    <Route path="dokumanlar/ekle" element={<DokumanlarEkle />} />
+    <Route path="dokumanlar/:id/duzenle" element={<DokumanlarDuzenle />} />
+    <Route path="mevzuatlar" element={<MevzuatlarIndex />} />
+    <Route path="mevzuatlar/ekle" element={<MevzuatlarEkle />} />
+    <Route path="mevzuatlar/:id/duzenle" element={<MevzuatlarDuzenle />} />
+    <Route path="egitimler" element={<EgitimlerIndex />} />
+    <Route path="egitimler/ekle" element={<EgitimlerEkle />} />
+    <Route path="egitimler/:id/duzenle" element={<EgitimlerDuzenle />} />
+
     <Route path="profil/sifre-degistir" element={<ChangePassword />} />
     <Route path="profil/oturum-kayitlari" element={<SessionHistory />} />
     {STUBS.map((slug) => (

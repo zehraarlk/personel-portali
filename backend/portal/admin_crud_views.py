@@ -581,9 +581,33 @@ def _kaynak_viewset_factory(kategori_slug, default_icon):
         pagination_class = None
 
         def get_queryset(self):
+            from django.db.models import Q
+
+            # Public API ile aynı esnek eşleme (Türkçe karakter / ASCII varyantları)
+            slug_q = Q(kategori__slug=kategori_slug) | Q(kategori__ad=kategori_slug)
+            if kategori_slug == 'Dökümanlar':
+                slug_q |= (
+                    Q(kategori__slug__iexact='Dokümanlar')
+                    | Q(kategori__slug__iexact='Dökümanlar')
+                    | Q(kategori__ad__iexact='Dokümanlar')
+                    | Q(kategori__ad__iexact='Dökümanlar')
+                )
+            elif kategori_slug == 'Eğitimler':
+                slug_q |= (
+                    Q(kategori__slug__iexact='Eğitimler')
+                    | Q(kategori__slug__iexact='Egitimler')
+                    | Q(kategori__ad__iexact='Eğitimler')
+                    | Q(kategori__ad__iexact='Egitimler')
+                )
+            elif kategori_slug == 'Mevzuatlar':
+                slug_q |= (
+                    Q(kategori__slug__iexact='Mevzuatlar')
+                    | Q(kategori__ad__iexact='Mevzuatlar')
+                )
+
             return (
                 Kaynaklar.objects.select_related('kategori', 'alt_kategori')
-                .filter(kategori__slug=kategori_slug)
+                .filter(slug_q)
                 .order_by('-id')
             )
 

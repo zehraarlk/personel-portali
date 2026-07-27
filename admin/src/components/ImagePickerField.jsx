@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { uploadAdminImage } from '../api/client';
-import { BRAND_IMG } from '../constants';
+import MediaFrame from '../../../frontend/src/components/MediaFrame.jsx';
+import '../../../frontend/src/styles/media.css';
 
 function toPreviewSrc(path) {
   if (!path) return '';
@@ -10,9 +11,7 @@ function toPreviewSrc(path) {
   return path.replace(/^\.\.\//, '/');
 }
 
-/**
- * Dosya seçici + yükleme. value: DB yolu (örn. ../images/uploads/x.webp)
- */
+/** Dosya seçici + yükleme. Önizleme site geneli navbar fit ayarını kullanır. */
 export default function ImagePickerField({ value, onChange, label = 'Resim' }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -61,15 +60,9 @@ export default function ImagePickerField({ value, onChange, label = 'Resim' }) {
 
   return (
     <div className="admin-image-picker">
-      <div className="admin-form-preview">
+      <div className={`admin-form-preview admin-form-preview--media${preview ? ' has-image' : ''}`}>
         {preview ? (
-          <img
-            src={preview}
-            alt=""
-            onError={(e) => {
-              e.currentTarget.src = BRAND_IMG;
-            }}
-          />
+          <MediaFrame src={preview} alt="" className="absolute inset-0" eager />
         ) : (
           <div className="admin-form-preview__empty">
             <i className="fas fa-image" aria-hidden="true" />

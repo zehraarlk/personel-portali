@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND_IMG } from '../constants';
 import { fetchProfile, logoutAdmin } from '../api/client';
 import { clearAdminSession, getYoneticiId } from '../auth/session';
+import useMediaFit from '../../../frontend/src/hooks/useMediaFit.js';
 
 const PROFILE_MENU = [
   { to: '/admin/profil/sifre-degistir', label: 'Şifre Değiştir', icon: 'fas fa-key' },
@@ -14,6 +15,7 @@ export default function AdminTopbar({ title, onMenu }) {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
+  const [fit, setFit] = useMediaFit();
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -71,53 +73,76 @@ export default function AdminTopbar({ title, onMenu }) {
         <h1>{title}</h1>
       </div>
 
-      <div className="admin-topbar__user" ref={menuRef}>
-        <button
-          type="button"
-          className="admin-topbar__badge"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-haspopup="menu"
-        >
-          <img
-            src={foto}
-            alt=""
-            onError={(e) => {
-              e.currentTarget.src = BRAND_IMG;
-            }}
-          />
-          <span className="admin-topbar__badge-text">
-            <strong>{name}</strong>
-            <small>{yetki}</small>
-          </span>
-          <i className={`fas fa-chevron-${open ? 'up' : 'down'}`} aria-hidden="true" />
-        </button>
+      <div className="admin-topbar__right">
+        <div className="admin-fit-toggle admin-fit-toggle--topbar" role="group" aria-label="Site görsel sığdırma">
+          <button
+            type="button"
+            className={`admin-fit-toggle__btn${fit === 'contain' ? ' is-active' : ''}`}
+            onClick={() => setFit('contain')}
+            title="Tam ekran — tüm görsel görünür, kenarlar bulanık"
+          >
+            <i className="fas fa-expand" aria-hidden="true" />
+            <span>Tam ekran</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-fit-toggle__btn${fit === 'cover' ? ' is-active' : ''}`}
+            onClick={() => setFit('cover')}
+            title="Sığdır — görsel alanı kaplar (kırpılabilir)"
+          >
+            <i className="fas fa-compress" aria-hidden="true" />
+            <span>Sığdır</span>
+          </button>
+        </div>
 
-        {open && (
-          <div className="admin-topbar__dropdown" role="menu">
-            {PROFILE_MENU.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
+        <div className="admin-topbar__user" ref={menuRef}>
+          <button
+            type="button"
+            className="admin-topbar__badge"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-haspopup="menu"
+          >
+            <img
+              src={foto}
+              alt=""
+              onError={(e) => {
+                e.currentTarget.src = BRAND_IMG;
+              }}
+            />
+            <span className="admin-topbar__badge-text">
+              <strong>{name}</strong>
+              <small>{yetki}</small>
+            </span>
+            <i className={`fas fa-chevron-${open ? 'up' : 'down'}`} aria-hidden="true" />
+          </button>
+
+          {open && (
+            <div className="admin-topbar__dropdown" role="menu">
+              {PROFILE_MENU.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  role="menuitem"
+                  className="admin-topbar__dropdown-item"
+                  onClick={() => setOpen(false)}
+                >
+                  <i className={item.icon} aria-hidden="true" />
+                  {item.label}
+                </Link>
+              ))}
+              <button
+                type="button"
                 role="menuitem"
                 className="admin-topbar__dropdown-item"
-                onClick={() => setOpen(false)}
+                onClick={handleLogout}
               >
-                <i className={item.icon} aria-hidden="true" />
-                {item.label}
-              </Link>
-            ))}
-            <button
-              type="button"
-              role="menuitem"
-              className="admin-topbar__dropdown-item"
-              onClick={handleLogout}
-            >
-              <i className="fas fa-sign-out-alt" aria-hidden="true" />
-              Çıkış Yap
-            </button>
-          </div>
-        )}
+                <i className="fas fa-sign-out-alt" aria-hidden="true" />
+                Çıkış Yap
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

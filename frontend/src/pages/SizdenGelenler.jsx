@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import MediaFrame from '../components/MediaFrame';
 import { fetchSizdenGelenler } from '../api/client';
 
 const SAYFA_BASI = 6;
@@ -43,10 +44,10 @@ function IcerikKarti({ item, arama, sayfa }) {
       className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] shadow-[0_6px_22px_rgba(2,40,66,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/25 hover:shadow-[0_16px_36px_rgba(2,40,66,0.14)]"
     >
       <div className="relative h-52 overflow-hidden bg-[#dce6ed]">
-        <img
+        <MediaFrame
           src={item.resim}
           alt={item.kategori}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          className="absolute inset-0 transition duration-500 group-hover:scale-[1.02]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/55 via-transparent to-black/5 opacity-80 transition duration-300 group-hover:opacity-100" />
 
@@ -219,10 +220,11 @@ export default function SizdenGelenler() {
                           i === slide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                         }`}
                       >
-                        <img
+                        <MediaFrame
                           src={item.resim}
                           alt={item.kategori}
-                          className="h-full w-full scale-105 object-cover"
+                          dark
+                          className="absolute inset-0"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/85 via-[#011f34]/25 to-transparent" />
                         <div className="absolute left-4 bottom-4 right-4 sm:left-6 sm:bottom-6 sm:right-24">

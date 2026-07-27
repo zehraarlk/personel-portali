@@ -95,12 +95,6 @@
   height: 100%;
 }
 
-.etkinlik-detay-media img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important; /* Görsel ne boyutta olursa olsun alanı doldurup fazlalığı kırpar */
-  display: block;
-}
 .etkinlik-detay-media--placeholder {
   width: 100%;
   height: 100%;
@@ -304,20 +298,10 @@
 }
 
 .etkinlik-detay-diger-media {
+  position: relative;
   height: 130px;
   background: #f1f5f9;
   overflow: hidden;
-}
-
-.etkinlik-detay-diger-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.etkinlik-detay-diger-card:hover .etkinlik-detay-diger-media img {
-  transform: scale(1.05);
 }
 
 .etkinlik-detay-diger-body {
