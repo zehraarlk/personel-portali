@@ -12,7 +12,7 @@ const QUICK_LINKS = [
   { to: '/egitimler', label: 'Eğitimler', icon: 'fas fa-graduation-cap' },
 ];
 
-const SAYFA_BASI = 9;
+const SAYFA_BASI = 8;
 
 function normalizeIcon(ikon) {
   const raw = (ikon || 'fas fa-balance-scale').trim();
@@ -265,8 +265,8 @@ export default function Mevzuatlar() {
         ) : null}
 
         {!loading && !error && gosterilenler.length > 0 ? (
-          <div className="mevzuat-grid">
-            {gosterilenler.map((item) => {
+          <div className="protokoller-grid mevzuat-protokol-grid">
+            {gosterilenler.map((item, index) => {
               const href = item.dosya_yolu || item.resmi_sayfa || undefined;
               const CardTag = href ? 'a' : 'article';
               const cardProps = href
@@ -279,34 +279,42 @@ export default function Mevzuatlar() {
                 : {};
 
               return (
-                <CardTag key={item.id} className="mevzuat-card" {...cardProps}>
-                  <div className="mevzuat-card__head">
-                    <span className="mevzuat-card__icon" aria-hidden="true">
-                      <i className={normalizeIcon(item.ikon)} />
-                    </span>
-                    <h2 className="mevzuat-card__title">{item.baslik}</h2>
-                  </div>
-
-                  <p className="mevzuat-card__desc">
-                    {item.aciklama || 'Açıklama bulunmuyor.'}
-                  </p>
-
-                  <div className="mevzuat-card__foot">
-                    <span className="mevzuat-card__meta">
-                      <i className="far fa-calendar-alt" aria-hidden="true" />
-                      {item.tarih || '—'}
-                    </span>
-                    <span className="mevzuat-card__meta">
-                      <i className="far fa-file-alt" aria-hidden="true" />
-                      {item.boyut || '—'}
-                    </span>
-                    {href ? (
-                      <span className="mevzuat-card__link">
-                        Görüntüle
-                        <i className="fas fa-arrow-right" aria-hidden="true" />
+                <CardTag
+                  key={item.id}
+                  className="protokol-card"
+                  style={{ '--card-delay': `${Math.min(index, 8) * 40}ms` }}
+                  {...cardProps}
+                >
+                  <span className="protokol-card__accent" aria-hidden="true" />
+                  <div className="protokol-card__body">
+                    <div className="protokol-card__top">
+                      <span className="protokol-card__icon" aria-hidden="true">
+                        <i className={normalizeIcon(item.ikon)} />
                       </span>
-                    ) : null}
+                      <div className="protokol-card__chips">
+                        <span className="protokol-chip">
+                          <i className="far fa-calendar-alt" aria-hidden="true" />
+                          {item.tarih || '—'}
+                        </span>
+                        <span className="protokol-chip">
+                          <i className="far fa-file-alt" aria-hidden="true" />
+                          {item.boyut || '—'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <h2 className="protokol-card__title">{item.baslik}</h2>
+                    <p className="protokol-card__desc">
+                      {item.aciklama || 'Açıklama bulunmuyor.'}
+                    </p>
                   </div>
+
+                  {href ? (
+                    <span className="protokol-card__cta">
+                      Detaylı bilgi için tıklayınız
+                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                    </span>
+                  ) : null}
                 </CardTag>
               );
             })}

@@ -276,3 +276,20 @@
   font-size: 0.7rem;
   transition: transform 0.15s ease;
 }
+
+/* --- Mevzuatlar'da Protokoller kartlarını eşit yükseklikte tutma --- */
+
+.mevzuat-protokol-grid {
+  align-items: stretch;
+}
+
+.mevzuat-protokol-grid .protokol-card {
+  height: 340px;
+}
+
+.mevzuat-protokol-grid .protokol-card__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
