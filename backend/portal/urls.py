@@ -9,6 +9,7 @@ from .views import (
     etkinlikler_list,
     etkinlik_duyurular_list,
     protokoller_list,
+    dokumanlar_list,
     mevzuatlar_list,
 )
 from .profile_views import (
@@ -84,6 +85,7 @@ urlpatterns = [
     path('etkinlikler/', etkinlikler_list, name='etkinlikler'),
     path('duyurular/', etkinlik_duyurular_list, name='etkinlik-duyurular'),
     path('protokoller/', protokoller_list, name='protokoller'),
+    path('dokumanlar/', dokumanlar_list, name='dokumanlar'),
     path('mevzuatlar/', mevzuatlar_list, name='mevzuatlar'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),

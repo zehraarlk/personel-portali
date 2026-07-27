@@ -1,8 +1,24 @@
 export const KAYNAK_QUICK_LINKS = [
-  { to: '/protokoller', label: 'Protokoller', icon: 'fas fa-file-signature' },
-  { to: '/dokumanlar', label: 'Dökümanlar', icon: 'fas fa-file-alt' },
-  { to: '/mevzuatlar', label: 'Mevzuatlar', icon: 'fas fa-balance-scale' },
-  { to: '/egitimler', label: 'Eğitimler', icon: 'fas fa-graduation-cap' },
+  {
+    to: '/protokoller',
+    label: 'Protokoller',
+    icon: 'fas fa-file-signature',
+  },
+  {
+    to: '/dokumanlar',
+    label: 'Dokümanlar',
+    icon: 'fas fa-file-alt',
+  },
+  {
+    to: '/mevzuatlar',
+    label: 'Mevzuatlar',
+    icon: 'fas fa-balance-scale',
+  },
+  {
+    to: '/egitimler',
+    label: 'Eğitimler',
+    icon: 'fas fa-graduation-cap',
+  },
 ];
 
 export const KAYNAK_PAGES = {
@@ -10,18 +26,21 @@ export const KAYNAK_PAGES = {
     title: 'Protokoller',
     description:
       'Personel ve kurumsal indirim anlaşmalarını inceleyin; ilgili belgeye tek tıkla ulaşın.',
-    searchPlaceholder: 'Kurum veya protokol adı ara…',
+    searchPlaceholder:
+      'Kurum veya protokol adı ara…',
     searchId: 'protokol-ara',
     statLabel: 'aktif protokol',
   },
+
   dokumanlar: {
-    title: 'Dökümanlar',
+    title: 'Dokümanlar',
     description:
       'Kurumsal formlar, belgeler ve personel dokümanlarına buradan ulaşın.',
-    searchPlaceholder: 'Döküman adı ara…',
+    searchPlaceholder: 'Doküman adı ara…',
     searchId: 'dokuman-ara',
-    statLabel: 'aktif döküman',
+    statLabel: 'aktif doküman',
   },
+
   mevzuatlar: {
     title: 'Mevzuatlar',
     description:
@@ -30,6 +49,7 @@ export const KAYNAK_PAGES = {
     searchId: 'mevzuat-ara',
     statLabel: 'aktif mevzuat',
   },
+
   egitimler: {
     title: 'Eğitimler',
     description:

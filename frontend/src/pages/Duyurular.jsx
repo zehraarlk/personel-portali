@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-
 import Layout from '../components/Layout';
 import Footer from '../components/Footer';
 import { fetchDuyurular } from '../api/client';
@@ -447,30 +445,7 @@ export default function Duyurular() {
 
         {!loading && !error && (
           <div className="mx-auto w-full max-w-[1440px] px-4 pb-6 pt-4 md:px-8 md:pb-8 md:pt-4">
-            <nav
-              aria-label="Sayfa yolu"
-              className="mb-4 flex items-center gap-2 px-2 text-sm font-medium text-[#33495a]"
-            >
-              <Link
-                to="/"
-                className="transition hover:text-[#022842] hover:underline"
-              >
-                Anasayfa
-              </Link>
-
-              <span
-                className="material-symbols-outlined text-[18px] text-[#536575]"
-                aria-hidden="true"
-              >
-                chevron_right
-              </span>
-
-              <span className="font-semibold text-[#022842]" aria-current="page">
-                Duyurular
-              </span>
-            </nav>
-
-            <header className="relative mb-6 w-full overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-[#022842] via-[#073a5c] to-[#0c5278] px-6 py-4 text-white shadow-[0_14px_38px_rgba(2,40,66,0.18)] md:px-9 md:py-5">
+            <header className="relative mb-6 w-full overflow-hidden rounded-2xl border border-[#022842]/10 bg-[linear-gradient(105deg,#022842_0%,#022842_28%,#073a5c_66%,#0c5278_100%)] px-6 py-4 text-white shadow-[0_14px_38px_rgba(2,40,66,0.18)] md:px-9 md:py-5">
               <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10 bg-white/5" />
               <div className="pointer-events-none absolute -bottom-28 right-28 h-56 w-56 rounded-full border border-[#f5a623]/20 bg-[#f5a623]/5" />
 

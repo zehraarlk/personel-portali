@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.db.models import F
+from django.db.models import F, Q
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -236,6 +236,50 @@ def protokoller_list(request):
         for row in qs
     ]
     return Response({'protokoller': items, 'toplam': len(items)})
+
+
+@api_view(['GET'])
+def dokumanlar_list(request):
+    """Personel portalı - Kaynaklar > Dokümanlar."""
+    q = (request.query_params.get('q') or '').strip()
+
+    qs = (
+        Kaynaklar.objects.select_related('kategori')
+        .filter(
+            Q(kategori__slug__iexact='Dokümanlar')
+            | Q(kategori__slug__iexact='Dökümanlar')
+            | Q(kategori__ad__iexact='Dokümanlar')
+            | Q(kategori__ad__iexact='Dökümanlar')
+        )
+        .order_by('-id')
+    )
+
+    if q:
+        q_fold = _tr_casefold(q)
+        matched_ids = [
+            row.id
+            for row in qs
+            if q_fold in _tr_casefold(row.baslik)
+            or q_fold in _tr_casefold(row.aciklama)
+        ]
+        qs = qs.filter(id__in=matched_ids)
+
+    items = [
+        {
+            'id': row.id,
+            'baslik': row.baslik,
+            'aciklama': row.aciklama,
+            'ikon': row.ikon or 'fas fa-file-alt',
+            'dosya_yolu': row.dosya_yolu,
+            'resmi_sayfa': row.resmi_sayfa or '',
+            'boyut': row.boyut,
+            'tarih': row.tarih,
+        }
+        for row in qs
+    ]
+
+    return Response({'dokumanlar': items, 'toplam': len(items)})
+
 
 @api_view(['GET'])
 def mevzuatlar_list(request):
