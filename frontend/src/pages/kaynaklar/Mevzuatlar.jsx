@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchMevzuatlar } from '../../api/client';
@@ -22,6 +22,7 @@ function normalizeIcon(ikon) {
 
 export default function Mevzuatlar() {
   const location = useLocation();
+  const filtreRef = useRef(null);
   const [items, setItems] = useState([]);
   const [altKategoriler, setAltKategoriler] = useState([]);
   const [altKategori, setAltKategori] = useState(null);
@@ -35,6 +36,7 @@ export default function Mevzuatlar() {
   useEffect(() => {
     setAltKategori(null);
     setQuery('');
+    setSayfa(0);
   }, [location.key]);
 
   useEffect(() => {
@@ -142,7 +144,7 @@ export default function Mevzuatlar() {
           </nav>
         </div>
 
-        <div className="mevzuat-filter-bar">
+        <div className="mevzuat-filter-bar" ref={filtreRef}>
           <p className="mevzuat-filter-bar__label">
             Kategori: <strong>{aktifAltKategoriAdi}</strong>
           </p>
@@ -272,7 +274,10 @@ export default function Mevzuatlar() {
           <div className="mevzuat-pagination">
             <button
               type="button"
-              onClick={() => setSayfa((s) => Math.max(0, s - 1))}
+              onClick={() => {
+                setSayfa((s) => Math.max(0, s - 1));
+                filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               disabled={sayfa === 0}
               className="mevzuat-pagination__arrow"
               aria-label="Önceki sayfa"
@@ -284,7 +289,10 @@ export default function Mevzuatlar() {
               <button
                 key={n}
                 type="button"
-                onClick={() => setSayfa(n)}
+                onClick={() => {
+                  setSayfa(n);
+                  filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
                 aria-current={sayfa === n ? 'page' : undefined}
                 className={`mevzuat-pagination__num${sayfa === n ? ' is-active' : ''}`}
               >
@@ -294,7 +302,10 @@ export default function Mevzuatlar() {
 
             <button
               type="button"
-              onClick={() => setSayfa((s) => Math.min(toplamSayfa - 1, s + 1))}
+              onClick={() => {
+                setSayfa((s) => Math.min(toplamSayfa - 1, s + 1));
+                filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               disabled={sayfa >= toplamSayfa - 1}
               className="mevzuat-pagination__arrow"
               aria-label="Sonraki sayfa"
