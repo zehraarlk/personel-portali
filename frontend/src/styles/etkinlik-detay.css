@@ -1,18 +1,17 @@
 /* ==========================================================================
-   Etkinlik Detay - Modern Layout
+   Etkinlik Detay - Modern 3/4 + 1/4 Grid Layout
    ========================================================================== */
 
 .etkinlik-detay-page {
   --ek-primary: #022842;
   --ek-primary-light: #0b3757;
   --ek-accent: #f5a623;
-  --ek-accent-hover: #d98e18;
   --ek-text-dark: #1e293b;
   --ek-text-muted: #64748b;
   --ek-border: #e2e8f0;
   --ek-bg-card: #ffffff;
   --ek-radius: 16px;
-  --ek-shadow: 0 10px 25px -5px rgba(2, 40, 66, 0.08), 0 8px 10px -6px rgba(2, 40, 66, 0.04);
+  --ek-shadow: 0 10px 25px -5px rgba(2, 40, 66, 0.08);
   color: var(--ek-text-dark);
 }
 
@@ -30,9 +29,9 @@
   padding: 10px 18px;
   border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .etkinlik-detay-back:hover {
@@ -66,7 +65,17 @@
 .etkinlik-detay-skeleton-hero { height: 320px; }
 .etkinlik-detay-skeleton-row { height: 80px; }
 
-/* --- Ana Görsel & Hero --- */
+/* --- Üst Alan Layout: 3/4 (Hero) + 1/4 (Bilgi/Açıklama Paneli) --- */
+
+.etkinlik-detay-top-grid {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+  align-items: stretch;
+}
+
+/* --- %75 Hero/Görsel Alanı --- */
 
 .etkinlik-detay-hero {
   position: relative;
@@ -74,21 +83,24 @@
   overflow: hidden;
   background: var(--ek-primary);
   box-shadow: var(--ek-shadow);
-  margin-bottom: 32px;
+  /* Sabit bir yükseklik vererek görselin boyutu ne olursa olsun dış çerçevyi kilitliyoruz */
+  height: 380px; 
+  width: 100%;
 }
 
 .etkinlik-detay-media {
-  position: relative;
-  height: 380px;
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
 }
 
 .etkinlik-detay-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important; /* Görsel ne boyutta olursa olsun alanı doldurup fazlalığı kırpar */
+  display: block;
 }
-
 .etkinlik-detay-media--placeholder {
   width: 100%;
   height: 100%;
@@ -96,8 +108,12 @@
 }
 
 .etkinlik-detay-shade {
+  max-width: 100%;
+  height: 100%;
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   background: linear-gradient(180deg, rgba(2, 40, 66, 0.1) 0%, rgba(2, 40, 66, 0.85) 100%);
 }
 
@@ -106,7 +122,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 32px;
+  padding: 28px;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -125,82 +141,37 @@
   background: var(--ek-accent);
   padding: 6px 14px;
   border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(245, 166, 35, 0.3);
 }
 
 .etkinlik-detay-title {
   margin: 0;
-  font-size: clamp(24px, 4vw, 36px);
+  font-size: clamp(22px, 3vw, 32px);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.25;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* --- İki Sütunlu Sayfa Düzeni (Layout Grid) --- */
+/* --- %25 Yan Yan Panel (Tarih & Açıklama) --- */
 
-.etkinlik-detay-grid {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 32px;
-  align-items: start;
-}
-
-.etkinlik-detay-main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.etkinlik-detay-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  position: sticky;
-  top: 24px;
-}
-
-/* --- Kart Yapısı & İçerik --- */
-
-.etkinlik-detay-card {
+.etkinlik-detay-side-panel {
   background: var(--ek-bg-card);
   border: 1px solid var(--ek-border);
   border-radius: var(--ek-radius);
   padding: 24px;
   box-shadow: var(--ek-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.etkinlik-detay-card h2 {
-  margin: 0 0 16px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ek-primary);
+/* Tarih Bloğu */
+.etkinlik-detay-date-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-bottom: 2px solid #f1f5f9;
-  padding-bottom: 10px;
-}
-
-.etkinlik-detay-aciklama {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.8;
-  color: #334155;
-  white-space: pre-line;
-}
-
-/* --- Sağ Sidebar Bilgi Blokları --- */
-
-.etkinlik-detay-info-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 12px 0;
-}
-
-.etkinlik-detay-info-box:not(:last-child) {
-  border-bottom: 1px dashed var(--ek-border);
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ek-border);
 }
 
 .etkinlik-detay-date-badge {
@@ -231,42 +202,88 @@
   margin-top: 4px;
 }
 
-.etkinlik-detay-info-text {
+.etkinlik-detay-date-text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-.etkinlik-detay-info-text strong {
-  font-size: 15px;
+.etkinlik-detay-date-text strong {
+  font-size: 14px;
   color: var(--ek-text-dark);
 }
 
-.etkinlik-detay-info-text span {
-  font-size: 13px;
+.etkinlik-detay-date-text span {
+  font-size: 12.5px;
   color: var(--ek-text-muted);
 }
 
-.etkinlik-detay-icon-wrapper {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: #f1f5f9;
+/* Konum & Açıklama Blokları */
+
+.etkinlik-detay-konum-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ek-primary);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ek-border);
+}
+
+.etkinlik-detay-konum-box i {
+  color: var(--ek-accent);
+  font-size: 16px;
+}
+
+.etkinlik-detay-aciklama-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.etkinlik-detay-aciklama-wrapper h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ek-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.etkinlik-detay-aciklama {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #475569;
+  white-space: pre-line;
+}
+
+/* --- Alt Kısım: Tüm Sayfayı Kaplayan Diğer Etkinlikler --- */
+
+.etkinlik-detay-full-section {
+  width: 100%;
+  background: var(--ek-bg-card);
+  border: 1px solid var(--ek-border);
+  border-radius: var(--ek-radius);
+  padding: 28px;
+  box-shadow: var(--ek-shadow);
+}
+
+.etkinlik-detay-full-section h2 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 800;
   color: var(--ek-primary);
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
+  gap: 10px;
 }
-
-/* --- Diğer Etkinlikler Kartları --- */
 
 .etkinlik-detay-diger-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 12px;
+  gap: 20px;
 }
 
 .etkinlik-detay-diger-card {
@@ -277,17 +294,17 @@
   overflow: hidden;
   background: var(--ek-bg-card);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .etkinlik-detay-diger-card:hover {
   transform: translateY(-4px);
   border-color: var(--ek-primary-light);
-  box-shadow: var(--ek-shadow);
+  box-shadow: 0 12px 20px rgba(2, 40, 66, 0.1);
 }
 
 .etkinlik-detay-diger-media {
-  height: 110px;
+  height: 130px;
   background: #f1f5f9;
   overflow: hidden;
 }
@@ -304,7 +321,7 @@
 }
 
 .etkinlik-detay-diger-body {
-  padding: 12px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -319,36 +336,72 @@
 
 .etkinlik-detay-diger-body h3 {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.4;
   color: var(--ek-text-dark);
 }
 
 /* ==========================================================================
-   Responsive Tasarım
+   Responsive
    ========================================================================== */
 
-@media (max-width: 900px) {
-  .etkinlik-detay-grid {
+@media (max-width: 992px) {
+  .etkinlik-detay-top-grid {
     grid-template-columns: 1fr;
-  }
-
-  .etkinlik-detay-sidebar {
-    position: static;
   }
 }
 
 @media (max-width: 640px) {
-  .etkinlik-detay-media {
-    height: 260px;
-  }
-
-  .etkinlik-detay-hero-overlay {
-    padding: 16px;
+  .etkinlik-detay-hero {
+    min-height: 260px;
   }
 
   .etkinlik-detay-diger-list {
     grid-template-columns: 1fr;
   }
+}
+/* --- Slider Başlık ve Kontrol Butonları --- */
+
+.etkinlik-detay-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.etkinlik-detay-slider-header h2 {
+  margin: 0;
+}
+
+.etkinlik-detay-slider-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.etkinlik-slider-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--ek-border);
+  background: var(--ek-bg-card);
+  color: var(--ek-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.etkinlik-slider-btn:hover:not(:disabled) {
+  background: var(--ek-primary);
+  color: #ffffff;
+  border-color: var(--ek-primary);
+}
+
+.etkinlik-slider-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
