@@ -9,6 +9,7 @@ from .views import (
     etkinlikler_list,
     etkinlik_duyurular_list,
     protokoller_list,
+    egitimler_list,
     dokumanlar_list,
     mevzuatlar_list,
 )
@@ -85,6 +86,7 @@ urlpatterns = [
     path('etkinlikler/', etkinlikler_list, name='etkinlikler'),
     path('duyurular/', etkinlik_duyurular_list, name='etkinlik-duyurular'),
     path('protokoller/', protokoller_list, name='protokoller'),
+    path('egitimler/', egitimler_list, name='egitimler'),
     path('dokumanlar/', dokumanlar_list, name='dokumanlar'),
     path('mevzuatlar/', mevzuatlar_list, name='mevzuatlar'),
 

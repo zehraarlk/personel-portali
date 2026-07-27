@@ -446,6 +446,26 @@ export async function fetchProtokoller(q = '') {
 }
 
 /**
+ * Eğitimler
+ * { egitimler: [...], toplam }
+ */
+export async function fetchEgitimler(q = '') {
+  const qs = q
+    ? `?q=${encodeURIComponent(q)}`
+    : '';
+
+  const response = await fetch(
+    `${API_BASE}/egitimler/${qs}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Eğitimler alınamadı');
+  }
+
+  return response.json();
+}
+
+/**
  * Dokümanlar
  * { dokumanlar: [...], toplam }
  */
