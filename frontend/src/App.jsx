@@ -44,9 +44,10 @@ export default function App() {
         <Route path="/etkinlikler/:id" element={<EtkinlikDetay />} />
         <Route path="/duyurular" element={<Duyurular />} />
         <Route path="/protokoller" element={<Protokoller />} />
-        <Route path="/mevzuatlar" element={<Mevzuatlar />} />
         <Route path="/dokumanlar" element={<Dokumanlar />} />
+        <Route path="/mevzuatlar" element={<Mevzuatlar />} />
         <Route path="/egitimler" element={<Egitimler />} />
+
         <Route path="/test" element={<Test />} />
         <Route path="/test/personel-db" element={<PersonelDb />} />
         <Route path="/profil/sifre-degistir" element={<ChangePassword />} />
