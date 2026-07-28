@@ -207,6 +207,7 @@ export default function Mevzuatlar() {
                       setAltKategori(null);
                       setQuery('');
                       setMenuAcik(false);
+                      scrollToFiltre();
                     }}
                   >
                     <i className="fas fa-list" aria-hidden="true" />
@@ -222,6 +223,7 @@ export default function Mevzuatlar() {
                         setAltKategori(kategori.slug);
                         setQuery('');
                         setMenuAcik(false);
+                        scrollToFiltre();
                       }}
                     >
                       <i className="fas fa-balance-scale" aria-hidden="true" />
