@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import MediaFrame from '../components/MediaFrame';
@@ -30,6 +30,7 @@ export default function SizdenGelenlerDetay() {
   const [resimBuyuk, setResimBuyuk] = useState(false);
   const [seciliMudurluk, setSeciliMudurluk] = useState(undefined);
   const [menuAcik, setMenuAcik] = useState(false);
+  const gonderilenIdler = useRef(new Set());
 
   useEffect(() => {
     setLoading(true);
@@ -46,6 +47,8 @@ export default function SizdenGelenlerDetay() {
   }, [id]);
 
   useEffect(() => {
+    if (gonderilenIdler.current.has(id)) return;
+    gonderilenIdler.current.add(id);
     goruntulenmeArttir(id).catch(() => {});
   }, [id]);
 

@@ -102,7 +102,7 @@ export default function Mevzuatlar() {
   };
 
   const scrollToFiltre = () => {
-    filtreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    filtreRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
   };
 
   const aktifAltKategoriAdi = altKategori

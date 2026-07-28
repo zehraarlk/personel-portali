@@ -111,7 +111,7 @@ export default function SizdenGelenler() {
       { replace: true }
     );
     if (kaydir) {
-      listeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      listeRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
     }
   }
 
@@ -345,7 +345,7 @@ export default function SizdenGelenler() {
               </div>
             )}
 
-            <div ref={listeRef} className="mb-5 flex flex-wrap items-center justify-between gap-3 scroll-mt-6">
+            <div ref={listeRef} className="mb-5 flex flex-wrap items-center justify-between gap-3 scroll-mt-[90px]">
               <div>
                 <h2 className="text-xl font-bold text-[#0b1c30] md:text-2xl">
                   {kategoriler.find((k) => k.slug === seciliKategori)?.ad || 'Tüm İçerikler'}
