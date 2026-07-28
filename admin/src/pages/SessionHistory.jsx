@@ -13,6 +13,19 @@ function formatTs(value) {
   }
 }
 
+const KAPANIS_LABEL = {
+  manuel: 'Manuel çıkış',
+  sekme: 'Sekme kapandı',
+  otomatik: 'Otomatik (yeni giriş)',
+  eski: 'Eski oturum',
+  cikis: 'Çıkış',
+};
+
+function formatKapanis(tip) {
+  if (!tip) return 'Kapalı';
+  return KAPANIS_LABEL[String(tip).toLowerCase()] || tip;
+}
+
 export default function SessionHistory() {
   usePageTitle('Oturum Kayıtları');
   const [rows, setRows] = useState([]);
@@ -70,10 +83,10 @@ export default function SessionHistory() {
                     <td>{formatTs(r.cikis_zamani)}</td>
                     <td>{r.ip_adresi || '—'}</td>
                     <td>
-                      {r.aktif ? (
+                      {                        r.aktif ? (
                         <span className="admin-chip">Açık</span>
                       ) : (
-                        r.kapanis_tipi || 'Kapalı'
+                        formatKapanis(r.kapanis_tipi)
                       )}
                     </td>
                   </tr>

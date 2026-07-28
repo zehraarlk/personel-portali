@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import MediaFrame from '../components/MediaFrame';
 import { fetchHomeDashboard } from '../api/client';
 import { BRAND_IMG } from '../constants';
+import useSiteIcons from '../hooks/useSiteIcons';
 import '../styles/home.css';
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
   const [isPaused, setIsPaused] = useState(false);
   const thumbRefs = useRef([]);
   const thumbRailRef = useRef(null);
+  const { icon } = useSiteIcons();
 
   useEffect(() => {
     fetchHomeDashboard()
@@ -108,7 +110,7 @@ export default function Home() {
                         aria-label="Önceki Haber"
                         className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition border border-white/10 hover:bg-amber-500 hover:text-white"
                       >
-                        <span className="material-symbols-outlined">chevron_left</span>
+                        <i className={icon('onceki')} aria-hidden="true" />
                       </button>
                       <button
                         type="button"
@@ -116,7 +118,7 @@ export default function Home() {
                         aria-label="Sonraki Haber"
                         className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition border border-white/10 hover:bg-amber-500 hover:text-white"
                       >
-                        <span className="material-symbols-outlined">chevron_right</span>
+                        <i className={icon('sonraki')} aria-hidden="true" />
                       </button>
                     </>
                   )}
@@ -177,7 +179,7 @@ export default function Home() {
             className="flex items-stretch rounded-2xl bg-[#0b3757] border-b-4 border-amber-500 shadow-md overflow-hidden text-white gap-4 select-none min-h-[132px]"
           >
             <div className="shrink-0 flex items-center gap-2.5 z-10 bg-[#022842] pl-5 pr-6">
-              <span className="material-symbols-outlined text-2xl text-amber-400">campaign</span>
+              <i className={`${icon('duyuru_zili')} text-2xl text-amber-400`} aria-hidden="true" />
               <span className="font-black text-sm md:text-base tracking-wide uppercase">
                 Duyurular
               </span>
@@ -202,7 +204,7 @@ export default function Home() {
                         <MediaFrame src={d.resim} alt="" dark className="absolute inset-0" />
                       ) : (
                         <div className="absolute inset-0 grid place-items-center bg-white/10">
-                          <span className="material-symbols-outlined text-white/50 text-base">campaign</span>
+                          <i className={`${icon('duyuru_zili')} text-white/50 text-base`} aria-hidden="true" />
                         </div>
                       )}
                     </div>
@@ -228,7 +230,7 @@ export default function Home() {
   <div className="relative mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-rose-100/80 pb-3.5">
     <div className="flex items-center gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-rose-500 to-pink-500 text-white shadow-sm shadow-rose-200">
-        <span className="material-symbols-outlined text-xl">cake</span>
+        <i className={`${icon('dogum_sayfa')} text-xl`} aria-hidden="true" />
       </div>
       <div>
         <h2 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">
@@ -280,7 +282,7 @@ export default function Home() {
       ))
     ) : (
       <div className="col-span-full flex items-center justify-center gap-2 py-8 text-sm text-slate-500 bg-white/60 rounded-xl border border-rose-100/60">
-        <span className="material-symbols-outlined text-rose-400">event_busy</span>
+        <i className={`${icon('tarih')} text-rose-400`} aria-hidden="true" />
         Bugün doğum günü olan personel bulunmamaktadır.
       </div>
     )}
@@ -296,7 +298,7 @@ export default function Home() {
   <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
     <div className="flex items-center gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#022842] text-amber-400 shadow-sm">
-        <span className="material-symbols-outlined text-xl">grid_view</span>
+        <i className={`${icon('otomasyon_sistem')} text-xl`} aria-hidden="true" />
       </div>
       <div>
         <h2 className="text-lg md:text-xl font-bold text-[#022842]">
@@ -324,7 +326,7 @@ export default function Home() {
       >
         {/* Sağ Üst Çapraz Ok İkonu */}
         <span className="absolute top-3.5 right-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100/80 text-slate-400 transition-all duration-300 group-hover:bg-[#022842] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-          <span className="material-symbols-outlined text-base">north_east</span>
+          <i className={`${icon('harici_baglanti')} text-sm`} aria-hidden="true" />
         </span>
 
         {/* Büyütülmüş Logo/Fotoğraf Alanı */}

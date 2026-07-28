@@ -15,6 +15,46 @@ function normalizeIcon(icon) {
   return value;
 }
 
+function getFileType(item) {
+  const rawType = item.dosya_turu || item.uzanti || item.tip;
+
+  if (rawType) {
+    return String(rawType).replace('.', '').trim().toUpperCase();
+  }
+
+  const filePath = item.dosya_yolu || item.resmi_sayfa || '';
+  const cleanPath = filePath.split('?')[0].split('#')[0];
+  const fileName = cleanPath.split('/').pop() || '';
+
+  if (!fileName.includes('.')) {
+    return '';
+  }
+
+  return fileName.split('.').pop().toUpperCase();
+}
+
+function getFileTypeIcon(fileType) {
+  switch (fileType) {
+    case 'DOC':
+    case 'DOCX':
+      return 'far fa-file-word';
+    case 'PDF':
+      return 'far fa-file-pdf';
+    case 'XLS':
+    case 'XLSX':
+      return 'far fa-file-excel';
+    case 'PPT':
+    case 'PPTX':
+      return 'far fa-file-powerpoint';
+    case 'ZIP':
+    case 'RAR':
+    case '7Z':
+      return 'far fa-file-archive';
+    default:
+      return 'far fa-file-alt';
+  }
+}
+
 export default function Dokumanlar() {
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
@@ -118,12 +158,21 @@ export default function Dokumanlar() {
           {items.map((item, index) => {
             const href = item.dosya_yolu || item.resmi_sayfa || '';
             const Card = href ? 'a' : 'article';
+            const fileType = getFileType(item);
+            const isDownloadable = Boolean(item.dosya_yolu);
+
             const linkProps = href
-              ? {
-                  href,
-                  target: '_blank',
-                  rel: 'noopener noreferrer',
-                }
+              ? isDownloadable
+                ? {
+                    href,
+                    download: '',
+                    rel: 'noopener noreferrer',
+                  }
+                : {
+                    href,
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  }
               : {};
 
             return (
@@ -155,6 +204,16 @@ export default function Dokumanlar() {
                           {item.boyut}
                         </span>
                       ) : null}
+
+                      {fileType ? (
+                        <span className="protokol-chip protokol-chip--filetype">
+                          <i
+                            className={getFileTypeIcon(fileType)}
+                            aria-hidden="true"
+                          />
+                          {fileType}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
@@ -164,8 +223,17 @@ export default function Dokumanlar() {
 
                 {href ? (
                   <span className="protokol-card__cta">
-                    Dokümanı görüntüle
-                    <i className="fas fa-arrow-right" aria-hidden="true" />
+                    {isDownloadable
+                      ? 'Dokümanı indir'
+                      : 'Dokümanı görüntüle'}
+                    <i
+                      className={
+                        isDownloadable
+                          ? 'fas fa-download'
+                          : 'fas fa-arrow-right'
+                      }
+                      aria-hidden="true"
+                    />
                   </span>
                 ) : null}
               </Card>

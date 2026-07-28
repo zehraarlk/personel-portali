@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND_IMG, SITE_LOGO_WHITE } from '../constants';
 import {
-  fetchSiteIcons,
   fetchProfile,
   fetchAdminProfile,
   logoutPersonel,
@@ -13,8 +12,11 @@ import {
   clearAuth,
   clearPersonelAuth,
   getPersonelId,
+  getProfileCache,
   isYoneticiLoggedIn,
+  setProfileCache,
 } from '../auth/session';
+import useSiteIcons from '../hooks/useSiteIcons';
 import '../styles/navbar.css';
 
 const NAV_SECTIONS = [
@@ -68,34 +70,11 @@ const PROFILE_MENU_ADMIN = [
   { to: '/admin/profil/oturum-kayitlari', label: 'Oturum Kayıtları', iconKey: 'oturum_bilgileri' },
 ];
 
-const FALLBACK_ICONS = {
-  anasayfa: 'fas fa-home',
-  videolar: 'fas fa-video',
-  sizden_gelenler: 'fas fa-comments',
-  etkinlik_takvimi: 'fas fa-calendar-check',
-  duyurular: 'fas fa-bullhorn',
-  protokoller: 'fas fa-file-signature',
-  dokumanlar: 'fas fa-file-alt',
-  mevzuatlar: 'fas fa-balance-scale',
-  egitimler: 'fas fa-graduation-cap',
-  anketler: 'fas fa-poll',
-  yardimci_linkler: 'fas fa-link',
-  vefat_bilgisi: 'fas fa-ribbon',
-  dogum_gunu: 'fas fa-birthday-cake',
-  menu_ac: 'fas fa-bars',
-  sifre_degistir: 'fas fa-key',
-  email_degistir: 'fas fa-envelope',
-  oturum_bilgileri: 'fas fa-history',
-  giris: 'fas fa-sign-in-alt',
-  cikis: 'fas fa-sign-out-alt',
-  yonetim_paneli: 'fas fa-tachometer-alt',
-};
-
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [icons, setIcons] = useState(FALLBACK_ICONS);
-  const [profile, setProfile] = useState(null);
+  const { icon: iconClass } = useSiteIcons();
+  const [profile, setProfile] = useState(() => getProfileCache());
   const [loggedIn, setLoggedIn] = useState(() => canAccessPortal());
   const [isAdmin, setIsAdmin] = useState(() => isYoneticiLoggedIn());
   const [openMenu, setOpenMenu] = useState(null);
@@ -136,29 +115,30 @@ export default function Navbar() {
     const admin = isYoneticiLoggedIn();
     setLoggedIn(canAccessPortal());
     setIsAdmin(admin);
-    fetchSiteIcons()
-      .then((data) => {
-        if (!cancelled && data?.icons) {
-          setIcons({ ...FALLBACK_ICONS, ...data.icons });
-        }
-      })
-      .catch(() => {});
+    const cached = getProfileCache();
+    if (cached) setProfile(cached);
 
     if (getPersonelId()) {
       fetchProfile()
         .then((data) => {
-          if (!cancelled) setProfile(data);
+          if (!cancelled) {
+            setProfile(data);
+            setProfileCache(data);
+          }
         })
         .catch(() => {
-          if (!cancelled) setProfile(null);
+          if (!cancelled && !getProfileCache()) setProfile(null);
         });
     } else if (admin) {
       fetchAdminProfile()
         .then((data) => {
-          if (!cancelled) setProfile(data);
+          if (!cancelled) {
+            setProfile(data);
+            setProfileCache(data);
+          }
         })
         .catch(() => {
-          if (!cancelled) setProfile(null);
+          if (!cancelled && !getProfileCache()) setProfile(null);
         });
     } else {
       setProfile(null);
@@ -213,13 +193,15 @@ export default function Navbar() {
 
   const sectionKey = (section) => section.title ?? 'main';
   const sectionHasActive = (section) => section.items.some(isActive);
-  const iconClass = (key) => icons[key] || FALLBACK_ICONS[key] || 'fas fa-circle';
   const foto = profile?.foto || BRAND_IMG;
   const adSoyad = loggedIn
-    ? profile?.ad_soyad || profile?.kullanici_adi || (isAdmin ? 'Yönetici' : 'Personel')
+    ? profile?.ad_soyad ||
+      [profile?.ad, profile?.soyad].filter(Boolean).join(' ') ||
+      profile?.kullanici_adi ||
+      (isAdmin ? 'Yönetici' : 'Personel')
     : 'Misafir';
   const rol = loggedIn
-    ? profile?.yetki || profile?.rol || (isAdmin ? 'Yönetici' : 'Personel')
+    ? profile?.yetki || profile?.rol || (isAdmin ? 'Yönetici' : 'personel')
     : 'Giriş yapın';
 
   const toggleMenu = (key) => setOpenMenu((cur) => (cur === key ? null : key));
@@ -229,7 +211,7 @@ export default function Navbar() {
     if (!loggedIn) {
       return (
         <Link to="/giris" role="menuitem" className={linkClass} onClick={onClose}>
-          <i className={ico('giris')} aria-hidden="true" />
+          <i className={ico('giris_yap_bi')} aria-hidden="true" />
           Giriş Yap
         </Link>
       );
@@ -243,7 +225,7 @@ export default function Navbar() {
           </Link>
         ))}
         <button type="button" role="menuitem" className={linkClass} onClick={handleLogout}>
-          <i className={ico('cikis')} aria-hidden="true" />
+          <i className={ico('cikis_yap')} aria-hidden="true" />
           Çıkış Yap
         </button>
       </>
@@ -316,7 +298,7 @@ export default function Navbar() {
             aria-label="Menüyü aç"
             aria-expanded={sidebarOpen}
           >
-            <i className="fas fa-bars" aria-hidden="true" />
+            <i className={iconClass('menu_ac')} aria-hidden="true" />
           </button>
           <Link to="/" className="navbar-logo navbar-logo--mobile" aria-label="Ana Sayfa">
             <img src={SITE_LOGO_WHITE} alt="Gebze Belediyesi" />
@@ -457,5 +439,3 @@ export default function Navbar() {
     </header>
   );
 }
-
-export { FALLBACK_ICONS };

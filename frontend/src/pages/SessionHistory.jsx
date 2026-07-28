@@ -13,6 +13,19 @@ function formatTs(value) {
   }
 }
 
+const KAPANIS_LABEL = {
+  manuel: 'Manuel çıkış',
+  sekme: 'Sekme kapandı',
+  otomatik: 'Otomatik (yeni giriş)',
+  eski: 'Eski oturum',
+  cikis: 'Çıkış',
+};
+
+function formatKapanis(tip) {
+  if (!tip) return 'Kapalı';
+  return KAPANIS_LABEL[String(tip).toLowerCase()] || tip;
+}
+
 export default function SessionHistory() {
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState('');
@@ -77,7 +90,7 @@ export default function SessionHistory() {
                         {r.aktif ? (
                           <span className="profil-chip">Açık</span>
                         ) : (
-                          <span className="profil-muted">{r.kapanis_tipi || 'Kapalı'}</span>
+                          <span className="profil-muted">{formatKapanis(r.kapanis_tipi)}</span>
                         )}
                       </td>
                     </tr>

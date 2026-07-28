@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from './Layout';
 import { KAYNAK_QUICK_LINKS } from '../pages/kaynaklar/config';
+import useSiteIcons from '../hooks/useSiteIcons';
 import '../styles/protokoller.css';
 
 /**
  * Kaynaklar sayfaları ortak iskeleti: hero + arama + hızlı erişim.
- * `children` veri alanıdır; boş bırakılabilir.
  */
 export default function KaynaklarShell({
   title,
@@ -23,6 +23,7 @@ export default function KaynaklarShell({
   children,
 }) {
   const location = useLocation();
+  const { icon } = useSiteIcons();
   const [localQuery, setLocalQuery] = useState('');
   const [localSearch, setLocalSearch] = useState('');
 
@@ -70,7 +71,7 @@ export default function KaynaklarShell({
         <div className="protokoller-bar">
           <form className="protokoller-toolbar" onSubmit={submitSearch} role="search">
             <label className="protokoller-toolbar__field" htmlFor={searchId}>
-              <i className="fas fa-search" aria-hidden="true" />
+              <i className={icon('arama')} aria-hidden="true" />
               <input
                 id={searchId}
                 type="search"
@@ -108,7 +109,7 @@ export default function KaynaklarShell({
                   className={`protokoller-quick__btn${active ? ' is-active' : ''}`}
                   aria-current={active ? 'page' : undefined}
                 >
-                  <i className={item.icon} aria-hidden="true" />
+                  <i className={icon(item.iconKey)} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );

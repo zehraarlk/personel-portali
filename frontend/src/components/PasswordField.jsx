@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import useSiteIcons from '../hooks/useSiteIcons';
 
 /** Şifre alanı + göster/gizle (orijinal login.js) */
 export default function PasswordField({
@@ -15,6 +16,7 @@ export default function PasswordField({
   autoComplete = 'current-password',
 }) {
   const [show, setShow] = useState(false);
+  const { icon } = useSiteIcons();
 
   return (
     <div className="login-field">
@@ -48,7 +50,10 @@ export default function PasswordField({
           aria-label={show ? 'Şifreyi gizle' : 'Şifreyi göster'}
           onClick={() => setShow((v) => !v)}
         >
-          <i className={`fas ${show ? 'fa-eye' : 'fa-eye-slash'}`} aria-hidden="true" />
+          <i
+            className={icon(show ? 'sifre_gizle_bi' : 'sifre_goster_bi')}
+            aria-hidden="true"
+          />
         </button>
       </div>
       {error ? (

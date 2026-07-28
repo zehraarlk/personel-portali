@@ -7,7 +7,7 @@ import {
   getYoneticiOturumId,
 } from './session';
 
-const REQUEST_TIMEOUT_MS = 250;
+const REQUEST_TIMEOUT_MS = 400;
 
 /**
  * Sekmeler arası oturum paylaşımı (BroadcastChannel).

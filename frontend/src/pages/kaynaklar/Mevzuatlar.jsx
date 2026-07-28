@@ -2,14 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchMevzuatlar } from '../../api/client';
+import useSiteIcons from '../../hooks/useSiteIcons';
 import '../../styles/protokoller.css';
 import '../../styles/mevzuatlar.css';
 
 const QUICK_LINKS = [
-  { to: '/protokoller', label: 'Protokoller', icon: 'fas fa-file-signature' },
-  { to: '/dokumanlar', label: 'Dokümanlar', icon: 'fas fa-file-alt' },
-  { to: '/mevzuatlar', label: 'Mevzuatlar', icon: 'fas fa-balance-scale' },
-  { to: '/egitimler', label: 'Eğitimler', icon: 'fas fa-graduation-cap' },
+  { to: '/protokoller', label: 'Protokoller', iconKey: 'protokoller' },
+  { to: '/dokumanlar', label: 'Dokümanlar', iconKey: 'dokumanlar' },
+  { to: '/mevzuatlar', label: 'Mevzuatlar', iconKey: 'mevzuatlar' },
+  { to: '/egitimler', label: 'Eğitimler', iconKey: 'egitimler' },
 ];
 
 const SAYFA_BASI = 8;
@@ -25,6 +26,7 @@ function normalizeIcon(ikon) {
 export default function Mevzuatlar() {
   const location = useLocation();
   const filtreRef = useRef(null);
+  const { icon } = useSiteIcons();
 
   const [items, setItems] = useState([]);
   const [altKategoriler, setAltKategoriler] = useState([]);
@@ -163,7 +165,7 @@ export default function Mevzuatlar() {
                   className={`protokoller-quick__btn${active ? ' is-active' : ''}`}
                   aria-current={active ? 'page' : undefined}
                 >
-                  <i className={item.icon} aria-hidden="true" />
+                  <i className={icon(item.iconKey)} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -184,7 +186,7 @@ export default function Mevzuatlar() {
               aria-expanded={menuAcik}
               aria-controls="mevzuat-kategori-listesi"
             >
-              <i className="fas fa-bars" aria-hidden="true" />
+              <i className={icon('menu_ac')} aria-hidden="true" />
               Kategoriler
             </button>
 

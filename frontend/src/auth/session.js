@@ -2,6 +2,8 @@ const PERSONEL_KEY = 'personel_id';
 const YONETICI_KEY = 'yonetici_id';
 const OTURUM_KEY = 'oturum_id';
 const YONETICI_OTURUM_KEY = 'yonetici_oturum_id';
+const PROFILE_CACHE_KEY = 'portal_profile_cache';
+const PENDING_CLOSE_KEY = 'gebze_pending_session_close';
 const AUTH_CHANNEL = 'gebze-portal-auth';
 
 /** Eski localStorage kalıntılarını temizle (oturum artık sessionStorage) */
@@ -128,6 +130,74 @@ export function setYoneticiOturumId(id) {
   broadcastAuth();
 }
 
+/** Login yanıtını cache'le — navbar ad/rol hemen doğru görünsün */
+export function setProfileCache(profile) {
+  try {
+    if (!profile) {
+      sessionStorage.removeItem(PROFILE_CACHE_KEY);
+      return;
+    }
+    sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function getProfileCache() {
+  try {
+    const raw = sessionStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function clearProfileCache() {
+  setProfileCache(null);
+}
+
+/** Son sekme kapanırken localStorage bayrağı */
+export function markPendingSessionClose(payload) {
+  try {
+    localStorage.setItem(
+      PENDING_CLOSE_KEY,
+      JSON.stringify({ t: Date.now(), ...payload })
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+export function peekPendingSessionClose() {
+  try {
+    const raw = localStorage.getItem(PENDING_CLOSE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function consumePendingSessionClose() {
+  try {
+    const raw = localStorage.getItem(PENDING_CLOSE_KEY);
+    localStorage.removeItem(PENDING_CLOSE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function clearPendingSessionClose() {
+  try {
+    localStorage.removeItem(PENDING_CLOSE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Personel oturumu (yalnızca site) */
 export function isPersonelLoggedIn() {
   return Boolean(getPersonelId());
@@ -149,12 +219,14 @@ export function canAccessAdmin() {
 export function clearPersonelAuth() {
   write(PERSONEL_KEY, '');
   write(OTURUM_KEY, '');
+  clearProfileCache();
   broadcastAuth();
 }
 
 export function clearYoneticiAuth() {
   write(YONETICI_KEY, '');
   write(YONETICI_OTURUM_KEY, '');
+  clearProfileCache();
   broadcastAuth();
 }
 
@@ -163,6 +235,7 @@ export function clearAuth() {
   write(YONETICI_KEY, '');
   write(OTURUM_KEY, '');
   write(YONETICI_OTURUM_KEY, '');
+  clearProfileCache();
   broadcastClear();
 }
 
@@ -171,10 +244,20 @@ export function authHeaders(extra = {}) {
   const personelId = getPersonelId();
   const yoneticiId = getYoneticiId();
   const oturumId = getOturumId();
+  const yoneticiOturumId = getYoneticiOturumId();
   if (personelId) headers['X-Personel-Id'] = personelId;
   if (yoneticiId) headers['X-Yonetici-Id'] = yoneticiId;
   if (oturumId) headers['X-Oturum-Id'] = oturumId;
+  if (yoneticiOturumId) headers['X-Yonetici-Oturum-Id'] = yoneticiOturumId;
   return headers;
 }
 
-export { AUTH_CHANNEL, PERSONEL_KEY, YONETICI_KEY, OTURUM_KEY, YONETICI_OTURUM_KEY };
+export {
+  AUTH_CHANNEL,
+  PERSONEL_KEY,
+  YONETICI_KEY,
+  OTURUM_KEY,
+  YONETICI_OTURUM_KEY,
+  PROFILE_CACHE_KEY,
+  PENDING_CLOSE_KEY,
+};

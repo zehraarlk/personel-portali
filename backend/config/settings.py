@@ -114,6 +114,8 @@ CORS_ALLOW_HEADERS = list(
         'x-requested-with',
         'x-personel-id',
         'x-yonetici-id',
+        'x-oturum-id',
+        'x-yonetici-oturum-id',
     }
 )
 # Django REST Framework

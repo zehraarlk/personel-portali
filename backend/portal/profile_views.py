@@ -8,31 +8,33 @@ from .models import Personeller, OturumKayitlari, Yoneticiler, normalize_image_p
 
 
 def resolve_personel(request):
-    """Giriş yokken: ?personel_id= veya X-Personel-Id, yoksa ilk kayıt."""
+    """Yalnızca X-Personel-Id / ?personel_id ile; yoksa None (ilk kayda düşme)."""
     raw = request.query_params.get('personel_id') or request.headers.get('X-Personel-Id')
     if raw:
         try:
             return Personeller.objects.filter(pk=int(raw)).first()
         except (TypeError, ValueError):
             pass
-    return Personeller.objects.order_by('id').first()
+    return None
 
 
 def personel_payload(p: Personeller) -> dict:
     is_yonetici = Yoneticiler.objects.filter(
         aktif=1, ad__iexact=p.ad, soyad__iexact=p.soyad
     ).exists()
+    ad = (p.ad or '').strip()
+    soyad = (p.soyad or '').strip()
     return {
         'id': p.id,
         'sicil_no': p.sicil_no,
-        'ad': p.ad,
-        'soyad': p.soyad,
-        'ad_soyad': f'{p.ad} {p.soyad}'.strip(),
+        'ad': ad,
+        'soyad': soyad,
+        'ad_soyad': f'{ad} {soyad}'.strip(),
         'email': p.email,
         'telefon': p.telefon or '',
         'foto': normalize_image_path(p.foto_url),
         'dogum_tarihi': p.dogum_tarihi.isoformat() if p.dogum_tarihi else None,
-        'rol': 'Yönetici' if is_yonetici else 'Personel',
+        'rol': 'Yönetici' if is_yonetici else 'personel',
         'rol_kod': 'yonetici' if is_yonetici else 'personel',
     }
 
