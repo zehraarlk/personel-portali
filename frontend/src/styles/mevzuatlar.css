@@ -293,3 +293,42 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.mevzuat-head {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.mevzuat-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mevzuat-head-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #022842;
+  color: #f5a623;
+  font-size: 17px;
+  box-shadow: 0 4px 12px rgba(2, 40, 66, 0.18);
+}
+
+.mevzuat-head-left h1 {
+  margin: 0 0 2px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #022842;
+}
+
+.mevzuat-head-left p {
+  margin: 0;
+  font-size: 13px;
+  color: #5b6b78;
+  max-width: 32rem;
+}

@@ -2,18 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchMevzuatlar } from '../../api/client';
-import useSiteIcons from '../../hooks/useSiteIcons';
 import '../../styles/protokoller.css';
 import '../../styles/mevzuatlar.css';
 
 const QUICK_LINKS = [
-  { to: '/protokoller', label: 'Protokoller', iconKey: 'protokoller' },
-  { to: '/dokumanlar', label: 'Dokümanlar', iconKey: 'dokumanlar' },
-  { to: '/mevzuatlar', label: 'Mevzuatlar', iconKey: 'mevzuatlar' },
-  { to: '/egitimler', label: 'Eğitimler', iconKey: 'egitimler' },
+  { to: '/protokoller', label: 'Protokoller', icon: 'fas fa-file-signature' },
+  { to: '/dokumanlar', label: 'Dokümanlar', icon: 'fas fa-file-alt' },
+  { to: '/mevzuatlar', label: 'Mevzuatlar', icon: 'fas fa-balance-scale' },
+  { to: '/egitimler', label: 'Eğitimler', icon: 'fas fa-graduation-cap' },
 ];
 
-const SAYFA_BASI = 8;
+const SAYFA_BASI = 9;
 
 function normalizeIcon(ikon) {
   const raw = (ikon || 'fas fa-balance-scale').trim();
@@ -26,7 +25,8 @@ function normalizeIcon(ikon) {
 export default function Mevzuatlar() {
   const location = useLocation();
   const filtreRef = useRef(null);
-  const { icon } = useSiteIcons();
+  const ilkYuklemeTamam = useRef(false);
+  const oncekiAltKategori = useRef(null);
 
   const [items, setItems] = useState([]);
   const [altKategoriler, setAltKategoriler] = useState([]);
@@ -34,7 +34,6 @@ export default function Mevzuatlar() {
   const [query, setQuery] = useState('');
   const [sayfa, setSayfa] = useState(0);
   const [loading, setLoading] = useState(true);
-  const ilkYuklemeTamam = useRef(false);
   const [error, setError] = useState(null);
   const [menuAcik, setMenuAcik] = useState(false);
 
@@ -44,8 +43,6 @@ export default function Mevzuatlar() {
     setSayfa(0);
     setMenuAcik(false);
   }, [location.key]);
-
-  const oncekiAltKategori = useRef(altKategori);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,21 +123,19 @@ export default function Mevzuatlar() {
   return (
     <Layout>
       <div className="protokoller-page">
-        <header className="protokoller-hero">
-          <div className="protokoller-hero__text">
-            <span className="protokoller-hero__eyebrow">Kaynaklar</span>
-            <h1>Mevzuatlar</h1>
-            <p>
-              Personelimizi ilgilendiren kanun, yönetmelik ve mevzuat metinlerine buradan
-              ulaşabilirsiniz.
-            </p>
-          </div>
-          {!loading && !error ? (
-            <div className="protokoller-hero__stat" aria-live="polite">
-              <strong>{filtered.length}</strong>
-              <span>mevzuat</span>
+        <header className="mevzuat-head">
+          <div className="mevzuat-head-left">
+            <span className="mevzuat-head-icon">
+              <i className="fas fa-balance-scale" aria-hidden="true" />
+            </span>
+            <div>
+              <h1>Mevzuatlar</h1>
+              <p>
+                Personelimizi ilgilendiren kanun, yönetmelik ve mevzuat metinlerine buradan
+                ulaşabilirsiniz.
+              </p>
             </div>
-          ) : null}
+          </div>
         </header>
 
         <div className="protokoller-bar">
@@ -177,7 +172,7 @@ export default function Mevzuatlar() {
                   className={`protokoller-quick__btn${active ? ' is-active' : ''}`}
                   aria-current={active ? 'page' : undefined}
                 >
-                  <i className={icon(item.iconKey)} aria-hidden="true" />
+                  <i className={item.icon} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -198,7 +193,7 @@ export default function Mevzuatlar() {
               aria-expanded={menuAcik}
               aria-controls="mevzuat-kategori-listesi"
             >
-              <i className={icon('menu_ac')} aria-hidden="true" />
+              <i className="fas fa-bars" aria-hidden="true" />
               Kategoriler
             </button>
 
@@ -281,8 +276,8 @@ export default function Mevzuatlar() {
         ) : null}
 
         {!loading && !error && gosterilenler.length > 0 ? (
-          <div className="protokoller-grid mevzuat-protokol-grid">
-            {gosterilenler.map((item, index) => {
+          <div className="mevzuat-grid">
+            {gosterilenler.map((item) => {
               const href = item.dosya_yolu || item.resmi_sayfa || undefined;
               const CardTag = href ? 'a' : 'article';
               const cardProps = href
@@ -295,42 +290,34 @@ export default function Mevzuatlar() {
                 : {};
 
               return (
-                <CardTag
-                  key={item.id}
-                  className="protokol-card"
-                  style={{ '--card-delay': `${Math.min(index, 8) * 40}ms` }}
-                  {...cardProps}
-                >
-                  <span className="protokol-card__accent" aria-hidden="true" />
-                  <div className="protokol-card__body">
-                    <div className="protokol-card__top">
-                      <span className="protokol-card__icon" aria-hidden="true">
-                        <i className={normalizeIcon(item.ikon)} />
-                      </span>
-                      <div className="protokol-card__chips">
-                        <span className="protokol-chip">
-                          <i className="far fa-calendar-alt" aria-hidden="true" />
-                          {item.tarih || '—'}
-                        </span>
-                        <span className="protokol-chip">
-                          <i className="far fa-file-alt" aria-hidden="true" />
-                          {item.boyut || '—'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <h2 className="protokol-card__title">{item.baslik}</h2>
-                    <p className="protokol-card__desc">
-                      {item.aciklama || 'Açıklama bulunmuyor.'}
-                    </p>
+                <CardTag key={item.id} className="mevzuat-card" {...cardProps}>
+                  <div className="mevzuat-card__head">
+                    <span className="mevzuat-card__icon" aria-hidden="true">
+                      <i className={normalizeIcon(item.ikon)} />
+                    </span>
+                    <h2 className="mevzuat-card__title">{item.baslik}</h2>
                   </div>
 
-                  {href ? (
-                    <span className="protokol-card__cta">
-                      Detaylı bilgi için tıklayınız
-                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                  <p className="mevzuat-card__desc">
+                    {item.aciklama || 'Açıklama bulunmuyor.'}
+                  </p>
+
+                  <div className="mevzuat-card__foot">
+                    <span className="mevzuat-card__meta">
+                      <i className="far fa-calendar-alt" aria-hidden="true" />
+                      {item.tarih || '—'}
                     </span>
-                  ) : null}
+                    <span className="mevzuat-card__meta">
+                      <i className="far fa-file-alt" aria-hidden="true" />
+                      {item.boyut || '—'}
+                    </span>
+                    {href ? (
+                      <span className="mevzuat-card__link">
+                        Görüntüle
+                        <i className="fas fa-arrow-right" aria-hidden="true" />
+                      </span>
+                    ) : null}
+                  </div>
                 </CardTag>
               );
             })}
