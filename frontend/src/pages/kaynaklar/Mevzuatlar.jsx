@@ -34,6 +34,7 @@ export default function Mevzuatlar() {
   const [query, setQuery] = useState('');
   const [sayfa, setSayfa] = useState(0);
   const [loading, setLoading] = useState(true);
+  const ilkYuklemeTamam = useRef(false);
   const [error, setError] = useState(null);
   const [menuAcik, setMenuAcik] = useState(false);
 
@@ -44,11 +45,19 @@ export default function Mevzuatlar() {
     setMenuAcik(false);
   }, [location.key]);
 
+  const oncekiAltKategori = useRef(altKategori);
+
   useEffect(() => {
     let cancelled = false;
 
-    setLoading(true);
+    if (!ilkYuklemeTamam.current) {
+      setLoading(true);
+    }
     setError(null);
+
+    const kategoriDegisti = oncekiAltKategori.current !== altKategori;
+    oncekiAltKategori.current = altKategori;
+    const bekleSuresi = kategoriDegisti ? 0 : 300;
 
     const gecikme = setTimeout(() => {
       fetchMevzuatlar(query.trim(), altKategori)
@@ -64,9 +73,12 @@ export default function Mevzuatlar() {
           setError('Mevzuatlar yüklenirken bir sorun oluştu.');
         })
         .finally(() => {
-          if (!cancelled) setLoading(false);
+          if (!cancelled) {
+            setLoading(false);
+            ilkYuklemeTamam.current = true;
+          }
         });
-    }, 300);
+    }, bekleSuresi);
 
     return () => {
       cancelled = true;
