@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND_IMG } from '../constants';
 import { fetchProfile, logoutAdmin } from '../api/client';
 import { clearAdminSession, getProfileCache, getYoneticiId, setProfileCache } from '../auth/session';
-import useMediaFit from '../../../frontend/src/hooks/useMediaFit.js';
 
 const PROFILE_MENU = [
   { to: '/admin/profil/sifre-degistir', label: 'Şifre Değiştir', icon: 'fas fa-key' },
@@ -15,7 +14,6 @@ export default function AdminTopbar({ title, onMenu }) {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(() => getProfileCache());
   const [open, setOpen] = useState(false);
-  const [fit, setFit] = useMediaFit();
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -79,27 +77,6 @@ export default function AdminTopbar({ title, onMenu }) {
       </div>
 
       <div className="admin-topbar__right">
-        <div className="admin-fit-toggle admin-fit-toggle--topbar" role="group" aria-label="Site görsel sığdırma">
-          <button
-            type="button"
-            className={`admin-fit-toggle__btn${fit === 'contain' ? ' is-active' : ''}`}
-            onClick={() => setFit('contain')}
-            title="Tam ekran — tüm görsel görünür, kenarlar bulanık"
-          >
-            <i className="fas fa-expand" aria-hidden="true" />
-            <span>Tam ekran</span>
-          </button>
-          <button
-            type="button"
-            className={`admin-fit-toggle__btn${fit === 'cover' ? ' is-active' : ''}`}
-            onClick={() => setFit('cover')}
-            title="Sığdır — görsel alanı kaplar (kırpılabilir)"
-          >
-            <i className="fas fa-compress" aria-hidden="true" />
-            <span>Sığdır</span>
-          </button>
-        </div>
-
         <div className="admin-topbar__user" ref={menuRef}>
           <button
             type="button"

@@ -25,11 +25,10 @@ export const KAYNAK_PAGES = {
   protokoller: {
     title: 'Protokoller',
     description:
-      'Personel ve kurumsal indirim anlaşmalarını inceleyin; ilgili belgeye tek tıkla ulaşın.',
-    searchPlaceholder:
-      'Kurum veya protokol adı ara…',
+      'Kurumsal indirim ve personel anlaşmalarını inceleyin; belgeye tek tıkla ulaşın.',
+    searchPlaceholder: 'Protokol veya kurum adı ara…',
     searchId: 'protokol-ara',
-    statLabel: 'aktif protokol',
+    statLabel: 'protokol',
     iconKey: 'protokoller',
   },
 

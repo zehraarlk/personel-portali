@@ -11,7 +11,7 @@ function toPreviewSrc(path) {
   return path.replace(/^\.\.\//, '/');
 }
 
-/** Dosya seçici + yükleme. Önizleme site geneli navbar fit ayarını kullanır. */
+/** Dosya seçici + yükleme; önizleme MediaFrame ile cover sığdırır. */
 export default function ImagePickerField({ value, onChange, label = 'Resim' }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);

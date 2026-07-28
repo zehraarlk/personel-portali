@@ -7,6 +7,25 @@
   gap: 0.75rem;
   margin-bottom: 1.15rem;
   scroll-margin-top: 80px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 560px) {
+  .mevzuat-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mevzuat-menu__btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mevzuat-menu__list {
+    left: 0;
+    right: 0;
+    width: auto;
+  }
 }
 
 .mevzuat-filter-bar__label {
