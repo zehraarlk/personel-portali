@@ -116,7 +116,7 @@ export default function Etkinlikler() {
               <i className="fas fa-calendar-days" aria-hidden="true" />
             </span>
             <div>
-              <h1>Etkinlik</h1>
+              <h1>Etkinlikler</h1>
               <p>Gebze Belediyesi tarafından düzenlenen güncel ve yaklaşan etkinlikler.</p>
             </div>
           </div>
