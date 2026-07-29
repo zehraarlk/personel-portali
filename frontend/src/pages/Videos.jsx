@@ -21,6 +21,12 @@ const SORT_OPTIONS = [
   { value: 'uzun', label: 'Süresi Uzun', icon: 'more_time' },
 ];
 
+const VIDEO_TYPE_OPTIONS = [
+  { value: '', label: 'Tümü', icon: 'grid_view' },
+  { value: 'shorts', label: 'Shorts', icon: 'smartphone' },
+  { value: 'uzun-videolar', label: 'Uzun Videolar', icon: 'smart_display' },
+];
+
 function getPaginationItems(currentPage, totalPages) {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -86,6 +92,18 @@ function getCategoryIcon(category) {
   return 'smart_display';
 }
 
+function isShortVideo(video) {
+  const durationInSeconds = parseVideoDuration(video?.sure);
+
+  return Number.isFinite(durationInSeconds) && durationInSeconds < 60;
+}
+
+function getVideoTypeInfo(video) {
+  return isShortVideo(video)
+    ? { label: 'Shorts', icon: 'smartphone' }
+    : { label: 'Video', icon: 'smart_display' };
+}
+
 function getAutoplayEmbedUrl(embedUrl) {
   if (!embedUrl) return '';
 
@@ -128,6 +146,8 @@ function getModalEmbedUrl(video) {
 }
 
 function VideoCard({ video, onOpen }) {
+  const videoTypeInfo = getVideoTypeInfo(video);
+
   return (
     <article className="group relative z-0 h-full origin-center overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] shadow-[0_6px_22px_rgba(2,40,66,0.07)] transition-all duration-300 ease-out hover:z-20 hover:-translate-y-2 hover:scale-[1.035] hover:border-[#022842]/25 hover:shadow-[0_24px_55px_rgba(2,40,66,0.22)] focus-within:z-20 focus-within:-translate-y-2 focus-within:scale-[1.035] focus-within:shadow-[0_24px_55px_rgba(2,40,66,0.22)]">
       <button
@@ -147,14 +167,12 @@ function VideoCard({ video, onOpen }) {
           <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/55 via-transparent to-black/5 opacity-80 transition duration-300 group-hover:opacity-100" />
           <div className="absolute inset-0 bg-[#011f34]/0 transition-colors duration-300 group-hover:bg-[#011f34]/35 group-focus-within:bg-[#011f34]/35" />
 
-          {video.kategori && (
-            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-[#022842]/85 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm backdrop-blur-md">
-              <span className="material-symbols-outlined text-[15px] text-[#f5a623]">
-                {getCategoryIcon(video.kategori)}
-              </span>
-              <span>{video.kategori.ad}</span>
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-[#022842]/85 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm backdrop-blur-md">
+            <span className="material-symbols-outlined text-[15px] text-[#f5a623]">
+              {videoTypeInfo.icon}
             </span>
-          )}
+            <span>{videoTypeInfo.label}</span>
+          </span>
 
           {video.sure && (
             <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/65 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
@@ -207,29 +225,29 @@ function VideoCard({ video, onOpen }) {
 
 export default function Videos() {
   const [data, setData] = useState(EMPTY_DATA);
-  const [kategori, setKategori] = useState('');
-  const [kategoriMenuAcik, setKategoriMenuAcik] = useState(false);
+  const [videoTuru, setVideoTuru] = useState('');
+  const [videoTuruMenuAcik, setVideoTuruMenuAcik] = useState(false);
   const [siralamaMenuAcik, setSiralamaMenuAcik] = useState(false);
   const [arama, setArama] = useState('');
   const [siralama, setSiralama] = useState('yeni');
   const [sayfa, setSayfa] = useState(1);
   const [acikVideo, setAcikVideo] = useState(null);
-  const kategoriMenuRef = useRef(null);
+  const videoTuruMenuRef = useRef(null);
   const siralamaMenuRef = useRef(null);
   const videoListesiRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!kategoriMenuAcik && !siralamaMenuAcik) return undefined;
+    if (!videoTuruMenuAcik && !siralamaMenuAcik) return undefined;
 
     function handleOutsidePointerDown(event) {
       if (
-        kategoriMenuAcik &&
-        kategoriMenuRef.current &&
-        !kategoriMenuRef.current.contains(event.target)
+        videoTuruMenuAcik &&
+        videoTuruMenuRef.current &&
+        !videoTuruMenuRef.current.contains(event.target)
       ) {
-        setKategoriMenuAcik(false);
+        setVideoTuruMenuAcik(false);
       }
 
       if (
@@ -243,7 +261,7 @@ export default function Videos() {
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
-        setKategoriMenuAcik(false);
+        setVideoTuruMenuAcik(false);
         setSiralamaMenuAcik(false);
       }
     }
@@ -255,7 +273,7 @@ export default function Videos() {
       document.removeEventListener('pointerdown', handleOutsidePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [kategoriMenuAcik, siralamaMenuAcik]);
+  }, [videoTuruMenuAcik, siralamaMenuAcik]);
 
   useEffect(() => {
     if (!acikVideo) return undefined;
@@ -285,7 +303,7 @@ export default function Videos() {
       setError('');
 
       try {
-        const result = await fetchVideos(kategori);
+        const result = await fetchVideos('');
 
         if (!cancelled) {
           setData({
@@ -310,21 +328,28 @@ export default function Videos() {
     return () => {
       cancelled = true;
     };
-  }, [kategori]);
+  }, []);
 
   const kartVideolari = useMemo(() => {
-    if (kategori !== '' || !data.vitrin) {
+    if (!data.vitrin) {
       return data.videolar;
     }
 
     return data.videolar.filter((video) => video.id !== data.vitrin.id);
-  }, [data.videolar, data.vitrin, kategori]);
+  }, [data.videolar, data.vitrin]);
 
   const filtrelenmisVideolar = useMemo(() => {
     const sorgu = arama.trim().toLocaleLowerCase('tr-TR');
 
+    const videoTuruneGoreSonuclar =
+      videoTuru === 'shorts'
+        ? kartVideolari.filter((video) => isShortVideo(video))
+        : videoTuru === 'uzun-videolar'
+          ? kartVideolari.filter((video) => !isShortVideo(video))
+          : kartVideolari;
+
     const sonuclar = sorgu
-      ? kartVideolari.filter((video) => {
+      ? videoTuruneGoreSonuclar.filter((video) => {
           const aranacakMetin = [
             video.baslik,
             video.aciklama,
@@ -336,7 +361,7 @@ export default function Videos() {
 
           return aranacakMetin.includes(sorgu);
         })
-      : kartVideolari;
+      : videoTuruneGoreSonuclar;
 
     return [...sonuclar].sort((a, b) => {
       if (siralama === 'eski') {
@@ -365,7 +390,7 @@ export default function Videos() {
 
       return getVideoTimestamp(b) - getVideoTimestamp(a);
     });
-  }, [arama, kartVideolari, siralama]);
+  }, [arama, kartVideolari, siralama, videoTuru]);
 
   const toplamSayfa = Math.max(
     1,
@@ -384,7 +409,20 @@ export default function Videos() {
 
   useEffect(() => {
     setSayfa(1);
-  }, [kategori, arama, siralama]);
+  }, [videoTuru, arama, siralama]);
+
+  useEffect(() => {
+    if (!videoTuru) return;
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      videoListesiRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [videoTuru]);
 
   useEffect(() => {
     if (sayfa > toplamSayfa) {
@@ -393,7 +431,7 @@ export default function Videos() {
   }, [sayfa, toplamSayfa]);
 
   function videoyuAc(video) {
-    setKategoriMenuAcik(false);
+    setVideoTuruMenuAcik(false);
     setAcikVideo(video);
   }
 
@@ -412,10 +450,11 @@ export default function Videos() {
     });
   }
 
-  const aktifKategori =
-    data.kategoriler.find((item) => item.slug === kategori) ?? null;
+  const aktifVideoTuru =
+    VIDEO_TYPE_OPTIONS.find((option) => option.value === videoTuru) ??
+    VIDEO_TYPE_OPTIONS[0];
 
-  const aktifKategoriAdi = aktifKategori?.ad || 'Tüm Videolar';
+  const aktifVideoTuruAdi = aktifVideoTuru.label;
   const aktifSiralama =
     SORT_OPTIONS.find((option) => option.value === siralama) ?? SORT_OPTIONS[0];
 
@@ -447,8 +486,8 @@ export default function Videos() {
 
         {!loading && !error && (
           <>
-            {kategori === '' && data.vitrin && (
-              <section className="relative h-full min-h-full w-full overflow-hidden bg-black">
+            {data.vitrin && (
+              <section className="relative z-10 h-full min-h-full w-full overflow-hidden bg-black shadow-[0_10px_18px_-9px_rgba(2,40,66,0.5)]">
                 <div className="pointer-events-none absolute left-4 top-4 z-20 md:left-6 md:top-6">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#022842]/70 px-3 py-1.5 text-white shadow-[0_6px_18px_rgba(0,0,0,0.22)] backdrop-blur-md">
                     <span className="material-symbols-outlined icon-filled text-[16px] text-[#f5a623]">
@@ -470,94 +509,77 @@ export default function Videos() {
                     allowFullScreen
                   />
                 </div>
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-7 bg-gradient-to-b from-transparent via-[#dcecf7]/12 to-[#dcecf7]/38"
+                />
               </section>
             )}
 
-            <div className="mx-auto w-full max-w-[1440px] px-4 pt-6 md:px-8 md:pt-8">
+            <div className="relative z-0 mx-auto w-full max-w-[1440px] px-4 pt-6 md:px-8 md:pt-8">
               <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
-                {data.kategoriler.length > 0 && (
-                  <nav
-                    ref={kategoriMenuRef}
-                    className="relative z-50 w-full lg:w-[180px] lg:shrink-0"
-                    aria-label="Video kategorileri"
+                <nav
+                  ref={videoTuruMenuRef}
+                  className="relative z-50 w-full lg:w-[180px] lg:shrink-0"
+                  aria-label="Video türleri"
+                >
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={videoTuruMenuAcik}
+                    onClick={() => {
+                      setVideoTuruMenuAcik((acik) => !acik);
+                      setSiralamaMenuAcik(false);
+                    }}
+                    className="inline-flex h-[44px] w-full items-center justify-between gap-2.5 rounded-xl border border-[#cfd9e2] bg-white px-4 py-2 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
                   >
-                    <button
-                      type="button"
-                      aria-haspopup="menu"
-                      aria-expanded={kategoriMenuAcik}
-                      onClick={() => {
-                        setKategoriMenuAcik((acik) => !acik);
-                        setSiralamaMenuAcik(false);
-                      }}
-                      className="inline-flex h-[44px] w-full items-center justify-between gap-2.5 rounded-xl border border-[#cfd9e2] bg-white px-4 py-2 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
+                    <span className="inline-flex min-w-0 items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-[#022842]">
+                        {aktifVideoTuru.icon}
+                      </span>
+                      <span className="truncate">{aktifVideoTuruAdi}</span>
+                    </span>
+
+                    <span
+                      className={`material-symbols-outlined text-[19px] text-[#022842] transition-transform duration-200 ${
+                        videoTuruMenuAcik ? 'rotate-180' : ''
+                      }`}
                     >
-                      <span className="inline-flex min-w-0 items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                          {aktifKategori ? getCategoryIcon(aktifKategori) : 'grid_view'}
-                        </span>
-                        {kategori === '' ? 'Tümü' : aktifKategoriAdi}
-                      </span>
+                      expand_more
+                    </span>
+                  </button>
 
-                      <span
-                        className={`material-symbols-outlined text-[19px] text-[#022842] transition-transform duration-200 ${
-                          kategoriMenuAcik ? 'rotate-180' : ''
-                        }`}
-                      >
-                        expand_more
-                      </span>
-                    </button>
-
-                    {kategoriMenuAcik && (
-                      <div
-                        role="menu"
-                        className="absolute left-0 top-full mt-2 min-w-[250px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
-                      >
+                  {videoTuruMenuAcik && (
+                    <div
+                      role="menu"
+                      className="absolute left-0 top-full mt-2 min-w-[250px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
+                    >
+                      {VIDEO_TYPE_OPTIONS.map((option, index) => (
                         <button
+                          key={option.value || 'all'}
                           type="button"
                           role="menuitemradio"
-                          aria-checked={kategori === ''}
+                          aria-checked={videoTuru === option.value}
                           onClick={() => {
-                            setKategori('');
-                            setKategoriMenuAcik(false);
+                            setVideoTuru(option.value);
+                            setVideoTuruMenuAcik(false);
                           }}
-                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
-                            kategori === ''
+                          className={`${index > 0 ? 'mt-1 ' : ''}flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
+                            videoTuru === option.value
                               ? 'bg-[#e8f1f8] text-[#022842]'
                               : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
                           }`}
                         >
                           <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                            grid_view
+                            {option.icon}
                           </span>
-                          Tümü
+                          {option.label}
                         </button>
-
-                        {data.kategoriler.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={kategori === item.slug}
-                            onClick={() => {
-                              setKategori(item.slug);
-                              setKategoriMenuAcik(false);
-                            }}
-                            className={`mt-1 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
-                              kategori === item.slug
-                                ? 'bg-[#e8f1f8] text-[#022842]'
-                                : 'text-[#33495a] hover:bg-[#eef5fa] hover:text-[#022842]'
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                              {getCategoryIcon(item)}
-                            </span>
-                            {item.ad}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </nav>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </nav>
 
                 <nav
                   ref={siralamaMenuRef}
@@ -570,7 +592,7 @@ export default function Videos() {
                     aria-expanded={siralamaMenuAcik}
                     onClick={() => {
                       setSiralamaMenuAcik((acik) => !acik);
-                      setKategoriMenuAcik(false);
+                      setVideoTuruMenuAcik(false);
                     }}
                     className="inline-flex h-[44px] w-full items-center justify-between gap-2.5 rounded-xl border border-[#cfd9e2] bg-white px-4 py-2 text-sm font-semibold text-[#022842] shadow-sm transition hover:border-[#022842]/35 hover:bg-[#f7fafc] focus:outline-none focus:ring-4 focus:ring-[#022842]/10"
                   >
@@ -669,7 +691,7 @@ export default function Videos() {
                     <span className="material-symbols-outlined text-[15px] text-[#f5a623]">
                       video_library
                     </span>
-                    {kategori === '' ? 'Video Arşivi' : aktifKategoriAdi}
+                    {videoTuru === '' ? 'Video Arşivi' : aktifVideoTuruAdi}
                   </h2>
 
                   <div aria-hidden="true" className="h-px flex-1 bg-[#022842]/15" />
@@ -692,18 +714,18 @@ export default function Videos() {
                     </span>
 
                     <h3 className="text-lg font-extrabold text-[#0b1c30]">
-                      Bu kategoride video bulunamadı
+                      Henüz video bulunamadı
                     </h3>
 
                     <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#61717d]">
-                      Bu kategoriye henüz video eklenmemiş olabilir. Diğer içerikleri görmek için tüm video arşivine dönebilirsiniz.
+                      Video arşivine henüz içerik eklenmemiş olabilir.
                     </p>
 
-                    {kategori !== '' && (
+                    {videoTuru !== '' && (
                       <button
                         type="button"
                         onClick={() => {
-                          setKategori('');
+                          setVideoTuru('');
                           setArama('');
                         }}
                         className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-[#022842] px-4 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(2,40,66,0.18)] transition hover:bg-[#0a3a5c]"
@@ -791,13 +813,13 @@ export default function Videos() {
                     <h3 className="text-lg font-extrabold text-[#0b1c30]">
                       {arama.trim()
                         ? 'Aradığınız video bulunamadı'
-                        : 'Başka video bulunamadı'}
+                        : 'Bu video türünde video bulunamadı'}
                     </h3>
 
                     <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#61717d]">
                       {arama.trim()
                         ? `“${arama.trim()}” ifadesiyle eşleşen bir sonuç yok. Farklı bir kelime deneyin veya filtreleri temizleyin.`
-                        : 'Bu kategoride öne çıkan video dışında başka video bulunmuyor. Tüm videolara dönerek diğer içeriklere göz atabilirsiniz.'}
+                        : 'Seçtiğiniz video türünde içerik bulunmuyor. Tüm videolara dönerek diğer içeriklere göz atabilirsiniz.'}
                     </p>
 
                     <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -814,11 +836,11 @@ export default function Videos() {
                         </button>
                       )}
 
-                      {kategori !== '' && (
+                      {videoTuru !== '' && (
                         <button
                           type="button"
                           onClick={() => {
-                            setKategori('');
+                            setVideoTuru('');
                             setArama('');
                           }}
                           className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#022842] px-4 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(2,40,66,0.18)] transition hover:bg-[#0a3a5c]"

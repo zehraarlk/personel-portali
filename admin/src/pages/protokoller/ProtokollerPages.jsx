@@ -107,7 +107,7 @@ export function ProtokollerIndex() {
 
       <div className="admin-card admin-card--flush">
         <div className="admin-table-wrap">
-          <table className="admin-table admin-table--crud">
+          <table className="admin-table admin-table--crud admin-table--kaynak">
             <thead>
               <tr>
                 <th>#</th>

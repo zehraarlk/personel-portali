@@ -1,9 +1,6 @@
-import useMediaFit from '../hooks/useMediaFit';
-
 /**
- * Farklı çözünürlükteki görselleri gösterir.
- * Varsayılan: site geneli fit (admin navbar).
- * forceCover / forceContain: tekil override.
+ * Görselleri çerçeveye sığdırır (object-fit: cover).
+ * forceContain: blur kenarlı tam görünsün; forceCover: kırparak doldur.
  */
 export default function MediaFrame({
   src,
@@ -15,18 +12,12 @@ export default function MediaFrame({
   forceContain = false,
   imgClassName = '',
   eager = false,
-  soft: _soft = false,
 }) {
-  const [globalFit] = useMediaFit();
-
   if (!src) return null;
 
-  // cover = tam ekran (alanı kapla), contain = sığdır (blur kenar)
-  let cover = globalFit === 'cover';
-  if (forceCover) cover = true;
-  else if (forceContain) cover = false;
-  else if (coverProp === true) cover = true;
-  else if (coverProp === false) cover = false;
+  let cover = true;
+  if (forceContain || coverProp === false) cover = false;
+  else if (forceCover || coverProp === true) cover = true;
 
   const loading = eager ? 'eager' : 'lazy';
   const isAbsolute = /\babsolute\b/.test(className);
