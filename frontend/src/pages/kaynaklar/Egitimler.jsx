@@ -1,23 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import KaynaklarShell from '../../components/KaynaklarShell';
+import { Link, useLocation } from 'react-router-dom';
+import Layout from '../../components/Layout';
 import { fetchEgitimler } from '../../api/client';
-import { KAYNAK_PAGES } from './config';
+import { KAYNAK_QUICK_LINKS } from './config';
+import '../../styles/etkinlikler.css';
 import '../../styles/protokoller.css';
 import '../../styles/egitimler.css';
 
-function normalizeIcon(ikon) {
-  const raw = (ikon || 'fas fa-graduation-cap').trim();
-  if (raw.startsWith('fa-') && !raw.includes(' ')) return `fas ${raw}`;
-  return raw;
-}
+const ORANGE = '#f5a623';
+const BLUE = '#1c3a5e';
+const LINK_BLUE = '#3762e3';
+const GRAY_ICON = '#8a8a85';
+const PAGE_SIZE = 6;
 
-/**
- * Backend tablosundaki alan adı henüz netleşmediği için, olası tüm
- * isimlendirmeleri sırayla deniyoruz ve ilk dolu olanı kullanıyoruz. Şu anda
- * üç buton da (Resmi Sayfa / Video / Sunum) aynı linke gidiyor; ileride her
- * biri için ayrı sütun eklenirse bu fonksiyon otomatik olarak kendi alanını
- * bulup kullanacak, ekstra bir değişiklik gerekmeyecek.
- */
 function resolveLink(item, keys) {
   for (const key of keys) {
     if (item[key]) return item[key];
@@ -36,14 +31,15 @@ const ORTAK_LINK_ALANLARI = [
   'link',
 ];
 
-const page = KAYNAK_PAGES.egitimler;
-
 export default function Egitimler() {
+  const location = useLocation();
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hoveredId, setHoveredId] = useState(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,127 +72,430 @@ export default function Egitimler() {
     });
   }, [items, search]);
 
-  return (
-    <KaynaklarShell
-      title={page.title}
-      description={page.description}
-      searchPlaceholder={page.searchPlaceholder}
-      searchId={page.searchId}
-      statCount={!loading && !error ? filtered.length : null}
-      statLabel={page.statLabel}
-      query={query}
-      search={search}
-      onQueryChange={setQuery}
-      onSearch={setSearch}
-      onClearSearch={() => {
-        setQuery('');
-        setSearch('');
-      }}
-    >
-      {search && !loading && !error ? (
-        <p className="protokoller-filter-note">
-          “<strong>{search}</strong>” için {filtered.length} sonuç
-        </p>
-      ) : null}
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-      {loading && (
-        <div className="protokoller-state" role="status">
-          <span className="protokoller-state__pulse" aria-hidden="true" />
-          Eğitimler yükleniyor…
-        </div>
-      )}
-      {!loading && error && (
-        <p className="protokoller-state protokoller-state--error">{error}</p>
-      )}
-      {!loading && !error && filtered.length === 0 && (
-        <div className="protokoller-empty">
-          <i className="fas fa-graduation-cap" aria-hidden="true" />
-          <h2>Sonuç bulunamadı</h2>
-          <p>Aramanızı değiştirerek tekrar deneyebilirsiniz.</p>
-          {search ? (
-            <button
-              type="button"
-              className="protokoller-toolbar__btn"
-              onClick={() => {
-                setQuery('');
-                setSearch('');
+  const submitSearch = (e) => {
+    e.preventDefault();
+    setSearch(query.trim());
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setQuery('');
+    setSearch('');
+    setPage(1);
+  };
+
+  return (
+    <Layout>
+      <div className="etkinlikler-page" style={{ minHeight: '85vh', paddingBottom: 40 }}>
+        <header className="etkinlikler-head">
+          <div className="etkinlikler-head-left">
+            <span className="etkinlikler-head-icon">
+              <i className="fas fa-graduation-cap" aria-hidden="true" />
+            </span>
+            <div>
+              <h1>Eğitimler</h1>
+              <p>Personel eğitim materyallerine ve ilgili kaynaklara buradan erişin.</p>
+            </div>
+          </div>
+        </header>
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            margin: '20px 0 24px',
+          }}
+        >
+          <form
+            onSubmit={submitSearch}
+            role="search"
+            style={{ display: 'flex', gap: 10, alignItems: 'center' }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: 600,
+                height: 50,
+                background: 'rgba(28,58,94,0.10)',
+                borderRadius: 999,
+                paddingLeft: 20,
+                overflow: 'hidden',
               }}
             >
-              Aramayı temizle
-            </button>
-          ) : null}
-        </div>
-      )}
-
-      {!loading && !error && filtered.length > 0 && (
-        <div className="protokoller-grid">
-          {filtered.map((item, index) => {
-            const ortakLink = resolveLink(item, ORTAK_LINK_ALANLARI);
-
-            return (
-              <article
-                key={item.id}
-                className="protokol-card"
-                style={{ '--card-delay': `${Math.min(index, 8) * 40}ms` }}
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Eğitim adı ara…"
+                autoComplete="off"
+                style={{
+                  flex: 1,
+                  height: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  fontSize: 15,
+                  color: '#333',
+                }}
+              />
+              <button
+                type="submit"
+                aria-label="Ara"
+                style={{
+                  width: 42,
+                  height: 42,
+                  margin: 4,
+                  flexShrink: 0,
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: '#f5a623',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
               >
-                <span className="protokol-card__accent" aria-hidden="true" />
-                <div className="protokol-card__body">
-                  <div className="protokol-card__top">
-                    <span className="protokol-card__icon" aria-hidden="true">
-                      <i className={normalizeIcon(item.ikon)} />
-                    </span>
-                    <div className="protokol-card__chips">
-                      <span className="protokol-chip">
-                        <i className="far fa-calendar-alt" aria-hidden="true" />
-                        {item.tarih || '—'}
-                      </span>
-                      <span className="protokol-chip">
-                        <i className="far fa-file-alt" aria-hidden="true" />
-                        {item.boyut || '—'}
-                      </span>
+                <i className="fas fa-magnifying-glass" style={{ fontSize: 15 }} aria-hidden="true" />
+              </button>
+            </div>
+            {search ? (
+              <button
+                type="button"
+                onClick={clearSearch}
+                style={{
+                  padding: '0 18px',
+                  height: 42,
+                  borderRadius: 10,
+                  border: '0.5px solid rgba(0,0,0,0.18)',
+                  background: 'transparent',
+                  color: '#333',
+                  fontSize: 14,
+                }}
+              >
+                Temizle
+              </button>
+            ) : null}
+          </form>
+
+
+          <nav
+            aria-label="Kaynaklar hızlı erişim"
+            style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}
+          >
+            {KAYNAK_QUICK_LINKS.map((item) => {
+              const active =
+                location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+              const TAB_ICONS = {
+                protokoller: 'fas fa-pen-fancy',
+                dokumanlar: 'far fa-file-alt',
+                mevzuatlar: 'fas fa-balance-scale',
+                egitimler: 'fas fa-graduation-cap',
+              };
+              const tabIcon = TAB_ICONS[item.iconKey] || 'fas fa-circle';
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  aria-current={active ? 'page' : undefined}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: 8,
+                    border: active ? '0.5px solid rgba(0,0,0,0.35)' : '0.5px solid rgba(0,0,0,0.15)',
+                    background: active ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    fontSize: 14,
+                    fontWeight: active ? 500 : 400,
+                    color: active ? '#111' : '#555',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 7,
+                  }}
+                >
+                  <i
+                    className={tabIcon}
+                    style={{ color: active ? ORANGE : undefined }}
+                    aria-hidden="true"
+                  />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {search && !loading && !error ? (
+          <p className="protokoller-filter-note">
+            "<strong>{search}</strong>" için {filtered.length} sonuç
+          </p>
+        ) : null}
+
+        {loading && (
+          <div className="protokoller-state" role="status">
+            <span className="protokoller-state__pulse" aria-hidden="true" />
+            Eğitimler yükleniyor…
+          </div>
+        )}
+        {!loading && error && (
+          <p className="protokoller-state protokoller-state--error">{error}</p>
+        )}
+        {!loading && !error && filtered.length === 0 && (
+          <div className="protokoller-empty">
+            <i className="fas fa-graduation-cap" aria-hidden="true" />
+            <h2>Sonuç bulunamadı</h2>
+            <p>Aramanızı değiştirerek tekrar deneyebilirsiniz.</p>
+          </div>
+        )}
+
+        {!loading && !error && filtered.length > 0 && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gridTemplateRows: `repeat(${Math.ceil(PAGE_SIZE / 2)}, minmax(140px, auto))`,
+              gap: 30,
+            }}
+          >
+            {paged.map((item) => {
+              const ortakLink = resolveLink(item, ORTAK_LINK_ALANLARI);
+              const isHovered = hoveredId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  onMouseEnter={() => setHoveredId(item.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 25,
+                    padding: '14px 18px',
+                    background: '#ffffff',
+                    border: isHovered
+                      ? `0.5px solid ${ORANGE}`
+                      : '0.5px solid rgba(0,0,0,0.15)',
+                    borderRadius: 12,
+                    transition: 'border-color 0.15s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 10,
+                        background: isHovered ? 'rgba(28,58,94,0.20)' : 'rgba(28,58,94,0.10)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'background-color 0.15s ease',
+                      }}
+                    >
+                      <i
+                        className="fas fa-graduation-cap"
+                        style={{
+                          fontSize: 20,
+                          color: BLUE,
+                          transition: 'color 0.15s ease',
+                        }}
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: 500, fontSize: 16, margin: 0 }}>{item.baslik}</p>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          color: '#888',
+                          margin: '6px 0 0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 14,
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <i
+                            className="far fa-calendar-alt"
+                            style={{ color: ORANGE, fontSize: 13 }}
+                            aria-hidden="true"
+                          />
+                          {item.tarih || '—'}
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <i
+                            className="far fa-file-alt"
+                            style={{ color: ORANGE, fontSize: 13 }}
+                            aria-hidden="true"
+                          />
+                          {item.boyut || '—'}
+                        </span>
+                      </p>
                     </div>
                   </div>
 
-                  <h2 className="protokol-card__title">{item.baslik}</h2>
-                  <p className="protokol-card__desc">{item.aciklama}</p>
+                  {ortakLink && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <a
+                        href={ortakLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          height: 34,
+                          justifyContent: 'center',
+                          fontSize: 13,
+                          border: '0.5px solid rgba(0,0,0,0.15)',
+                          borderRadius: 8,
+                          background: '#f4f5f7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          textDecoration: 'none',
+                          color: '#333',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <i className="fas fa-globe" style={{ color: LINK_BLUE }} aria-hidden="true" />Resmi Sayfa
+                      </a>
+                      <a
+                        href={ortakLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          height: 34,
+                          justifyContent: 'center',
+                          fontSize: 13,
+                          border: '0.5px solid rgba(0,0,0,0.15)',
+                          borderRadius: 8,
+                          background: '#f4f5f7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          textDecoration: 'none',
+                          color: '#333',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <i className="fas fa-circle-play" style={{ color: '#dc2626' }} aria-hidden="true" />Video
+                      </a>
+                      <a
+                        href={ortakLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          height: 34,
+                          justifyContent: 'center',
+                          fontSize: 13,
+                          border: '0.5px solid rgba(0,0,0,0.15)',
+                          borderRadius: 8,
+                          background: '#f4f5f7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          textDecoration: 'none',
+                          color: '#333',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <i className="fas fa-file-pdf" style={{ color: ORANGE }} aria-hidden="true" />Sunum
+                      </a>
+                    </div>
+                  )}
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                {ortakLink && (
-                  <div className="protokol-card__cta protokol-card__cta--split">
-                    <a
-                      href={ortakLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="protokol-card__cta-item"
-                    >
-                      <i className="fas fa-globe" aria-hidden="true" />
-                      Resmi Sayfa
-                    </a>
-                    <a
-                      href={ortakLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="protokol-card__cta-item"
-                    >
-                      <i className="fas fa-circle-play" aria-hidden="true" />
-                      Video
-                    </a>
-                    <a
-                      href={ortakLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="protokol-card__cta-item"
-                    >
-                      <i className="fas fa-file-pdf" aria-hidden="true" />
-                      Sunum
-                    </a>
-                  </div>
-                )}
-              </article>
-            );
-          })}
-        </div>
-      )}
-    </KaynaklarShell>
+        {!loading && !error && totalPages > 1 && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 6,
+              marginTop: 28,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              aria-label="Önceki sayfa"
+              style={{
+                width: 34,
+                height: 34,
+                border: '0.5px solid rgba(0,0,0,0.15)',
+                borderRadius: 8,
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: safePage === 1 ? 0.4 : 1,
+                cursor: safePage === 1 ? 'default' : 'pointer',
+              }}
+            >
+              <i className="fas fa-chevron-left" style={{ fontSize: 12 }} aria-hidden="true" />
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => {
+              const isActive = num === safePage;
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setPage(num)}
+                  aria-current={isActive ? 'page' : undefined}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    border: isActive ? `0.5px solid ${BLUE}` : '0.5px solid rgba(0,0,0,0.15)',
+                    borderRadius: 8,
+                    background: isActive ? BLUE : 'transparent',
+                    color: isActive ? '#fff' : '#333',
+                    fontWeight: isActive ? 600 : 400,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {num}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              aria-label="Sonraki sayfa"
+              style={{
+                width: 34,
+                height: 34,
+                border: '0.5px solid rgba(0,0,0,0.15)',
+                borderRadius: 8,
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: safePage === totalPages ? 0.4 : 1,
+                cursor: safePage === totalPages ? 'default' : 'pointer',
+              }}
+            >
+              <i className="fas fa-chevron-right" style={{ fontSize: 12 }} aria-hidden="true" />
+            </button>
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 }
