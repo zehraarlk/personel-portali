@@ -5,7 +5,10 @@ from django.db import models
 def normalize_image_path(path: str) -> str:
     if not path:
         return ''
-    cleaned = path.replace('\\', '/')
+    cleaned = path.replace('\\', '/').strip()
+    # http(s), data:, blob: — absolute / special URLs stay untouched
+    if cleaned.startswith(('http://', 'https://', 'data:', 'blob:')):
+        return cleaned
     if cleaned.startswith('../'):
         cleaned = cleaned[2:]
     if cleaned.startswith('./'):
