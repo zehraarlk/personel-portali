@@ -442,16 +442,19 @@ export default function Duyurular() {
 
         {!loading && !error && (
           <div className="mx-auto w-full max-w-[1440px] px-4 pb-6 pt-4 md:px-8 md:pb-8 md:pt-4">
-            <header className="relative mb-6 w-full overflow-hidden rounded-2xl border border-[#022842]/10 bg-[linear-gradient(105deg,#022842_0%,#022842_28%,#073a5c_66%,#0c5278_100%)] px-6 py-4 text-white shadow-[0_14px_38px_rgba(2,40,66,0.18)] md:px-9 md:py-5">
-              <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10 bg-white/5" />
-              <div className="pointer-events-none absolute -bottom-28 right-28 h-56 w-56 rounded-full border border-[#f5a623]/20 bg-[#f5a623]/5" />
+            <header className="mb-6 flex w-full items-center gap-4 bg-[#f7fafc] py-3">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,#073a68_0%,#022842_100%)] text-white shadow-[0_8px_20px_rgba(2,40,66,0.2)]">
+                <span className="material-symbols-outlined text-[30px]">
+                  campaign
+                </span>
+              </div>
 
-              <div className="relative max-w-3xl">
-                <h1 className="text-2xl font-black tracking-tight md:text-3xl">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-black leading-tight tracking-tight text-[#022842] md:text-[26px]">
                   Duyurular
                 </h1>
 
-                <p className="mt-1.5 max-w-2xl text-sm leading-6 text-white/75">
+                <p className="mt-1 text-xs font-medium leading-5 text-[#1f4f7f] md:text-[13px]">
                   Kurum içi güncel duyuru ve bilgilendirmeleri tek ekrandan takip
                   edebilirsiniz.
                 </p>
@@ -459,10 +462,45 @@ export default function Duyurular() {
             </header>
 
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+              <div className="relative w-full lg:min-w-0 lg:flex-1">
+                <label htmlFor="duyuru-search" className="sr-only">
+                  Duyurularda ara
+                </label>
+
+                <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[19px] text-[#022842]">
+                  search
+                </span>
+
+                <input
+                  id="duyuru-search"
+                  type="text"
+                  role="searchbox"
+                  inputMode="search"
+                  value={arama}
+                  onChange={(event) => setArama(event.target.value)}
+                  placeholder="Duyurularda ara..."
+                  autoComplete="off"
+                  className="h-[44px] w-full rounded-xl border border-[#cfd9e2] bg-white pl-10 pr-9 text-sm text-[#0b1c30] shadow-sm outline-none transition placeholder:text-[#7a8994] hover:border-[#022842]/35 focus:border-[#022842] focus:ring-4 focus:ring-[#022842]/10"
+                />
+
+                {arama && (
+                  <button
+                    type="button"
+                    onClick={() => setArama('')}
+                    className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-[#022842] transition hover:bg-[#eef5fa] hover:text-[#0a3a5c]"
+                    aria-label="Aramayı temizle"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      close
+                    </span>
+                  </button>
+                )}
+              </div>
+
               {data.kategoriler.length > 0 && (
                 <nav
                   ref={kategoriMenuRef}
-                  className="relative z-50 w-full lg:w-[180px] lg:shrink-0"
+                  className="relative z-50 w-full lg:w-[230px] lg:shrink-0"
                   aria-label="Duyuru kategorileri"
                 >
                   <button
@@ -480,7 +518,7 @@ export default function Duyurular() {
                         {aktifKategori ? getCategoryIcon(aktifKategori) : 'grid_view'}
                       </span>
                       <span className="truncate">
-                        {kategori === '' ? 'Tümü' : aktifKategoriAdi}
+                        {kategori === '' ? 'Tüm Duyurular' : aktifKategoriAdi}
                       </span>
                     </span>
 
@@ -515,7 +553,7 @@ export default function Duyurular() {
                         <span className="material-symbols-outlined text-[18px] text-[#022842]">
                           grid_view
                         </span>
-                        Tümü
+                        Tüm Duyurular
                       </button>
 
                       {data.kategoriler.map((item) => (
@@ -547,7 +585,7 @@ export default function Duyurular() {
 
               <nav
                 ref={siralamaMenuRef}
-                className="relative z-50 w-full lg:w-[180px] lg:shrink-0"
+                className="relative z-50 w-full lg:w-[230px] lg:shrink-0"
                 aria-label="Duyuru sıralama seçenekleri"
               >
                 <button
@@ -580,7 +618,7 @@ export default function Duyurular() {
                 {siralamaMenuAcik && (
                   <div
                     role="menu"
-                    className="absolute left-0 top-full mt-2 min-w-[230px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
+                    className="absolute right-0 top-full mt-2 min-w-[230px] overflow-hidden rounded-xl border border-[#d5dde5] bg-white p-2 shadow-[0_14px_35px_rgba(2,40,66,0.18)]"
                   >
                     {SORT_OPTIONS.map((option, index) => (
                       <button
@@ -612,62 +650,29 @@ export default function Duyurular() {
                   </div>
                 )}
               </nav>
-
-              <div className="relative w-full xl:w-[520px] xl:flex-none">
-                <label htmlFor="duyuru-search" className="sr-only">
-                  Duyurularda ara
-                </label>
-
-                <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[19px] text-[#022842]">
-                  search
-                </span>
-
-                <input
-                  id="duyuru-search"
-                  type="text"
-                  role="searchbox"
-                  inputMode="search"
-                  value={arama}
-                  onChange={(event) => setArama(event.target.value)}
-                  placeholder="Duyurularda ara..."
-                  autoComplete="off"
-                  className="h-[44px] w-full rounded-xl border border-[#cfd9e2] bg-white pl-10 pr-9 text-sm text-[#0b1c30] shadow-sm outline-none transition placeholder:text-[#7a8994] hover:border-[#022842]/35 focus:border-[#022842] focus:ring-4 focus:ring-[#022842]/10"
-                />
-
-                {arama && (
-                  <button
-                    type="button"
-                    onClick={() => setArama('')}
-                    className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-[#022842] transition hover:bg-[#eef5fa] hover:text-[#0a3a5c]"
-                    aria-label="Aramayı temizle"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">
-                      close
-                    </span>
-                  </button>
-                )}
-              </div>
             </div>
 
             <section ref={duyuruListesiRef} className="scroll-mt-4 pb-10">
-              <div className="mb-5 flex items-center gap-2.5">
-                <span aria-hidden="true" className="h-2.5 w-px shrink-0 bg-[#022842]/25" />
-
-                <h2 className="flex shrink-0 items-center gap-1.5 text-[13px] font-extrabold tracking-wide text-[#022842] md:text-sm">
-                  <span className="material-symbols-outlined text-[15px] text-[#f5a623]">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="material-symbols-outlined text-[24px] leading-none text-[#022842]">
                     folder_open
                   </span>
-                  {kategori === '' ? 'Duyuru Arşivi' : aktifKategoriAdi}
-                </h2>
 
-                <div aria-hidden="true" className="h-px flex-1 bg-[#022842]/15" />
-                <span aria-hidden="true" className="h-2.5 w-px shrink-0 bg-[#022842]/25" />
+                  <h2 className="text-lg font-extrabold leading-none tracking-tight text-[#022842] md:text-[16px]">
+                    {kategori === '' ? 'Tüm Duyurular' : aktifKategoriAdi}
+                  </h2>
 
-                <span className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[#022842]/15 bg-white px-2 py-0.5 text-[11px] font-semibold text-[#536575]">
-                  {filtrelenmisDuyurular.length > 0
-                    ? `${filtrelenmisDuyurular.length} duyuru`
-                    : 'Duyuru bulunamadı'}
-                </span>
+                  <span className="text-sm font-semibold italic text-[#516b86] md:text-[14px]">
+                    –
+                    {' '}
+                    {filtrelenmisDuyurular.length > 0
+                      ? `${filtrelenmisDuyurular.length} duyuru`
+                      : 'Duyuru bulunamadı'}
+                  </span>
+                </div>
+
+                <div aria-hidden="true" className="h-px flex-1 bg-[#022842]/20" />
               </div>
 
               {data.duyurular.length === 0 ? (
