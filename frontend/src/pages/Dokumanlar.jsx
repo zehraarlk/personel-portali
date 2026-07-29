@@ -446,7 +446,7 @@ export default function Dokumanlar() {
         <section className="documents-heading" aria-labelledby="documents-title">
           <div className="documents-heading__identity">
             <span className="documents-heading__icon" aria-hidden="true">
-              <i className="far fa-file-alt" />
+              <i className="fas fa-file-alt documents-heading__glyph" />
             </span>
 
             <div>
