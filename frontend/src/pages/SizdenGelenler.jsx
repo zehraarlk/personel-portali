@@ -3,33 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { fetchSizdenGelenler } from '../api/client';
 
-const SAYFA_BASI = 6;
+const SAYFA_BASI = 12;
 
-const RENK_PALETI = [
-  { bg: 'bg-[#022842]', soft: 'bg-[#022842]/10', text: 'text-[#022842]' },
-  { bg: 'bg-[#c2410c]', soft: 'bg-[#c2410c]/10', text: 'text-[#c2410c]' },
-  { bg: 'bg-[#0f766e]', soft: 'bg-[#0f766e]/10', text: 'text-[#0f766e]' },
-  { bg: 'bg-[#15803d]', soft: 'bg-[#15803d]/10', text: 'text-[#15803d]' },
-  { bg: 'bg-[#a16207]', soft: 'bg-[#a16207]/10', text: 'text-[#a16207]' },
-  { bg: 'bg-[#4338ca]', soft: 'bg-[#4338ca]/10', text: 'text-[#4338ca]' },
-];
-
-function deptRenk(slug) {
-  if (!slug) return RENK_PALETI[0];
-  let hash = 0;
-  for (let i = 0; i < slug.length; i += 1) hash = (hash * 31 + slug.charCodeAt(i)) % RENK_PALETI.length;
-  return RENK_PALETI[hash];
-}
-
-function deptIkon(kategori) {
-  const value = `${kategori?.slug ?? ''} ${kategori?.ad ?? ''}`.toLocaleLowerCase('tr-TR');
-  if (value.includes('insan') || value.includes('kaynak')) return 'groups';
-  if (value.includes('fen')) return 'construction';
-  if (value.includes('temizlik')) return 'cleaning_services';
-  if (value.includes('veteriner')) return 'pets';
-  if (value.includes('park') || value.includes('bahce') || value.includes('bahçe')) return 'park';
-  if (value.includes('zabita') || value.includes('zabıta')) return 'shield';
-  return 'apartment';
+function formatTarih(tarih) {
+  if (!tarih) return '—';
+  const parcalar = tarih.split('-');
+  if (parcalar.length !== 3) return tarih;
+  const [yil, ay, gun] = parcalar;
+  return `${gun}.${ay}.${yil}`;
 }
 
 export default function SizdenGelenler() {
@@ -121,7 +102,7 @@ export default function SizdenGelenler() {
 
   return (
     <Layout>
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="w-full">
         <div className="mb-5 flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#022842]">
             <span className="material-symbols-outlined text-[19px] text-[#f5a623]">campaign</span>
@@ -173,19 +154,18 @@ export default function SizdenGelenler() {
                 {menuAcik && (
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setMenuAcik(false)} />
-                    <div className="absolute right-0 z-40 mt-2 w-56 overflow-hidden rounded-xl border border-[#022842]/10 bg-white shadow-[0_16px_36px_rgba(2,40,66,0.14)]">
+                    <div className="absolute right-0 z-40 mt-2 w-52 overflow-hidden rounded-xl border border-[#022842]/10 bg-white shadow-[0_16px_36px_rgba(2,40,66,0.14)]">
                       <button
                         onClick={() => {
                           kategoriSec(null);
                           setMenuAcik(false);
                         }}
-                        className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold transition ${
+                        className={`flex w-full items-center px-4 py-0.25 text-left text-[11px] font-semibold transition ${
                           seciliKategori === null
                             ? 'bg-[#022842] text-white'
                             : 'text-[#33495a] hover:bg-[#f8fbfd]'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-[18px]">grid_view</span>
                         Tümü
                       </button>
                       {kategoriler.map((k) => (
@@ -195,13 +175,12 @@ export default function SizdenGelenler() {
                             kategoriSec(k.slug);
                             setMenuAcik(false);
                           }}
-                          className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold transition ${
+                          className={`flex w-full items-center px-4 py-0.25 text-left text-[11px] font-semibold transition ${
                             seciliKategori === k.slug
-                              ? `${deptRenk(k.slug).bg} text-white`
+                              ? 'bg-[#022842] text-white'
                               : 'text-[#33495a] hover:bg-[#f8fbfd]'
                           }`}
                         >
-                          <span className="material-symbols-outlined text-[18px]">{deptIkon(k)}</span>
                           {k.ad}
                         </button>
                       ))}
@@ -216,18 +195,18 @@ export default function SizdenGelenler() {
                 to={`/sizden-gelenler/detay/${oneCikan.id}`}
                 className="mb-6 block overflow-hidden rounded-2xl bg-[#011f34] shadow-sm"
               >
-                <div className="relative h-64">
+                <div className="relative h-72">
                   <img
                     src={oneCikan.resim}
                     alt={oneCikan.kategori}
                     className="h-full w-full object-cover opacity-80"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#011f34] via-[#011f34]/30 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4">
+                  <div className="absolute inset-x-0 bottom-0 p-5">
                     <span className="mb-1.5 inline-block rounded-full bg-[#f5a623] px-2.5 py-1 text-[11px] font-bold text-[#022842]">
                       Öne Çıkan · {oneCikan.kategori}
                     </span>
-                    <p className="text-base font-bold text-white">{oneCikan.baslik}</p>
+                    <p className="text-lg font-bold text-white">{oneCikan.baslik}</p>
                   </div>
                 </div>
               </Link>
@@ -235,38 +214,32 @@ export default function SizdenGelenler() {
 
             <div ref={listeRef} className="scroll-mt-24" />
 
-            <div className="flex flex-col gap-3">
-              {gosterilenler.map((item) => {
-                const renk = deptRenk(item.kategori_slug);
-                return (
-                  <Link
-                    key={item.id}
-                    to={`/sizden-gelenler/detay/${item.id}?ref=${sayfa}`}
-                    className="group flex gap-3 rounded-xl border border-[#022842]/10 bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <div className="h-[60px] w-[78px] shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
-                      <img
-                        src={item.resim}
-                        alt={item.kategori}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1 self-center">
-                      <p className={`mb-0.5 text-[11px] font-bold uppercase ${renk.text}`}>
-                        {item.kategori}
-                      </p>
-                      <p className="line-clamp-1 text-sm font-semibold text-[#022842]">{item.baslik}</p>
-                      <p className="mt-0.5 text-[11px] text-[#9aa5ad]">{item.tarih}</p>
-                    </div>
-                    <span className="material-symbols-outlined self-center text-[18px] text-[#c7cdd2] transition group-hover:translate-x-0.5">
-                      chevron_right
-                    </span>
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {gosterilenler.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/sizden-gelenler/detay/${item.id}?ref=${sayfa}`}
+                  className="group flex gap-3 overflow-hidden rounded-xl border border-[#022842]/10 bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="h-[60px] w-[78px] shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
+                    <img
+                      src={item.resim}
+                      alt={item.kategori}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1 self-center">
+                    <p className="mb-0.5 text-[11px] font-bold uppercase text-[#c2410c]">
+                      {item.kategori}
+                    </p>
+                    <p className="line-clamp-1 text-sm font-semibold text-[#022842]">{item.baslik}</p>
+                    <p className="mt-0.5 text-[11px] text-[#9aa5ad]">{formatTarih(item.tarih)}</p>
+                  </div>
+                </Link>
+              ))}
 
               {!gosterilenler.length && (
-                <div className="rounded-2xl border border-[#022842]/10 bg-white p-8 text-center shadow-sm">
+                <div className="col-span-full rounded-2xl border border-[#022842]/10 bg-white p-8 text-center shadow-sm">
                   <span className="material-symbols-outlined mb-2 text-4xl text-[#c7cdd2]">search_off</span>
                   <p className="text-sm text-[#5b6b78]">Aramanla eşleşen içerik bulunamadı.</p>
                 </div>
