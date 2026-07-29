@@ -48,8 +48,18 @@ import {
   EgitimlerEkle,
   EgitimlerDuzenle,
 } from './pages/kaynaklar/KaynaklarPages';
+import {
+  AnketlerIndex,
+  AnketlerEkle,
+  AnketlerDuzenle,
+} from './pages/anketler/AnketlerPages';
+import {
+  YardimciLinklerIndex,
+  YardimciLinklerEkle,
+  YardimciLinklerDuzenle,
+} from './pages/yardimci-linkler/YardimciLinklerPages';
 
-const STUBS = ['anketler', 'yardimci-linkler', 'vefat', 'dogum-gunu'];
+const STUBS = ['vefat', 'dogum-gunu'];
 
 /**
  * /admin altındaki sayfa rotaları.
@@ -94,6 +104,14 @@ export const adminChildRoutes = (
     <Route path="egitimler" element={<EgitimlerIndex />} />
     <Route path="egitimler/ekle" element={<EgitimlerEkle />} />
     <Route path="egitimler/:id/duzenle" element={<EgitimlerDuzenle />} />
+
+    <Route path="anketler" element={<AnketlerIndex />} />
+    <Route path="anketler/ekle" element={<AnketlerEkle />} />
+    <Route path="anketler/:id/duzenle" element={<AnketlerDuzenle />} />
+
+    <Route path="yardimci-linkler" element={<YardimciLinklerIndex />} />
+    <Route path="yardimci-linkler/ekle" element={<YardimciLinklerEkle />} />
+    <Route path="yardimci-linkler/:id/duzenle" element={<YardimciLinklerDuzenle />} />
 
     <Route path="profil/sifre-degistir" element={<ChangePassword />} />
     <Route path="profil/oturum-kayitlari" element={<SessionHistory />} />

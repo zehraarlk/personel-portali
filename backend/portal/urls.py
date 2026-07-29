@@ -48,6 +48,10 @@ from .admin_crud_views import (
     DokumanlarViewSet,
     MevzuatlarViewSet,
     EgitimlerViewSet,
+    AnketViewSet,
+    AnketKategoriViewSet,
+    YardimciLinkViewSet,
+    YardimciLinkKategoriViewSet,
 )
 
 router = DefaultRouter()
@@ -69,6 +73,18 @@ router.register(r'admin/protokoller', ProtokolViewSet, basename='admin-protokoll
 router.register(r'admin/dokumanlar', DokumanlarViewSet, basename='admin-dokumanlar')
 router.register(r'admin/mevzuatlar', MevzuatlarViewSet, basename='admin-mevzuatlar')
 router.register(r'admin/egitimler', EgitimlerViewSet, basename='admin-egitimler')
+router.register(r'admin/anketler', AnketViewSet, basename='admin-anketler')
+router.register(
+    r'admin/anketler-kategoriler',
+    AnketKategoriViewSet,
+    basename='admin-anketler-kategoriler',
+)
+router.register(r'admin/yardimci-linkler', YardimciLinkViewSet, basename='admin-yardimci-linkler')
+router.register(
+    r'admin/yardimci-linkler-kategoriler',
+    YardimciLinkKategoriViewSet,
+    basename='admin-yardimci-linkler-kategoriler',
+)
 
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),

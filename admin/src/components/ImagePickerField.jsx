@@ -11,8 +11,11 @@ function toPreviewSrc(path) {
   return path.replace(/^\.\.\//, '/');
 }
 
-/** Dosya seçici + yükleme; önizleme MediaFrame ile cover sığdırır. */
-export default function ImagePickerField({ value, onChange, label = 'Resim' }) {
+/**
+ * Dosya seçici + yükleme.
+ * fit: 'cover' | 'contain' | 'logo' (PHP admin-img-preview: ortalı contain, max-height 200px)
+ */
+export default function ImagePickerField({ value, onChange, label = 'Resim', fit = 'cover' }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -25,6 +28,8 @@ export default function ImagePickerField({ value, onChange, label = 'Resim' }) {
   }, [localPreview]);
 
   const preview = localPreview || toPreviewSrc(value);
+  const contain = fit === 'contain';
+  const logo = fit === 'logo';
 
   const onPick = async (e) => {
     const file = e.target.files?.[0];
@@ -59,17 +64,36 @@ export default function ImagePickerField({ value, onChange, label = 'Resim' }) {
   };
 
   return (
-    <div className="admin-image-picker">
-      <div className={`admin-form-preview admin-form-preview--media${preview ? ' has-image' : ''}`}>
-        {preview ? (
-          <MediaFrame src={preview} alt="" className="absolute inset-0" eager />
-        ) : (
-          <div className="admin-form-preview__empty">
-            <i className="fas fa-image" aria-hidden="true" />
-            Görsel önizleme
-          </div>
-        )}
-      </div>
+    <div className={`admin-image-picker${logo ? ' admin-image-picker--logo' : ''}`}>
+      {logo ? (
+        <div className={`admin-img-preview${preview ? ' has-image' : ''}`}>
+          {preview ? (
+            <img src={preview} alt="" decoding="async" />
+          ) : (
+            <p className="admin-img-preview-empty">
+              Önizleme yok — görsel seçildiğinde burada görünür.
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className={`admin-form-preview admin-form-preview--media${preview ? ' has-image' : ''}`}>
+          {preview ? (
+            <MediaFrame
+              src={preview}
+              alt=""
+              className="absolute inset-0"
+              eager
+              forceContain={contain}
+              forceCover={!contain}
+            />
+          ) : (
+            <div className="admin-form-preview__empty">
+              <i className="fas fa-image" aria-hidden="true" />
+              Görsel önizleme
+            </div>
+          )}
+        </div>
+      )}
 
       <span className="admin-image-picker__label">{label}</span>
       <div className="admin-image-picker__row">

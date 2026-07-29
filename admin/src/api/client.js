@@ -386,6 +386,91 @@ export const dokumanlarApi = _kaynakApi('dokumanlar');
 export const mevzuatlarApi = _kaynakApi('mevzuatlar');
 export const egitimlerApi = _kaynakApi('egitimler');
 
+export async function listAnketler() {
+  const response = await fetch(`${API_BASE}/admin/anketler/`);
+  return parseJson(response);
+}
+
+export async function getAnket(id) {
+  const response = await fetch(`${API_BASE}/admin/anketler/${id}/`);
+  return parseJson(response);
+}
+
+export async function createAnket(payload) {
+  const response = await fetch(`${API_BASE}/admin/anketler/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateAnket(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/anketler/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteAnket(id) {
+  const response = await fetch(`${API_BASE}/admin/anketler/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listAnketKategoriler() {
+  const response = await fetch(`${API_BASE}/admin/anketler-kategoriler/`);
+  return parseJson(response);
+}
+
+export async function listYardimciLinkler(kategoriId) {
+  const qs = kategoriId ? `?kategori=${encodeURIComponent(kategoriId)}` : '';
+  const response = await fetch(`${API_BASE}/admin/yardimci-linkler/${qs}`);
+  return parseJson(response);
+}
+
+export async function getYardimciLink(id) {
+  const response = await fetch(`${API_BASE}/admin/yardimci-linkler/${id}/`);
+  return parseJson(response);
+}
+
+export async function createYardimciLink(payload) {
+  const response = await fetch(`${API_BASE}/admin/yardimci-linkler/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateYardimciLink(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/yardimci-linkler/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteYardimciLink(id) {
+  const response = await fetch(`${API_BASE}/admin/yardimci-linkler/${id}/`, {
+    method: 'DELETE',
+  });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+export async function listYardimciLinkKategoriler() {
+  const response = await fetch(`${API_BASE}/admin/yardimci-linkler-kategoriler/`);
+  return parseJson(response);
+}
+
 export async function listSizdenGelenKategoriler() {
   const response = await fetch(`${API_BASE}/admin/sizden-gelenler-kategoriler/`);
   return parseJson(response);

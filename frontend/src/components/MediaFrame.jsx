@@ -42,6 +42,7 @@ export default function MediaFrame({
     border: 0,
     objectFit: cover ? 'cover' : 'contain',
     objectPosition: 'center center',
+    imageRendering: 'auto',
   };
 
   return (

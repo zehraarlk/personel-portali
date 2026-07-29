@@ -5,6 +5,8 @@ from django.utils import timezone
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import AllowAny
 
+from django.db import transaction
+
 from .models import (
     Etkinlikler,
     EtkinliklerDuyurular,
@@ -16,6 +18,14 @@ from .models import (
     SizdengelenlerKategori,
     Kaynaklar,
     KaynaklarKategori,
+    Anketler,
+    AnketlerKategori,
+    AnketSorulari,
+    AnketSecenekleri,
+    AnketCevaplari,
+    AnketKatilimlari,
+    YardimciLinkler,
+    YardimciLinklerKategori,
     normalize_image_path,
 )
 from .validators import (
@@ -619,3 +629,321 @@ def _kaynak_viewset_factory(kategori_slug, default_icon):
 DokumanlarViewSet = _kaynak_viewset_factory('Dökümanlar', 'fas fa-file-alt')
 MevzuatlarViewSet = _kaynak_viewset_factory('Mevzuatlar', 'fas fa-folder-open')
 EgitimlerViewSet = _kaynak_viewset_factory('Eğitimler', 'fas fa-graduation-cap')
+
+
+# ───────────────────── Anketler ─────────────────────
+
+ANKET_SORU_TIPLERI = ('coktan_secmeli', 'acik_uclu')
+
+
+class AdminAnketKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnketlerKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class AdminAnketSecenekSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False, allow_null=True)
+    secenek_metni = serializers.CharField(max_length=255)
+
+
+class AdminAnketSoruSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False, allow_null=True)
+    soru_metni = serializers.CharField()
+    soru_tipi = serializers.ChoiceField(choices=ANKET_SORU_TIPLERI)
+    sira = serializers.IntegerField(min_value=1)
+    secenekler = AdminAnketSecenekSerializer(many=True, required=False)
+
+    def validate(self, attrs):
+        tip = attrs.get('soru_tipi')
+        secenekler = attrs.get('secenekler') or []
+        if tip == 'coktan_secmeli' and len(secenekler) < 2:
+            raise serializers.ValidationError(
+                {'secenekler': 'Çoktan seçmeli soruda en az 2 seçenek gerekir.'}
+            )
+        if tip == 'acik_uclu':
+            attrs['secenekler'] = []
+        return attrs
+
+
+class AdminAnketSerializer(serializers.ModelSerializer):
+    kategori_ad = serializers.SerializerMethodField(read_only=True)
+    kategori_slug = serializers.SerializerMethodField(read_only=True)
+    resim_display = serializers.SerializerMethodField(read_only=True)
+    sorular = AdminAnketSoruSerializer(many=True, required=False)
+
+    class Meta:
+        model = Anketler
+        fields = [
+            'id',
+            'baslik',
+            'aciklama',
+            'resim_url',
+            'resim_display',
+            'baslangic_tarihi',
+            'bitis_tarihi',
+            'katilim_sayisi',
+            'hedef_katilim',
+            'favori',
+            'kategori',
+            'kategori_ad',
+            'kategori_slug',
+            'sorular',
+        ]
+        read_only_fields = ['katilim_sayisi']
+
+    def get_kategori_ad(self, obj):
+        return obj.kategori.ad if obj.kategori_id else None
+
+    def get_kategori_slug(self, obj):
+        return obj.kategori.slug if obj.kategori_id else None
+
+    def get_resim_display(self, obj):
+        return normalize_image_path(obj.resim_url) or (obj.resim_url or '')
+
+    def _serialize_sorular(self, obj):
+        rows = []
+        for soru in AnketSorulari.objects.filter(anket=obj).order_by('sira', 'id'):
+            secenekler = [
+                {'id': s.id, 'secenek_metni': s.secenek_metni}
+                for s in AnketSecenekleri.objects.filter(soru=soru).order_by('id')
+            ]
+            rows.append(
+                {
+                    'id': soru.id,
+                    'soru_metni': soru.soru_metni,
+                    'soru_tipi': soru.soru_tipi,
+                    'sira': soru.sira,
+                    'secenekler': secenekler,
+                }
+            )
+        return rows
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['sorular'] = self._serialize_sorular(instance)
+        return data
+
+    def validate_baslik(self, value):
+        title = (value or '').strip()
+        if not title:
+            raise serializers.ValidationError('Başlık zorunludur.')
+        if len(title) > 255:
+            raise serializers.ValidationError('Başlık en fazla 255 karakter olabilir.')
+        return title
+
+    def validate_favori(self, value):
+        try:
+            n = int(value)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError('Favori 0 veya 1 olmalıdır.')
+        if n not in (0, 1):
+            raise serializers.ValidationError('Favori 0 veya 1 olmalıdır.')
+        return n
+
+    def validate_hedef_katilim(self, value):
+        if value is None or value == '':
+            return None
+        try:
+            n = int(value)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError('Hedef katılım sayı olmalıdır.')
+        if n < 0:
+            raise serializers.ValidationError('Hedef katılım negatif olamaz.')
+        return n
+
+    def validate(self, attrs):
+        start = attrs.get('baslangic_tarihi', getattr(self.instance, 'baslangic_tarihi', None))
+        end = attrs.get('bitis_tarihi', getattr(self.instance, 'bitis_tarihi', None))
+        if start and end and end < start:
+            raise serializers.ValidationError(
+                {'bitis_tarihi': 'Bitiş tarihi başlangıçtan önce olamaz.'}
+            )
+        return attrs
+
+    def _sync_sorular(self, anket, sorular):
+        if sorular is None:
+            return
+        keep_ids = []
+        for idx, item in enumerate(sorular):
+            soru_id = item.get('id')
+            sira = item.get('sira') or (idx + 1)
+            tip = item['soru_tipi']
+            metin = item['soru_metni'].strip()
+            if soru_id:
+                soru = AnketSorulari.objects.filter(id=soru_id, anket=anket).first()
+                if not soru:
+                    soru = AnketSorulari(anket=anket)
+            else:
+                soru = AnketSorulari(anket=anket)
+            soru.soru_metni = metin
+            soru.soru_tipi = tip
+            soru.sira = sira
+            soru.save()
+            keep_ids.append(soru.id)
+
+            secenekler = item.get('secenekler') or []
+            if tip == 'acik_uclu':
+                AnketSecenekleri.objects.filter(soru=soru).delete()
+                continue
+
+            keep_secenek = []
+            for sec in secenekler:
+                sid = sec.get('id')
+                text = (sec.get('secenek_metni') or '').strip()
+                if not text:
+                    continue
+                if sid:
+                    row = AnketSecenekleri.objects.filter(id=sid, soru=soru).first()
+                    if not row:
+                        row = AnketSecenekleri(soru=soru)
+                else:
+                    row = AnketSecenekleri(soru=soru)
+                row.secenek_metni = text
+                row.save()
+                keep_secenek.append(row.id)
+            AnketSecenekleri.objects.filter(soru=soru).exclude(id__in=keep_secenek).delete()
+
+        stale = AnketSorulari.objects.filter(anket=anket).exclude(id__in=keep_ids)
+        stale_ids = list(stale.values_list('id', flat=True))
+        if stale_ids:
+            AnketCevaplari.objects.filter(soru_id__in=stale_ids).delete()
+            AnketSecenekleri.objects.filter(soru_id__in=stale_ids).delete()
+            stale.delete()
+
+    @transaction.atomic
+    def create(self, validated_data):
+        sorular = validated_data.pop('sorular', None)
+        if validated_data.get('resim_url') == '':
+            validated_data['resim_url'] = None
+        if validated_data.get('katilim_sayisi') is None:
+            validated_data['katilim_sayisi'] = 0
+        if validated_data.get('favori') is None:
+            validated_data['favori'] = 0
+        anket = super().create(validated_data)
+        self._sync_sorular(anket, sorular if sorular is not None else [])
+        return anket
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        sorular = validated_data.pop('sorular', None)
+        if validated_data.get('resim_url') == '':
+            validated_data['resim_url'] = None
+        anket = super().update(instance, validated_data)
+        if sorular is not None:
+            self._sync_sorular(anket, sorular)
+        return anket
+
+
+class AnketKategoriViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AnketlerKategori.objects.all().order_by('id')
+    serializer_class = AdminAnketKategoriSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+class AnketViewSet(viewsets.ModelViewSet):
+    queryset = Anketler.objects.select_related('kategori').all().order_by('-id')
+    serializer_class = AdminAnketSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        soru_ids = list(
+            AnketSorulari.objects.filter(anket=instance).values_list('id', flat=True)
+        )
+        AnketCevaplari.objects.filter(anket=instance).delete()
+        AnketKatilimlari.objects.filter(anket_id=instance.id).delete()
+        if soru_ids:
+            AnketSecenekleri.objects.filter(soru_id__in=soru_ids).delete()
+            AnketSorulari.objects.filter(id__in=soru_ids).delete()
+        instance.delete()
+
+
+# ───────────────────── Yardımcı Linkler ─────────────────────
+
+class AdminYardimciLinkKategoriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = YardimciLinklerKategori
+        fields = ['id', 'slug', 'ad']
+
+
+class AdminYardimciLinkSerializer(serializers.ModelSerializer):
+    kategori_ad = serializers.SerializerMethodField(read_only=True)
+    logo_display = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = YardimciLinkler
+        fields = [
+            'id',
+            'baslik',
+            'logo_url',
+            'logo_display',
+            'hedef_url',
+            'kategori',
+            'kategori_ad',
+        ]
+
+    def get_kategori_ad(self, obj):
+        return obj.kategori.ad if obj.kategori_id else None
+
+    def get_logo_display(self, obj):
+        return normalize_image_path(obj.logo_url) or (obj.logo_url or '')
+
+    def validate_baslik(self, value):
+        title = (value or '').strip()
+        if not title:
+            raise serializers.ValidationError('Başlık zorunludur.')
+        if len(title) > 255:
+            raise serializers.ValidationError('Başlık en fazla 255 karakter olabilir.')
+        return title
+
+    def validate_hedef_url(self, value):
+        url = (value or '').strip()
+        if not url:
+            raise serializers.ValidationError('Hedef URL zorunludur.')
+        if len(url) > 500:
+            raise serializers.ValidationError('Hedef URL en fazla 500 karakter olabilir.')
+        return url
+
+    def validate_logo_url(self, value):
+        if value is None:
+            return None
+        path = (value or '').strip()
+        return path or None
+
+    def create(self, validated_data):
+        if validated_data.get('logo_url') == '':
+            validated_data['logo_url'] = None
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        if validated_data.get('logo_url') == '':
+            validated_data['logo_url'] = None
+        return super().update(instance, validated_data)
+
+
+class YardimciLinkKategoriViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = YardimciLinklerKategori.objects.all().order_by('id')
+    serializer_class = AdminYardimciLinkKategoriSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+class YardimciLinkViewSet(viewsets.ModelViewSet):
+    queryset = YardimciLinkler.objects.select_related('kategori').all().order_by('id')
+    serializer_class = AdminYardimciLinkSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        kategori = self.request.query_params.get('kategori')
+        if kategori:
+            qs = qs.filter(kategori_id=kategori)
+        return qs
