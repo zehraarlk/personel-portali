@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { fetchSizdenGelenler, goruntulenmeArttir } from '../api/client';
+
+const PANEL_BASI = 6;
 
 function formatTarih(tarih) {
   if (!tarih) return '—';
@@ -16,13 +18,13 @@ export default function SizdenGelenlerDetayB() {
   const [searchParams] = useSearchParams();
   const refSayfa = searchParams.get('ref');
   const listeAdresi = refSayfa ? `/sizden-gelenler?sayfa=${refSayfa}` : '/sizden-gelenler';
-  const seritRef = useRef(null);
 
   const [tumIcerikler, setTumIcerikler] = useState([]);
   const [icerik, setIcerik] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resimBuyuk, setResimBuyuk] = useState(false);
+  const [panelSayfa, setPanelSayfa] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -40,19 +42,24 @@ export default function SizdenGelenlerDetayB() {
     goruntulenmeArttir(id).catch(() => {});
   }, [id]);
 
+  useEffect(() => {
+    setPanelSayfa(0);
+  }, [id]);
+
   const digerIcerikler = useMemo(() => {
     if (!icerik) return [];
-    return tumIcerikler.filter((i) => String(i.id) !== id).slice(0, 8);
+    return tumIcerikler.filter((i) => String(i.id) !== id);
   }, [tumIcerikler, icerik, id]);
 
-  function seritKaydir(yon) {
-    seritRef.current?.scrollBy({ left: yon * 280, behavior: 'smooth' });
-  }
+  const panelToplamSayfa = Math.max(1, Math.ceil(digerIcerikler.length / PANEL_BASI));
+  const panelGosterilenler = digerIcerikler.slice(
+    panelSayfa * PANEL_BASI,
+    panelSayfa * PANEL_BASI + PANEL_BASI
+  );
 
   return (
     <Layout>
       <div className="w-full pb-16">
-        {/* Geri Dön Linki */}
         <Link
           to={listeAdresi}
           className="mb-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[#022842] hover:underline"
@@ -84,14 +91,8 @@ export default function SizdenGelenlerDetayB() {
         )}
 
         {!loading && !error && icerik && (
-          <>
-            {/* TAM GENİŞLİKLİ ANA BEYAZ KART CONTAINER */}
-            <div className="overflow-hidden rounded-3xl border border-[#022842]/10 bg-white shadow-sm w-full">
-              {/* 
-                Görsel Kutusu:
-                - Üzerine gelindiğinde (hover) resim hareket etmez/büyümez.
-                - Tıklandığında büyük resmi açan buton görevi görür.
-              */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px] lg:items-stretch">
+            <div className="overflow-hidden rounded-3xl border border-[#022842]/10 bg-white shadow-sm">
               <button
                 type="button"
                 onClick={() => setResimBuyuk(true)}
@@ -105,9 +106,7 @@ export default function SizdenGelenlerDetayB() {
                 />
               </button>
 
-              {/* Kart İçerik Alanı */}
               <div className="p-6 sm:p-10">
-                {/* Kategori, Tarih ve Görüntülenme */}
                 <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold">
                   <span className="rounded-full bg-gray-100 border border-gray-200 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide text-[#022842]">
                     {icerik.kategori}
@@ -122,76 +121,79 @@ export default function SizdenGelenlerDetayB() {
                   </span>
                 </div>
 
-                {/* Başlık */}
                 <h1 className="mb-5 text-2xl font-bold text-[#022842] sm:text-3xl leading-snug">
                   {icerik.baslik}
                 </h1>
 
-                {/* Özet / İçerik */}
-                <p className="text-base leading-8 text-[#536575]">
-                  {icerik.ozet}
-                </p>
+                <p className="text-base leading-8 text-[#536575]">{icerik.ozet}</p>
               </div>
             </div>
 
-            {/* DİĞER İÇERİKLER BÖLÜMÜ */}
-            {digerIcerikler.length > 0 && (
-              <div className="mt-12">
-                <p className="mb-5 text-lg font-bold text-[#022842]">Diğer İçerikler</p>
+            <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-3xl border border-[#022842]/10 bg-white shadow-sm">
+              <div className="border-b border-[#022842]/10 px-5 py-4">
+                <p className="text-base font-bold text-[#022842]">Diğer İçerikler</p>
+              </div>
 
-                <div className="relative">
-                  {/* Sol Scroll Butonu */}
-                  <button
-                    onClick={() => seritKaydir(-1)}
-                    className="absolute -left-4 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#022842]/10 bg-white shadow-md transition hover:bg-gray-50"
-                  >
-                    <span className="material-symbols-outlined text-[18px] text-[#022842]">chevron_left</span>
-                  </button>
-
-                  {/* Şerit Liste */}
-                  <div
-                    ref={seritRef}
-                    className="flex gap-5 overflow-x-auto pb-4 scrollbar-none"
-                    style={{ scrollbarWidth: 'none' }}
-                  >
-                    {digerIcerikler.map((item) => (
+              <div className="flex-1 overflow-y-auto p-3">
+                {panelGosterilenler.length > 0 ? (
+                  <div className="flex flex-col gap-2.5">
+                    {panelGosterilenler.map((item) => (
                       <Link
                         key={item.id}
                         to={`/sizden-gelenler/detay/${item.id}${refSayfa ? `?ref=${refSayfa}` : ''}`}
-                        className="group w-56 shrink-0 overflow-hidden rounded-2xl border border-[#022842]/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        className="group flex items-center gap-3 rounded-xl p-2 transition hover:bg-[#f8fbfd]"
                       >
-                        <div className="h-32 overflow-hidden bg-[#dce6ed]">
+                        <div className="h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
                           <img
                             src={item.resim}
                             alt={item.kategori}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                           />
                         </div>
-                        <div className="p-4">
-                          <p className="line-clamp-2 text-xs font-bold leading-tight text-[#022842]">
+                        <div className="min-w-0">
+                          <p className="line-clamp-2 text-xs font-bold leading-snug text-[#022842] group-hover:text-[#0a3a5c]">
                             {item.baslik}
                           </p>
-                          <p className="mt-2 text-[10px] font-medium text-[#8696a4]">{formatTarih(item.tarih)}</p>
+                          <p className="mt-1 text-[10px] font-medium text-[#8696a4]">
+                            {formatTarih(item.tarih)}
+                          </p>
                         </div>
                       </Link>
                     ))}
                   </div>
+                ) : (
+                  <p className="p-3 text-xs text-[#8696a4]">Başka içerik bulunmuyor.</p>
+                )}
+              </div>
 
-                  {/* Sağ Scroll Butonu */}
+              {panelToplamSayfa > 1 && (
+                <div className="flex items-center justify-center gap-2 border-t border-[#022842]/10 px-3 py-2.5">
                   <button
-                    onClick={() => seritKaydir(1)}
-                    className="absolute -right-4 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#022842]/10 bg-white shadow-md transition hover:bg-gray-50"
+                    onClick={() => setPanelSayfa((s) => Math.max(0, s - 1))}
+                    disabled={panelSayfa === 0}
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[#022842]/10 bg-white disabled:opacity-30"
+                    aria-label="Önceki"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-[#022842]">chevron_right</span>
+                    <span className="material-symbols-outlined text-[15px] text-[#022842]">chevron_left</span>
+                  </button>
+                  <span className="text-[11px] font-semibold text-[#8696a4]">
+                    {panelSayfa + 1} / {panelToplamSayfa}
+                  </span>
+                  <button
+                    onClick={() => setPanelSayfa((s) => Math.min(panelToplamSayfa - 1, s + 1))}
+                    disabled={panelSayfa >= panelToplamSayfa - 1}
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[#022842]/10 bg-white disabled:opacity-30"
+                    aria-label="Sonraki"
+                  >
+                    <span className="material-symbols-outlined text-[15px] text-[#022842]">chevron_right</span>
                   </button>
                 </div>
-              </div>
-            )}
-          </>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Resim Büyütme Modalı (Büyük Görsel Ekranı) */}
       {resimBuyuk && icerik && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
