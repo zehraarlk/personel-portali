@@ -589,13 +589,6 @@ export async function fetchYardimciLinkler(kategori = '') {
   return response.json();
 }
 
-export {
-  canAccessPortal,
-  isPersonelLoggedIn,
-  isYoneticiLoggedIn,
-} from '../auth/session';
-
-
 /** vefat — { vefatlar: [...], toplam } */
 export async function fetchVefat(q) {
   const qs = q ? `?q=${encodeURIComponent(q)}` : '';
@@ -605,3 +598,9 @@ export async function fetchVefat(q) {
   }
   return response.json();
 }
+
+export {
+  canAccessPortal,
+  isPersonelLoggedIn,
+  isYoneticiLoggedIn,
+} from '../auth/session';
