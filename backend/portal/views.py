@@ -394,6 +394,7 @@ def vefat_list(request):
             for row in qs
             if q_fold in _tr_casefold(row.vefat_eden_adi)
             or q_fold in _tr_casefold(row.iliski_pozisyon)
+            or q_fold in _tr_casefold(row.cenaze_mesaji)
         ]
         qs = qs.filter(id__in=matched_ids)
 

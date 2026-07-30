@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Layout from '../components/Layout';
 import { fetchVefat } from '../api/client';
 
@@ -36,8 +36,9 @@ export default function VefatEdenler() {
   const [vefatlar, setVefatlar] = useState([]);
   const [query, setQuery] = useState('');
   const [seciliYil, setSeciliYil] = useState('tumu');
-  
   const [sayfa, setSayfa] = useState(0);
+  const aramaInputRef = useRef(null);
+  const yilSelectRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -96,20 +97,35 @@ export default function VefatEdenler() {
   return (
     <Layout>
       <div className="w-full">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#022842]">
-            <i className="fas fa-ribbon text-[17px] text-[#f5a623]" aria-hidden="true" />
+        <div className="mb-4 flex items-center gap-3">
+          <span
+            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl"
+            style={{ background: '#022842', boxShadow: '0 4px 12px rgba(2, 40, 66, 0.18)' }}
+          >
+            <i className="fas fa-ribbon text-[17px] text-white" aria-hidden="true" />
           </span>
           <div>
-            <h1 className="text-lg font-bold text-[#022842]">Vefat Edenler</h1>
-            <p className="text-sm text-[#5b6b78]">Personelimizin ve yakınlarının vefat duyuruları</p>
+            <h1 className="m-0 text-[22px] font-extrabold leading-tight tracking-tight text-[#022842]">
+              Vefat Edenler
+            </h1>
+            <p className="m-0 text-[13px] text-[#5b6b78]">
+              Personelimizin ve yakınlarının vefat duyuruları
+            </p>
           </div>
         </div>
 
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row">
-          <div className="flex flex-1 items-center gap-2 rounded-xl border border-[#022842]/10 bg-white px-3.5 py-2.5 shadow-sm">
-            <span className="material-symbols-outlined text-[17px] text-[#9aa5ad]">search</span>
+        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="flex h-[42px] items-center gap-2 rounded-xl border border-[#022842]/10 bg-white px-3.5 shadow-sm">
+            <button
+              type="button"
+              onClick={() => aramaInputRef.current?.focus()}
+              className="flex items-center"
+              aria-label="Arama kutusuna odaklan"
+            >
+              <span className="material-symbols-outlined text-[17px] text-[#9aa5ad]">search</span>
+            </button>
             <input
+              ref={aramaInputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -118,23 +134,34 @@ export default function VefatEdenler() {
             />
           </div>
 
-          <div className="flex items-center gap-2 rounded-xl border border-[#022842]/10 bg-white px-3.5 py-2.5 shadow-sm">
-            <span className="material-symbols-outlined text-[17px] text-[#9aa5ad]">calendar_month</span>
-            <select
-              value={seciliYil}
-              onChange={(e) => setSeciliYil(e.target.value)}
-              className="border-0 bg-transparent text-sm font-semibold text-[#022842] outline-none"
-            >
-              <option value="tumu">Tüm Yıllar</option>
-              {yillar.map((yil) => (
-                <option key={yil} value={yil}>
-                  {yil}
-                </option>
-              ))}
-            </select>
+          <div className="flex items-center justify-end">
+            <div className="flex h-[42px] w-fit items-center gap-2 rounded-xl border border-[#022842]/10 bg-white px-3.5 shadow-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  yilSelectRef.current?.focus();
+                  yilSelectRef.current?.click();
+                }}
+                className="flex items-center"
+                aria-label="Yıl menüsünü aç"
+              >
+                <span className="material-symbols-outlined text-[17px] text-[#9aa5ad]">calendar_month</span>
+              </button>
+              <select
+                ref={yilSelectRef}
+                value={seciliYil}
+                onChange={(e) => setSeciliYil(e.target.value)}
+                className="border-0 bg-transparent text-sm font-semibold text-[#022842] outline-none"
+              >
+                <option value="tumu">Tüm Yıllar</option>
+                {yillar.map((yil) => (
+                  <option key={yil} value={yil}>
+                    {yil}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-
-          
         </div>
 
         {loading && (
@@ -161,47 +188,40 @@ export default function VefatEdenler() {
 
         {!loading && !error && gosterilenler.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {gosterilenler.map((v) => {
                 const { giris, cenaze, irtibat } = mesajiAyikla(v.cenaze_mesaji);
                 return (
                   <div
                     key={v.id}
-                    className="flex h-full flex-col overflow-hidden rounded-xl border border-[#022842]/10 bg-white shadow-sm"
+                    className="flex overflow-hidden rounded-xl border border-[#022842]/10 bg-white shadow-sm"
                   >
                     <div
-                      className="flex items-center justify-between px-4 py-2.5"
+                      className="flex w-24 shrink-0 flex-col items-center justify-center gap-2 px-3 py-4 text-center"
                       style={{
-                        background: 'linear-gradient(to right, #022842 0%, #134a6e 50%, #022842 100%)',
+                        background: 'linear-gradient(to bottom, #022842 0%, #134a6e 50%, #022842 100%)',
                       }}
                     >
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-white">
-                        Cenaze Duyurusu
-                      </span>
-                      <span className="text-[11px] font-semibold text-white">
+                      <i className="fas fa-ribbon text-[22px] text-white" aria-hidden="true" />
+                      <span className="text-[10px] font-semibold leading-tight text-white/90">
                         {v.vefat_tarihi_metin}
                       </span>
                     </div>
 
                     <div className="flex flex-1 flex-col p-4">
-                      <div className="mb-3 flex flex-col items-center text-center">
-                        <span className="mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-[#f4f7fa] text-[#8696a4]">
-                          <span className="material-symbols-outlined text-[26px]">person</span>
+                      <p className="text-sm font-bold text-[#022842]">{v.vefat_eden_adi}</p>
+                      {v.iliski_pozisyon && (
+                        <span className="mt-1 inline-block w-fit rounded-full bg-[#f4f7fa] px-2.5 py-0.5 text-[11px] font-medium text-[#5b6b78]">
+                          {v.iliski_pozisyon}
                         </span>
-                        <p className="text-sm font-bold text-[#022842]">{v.vefat_eden_adi}</p>
-                        {v.iliski_pozisyon && (
-                          <span className="mt-1 inline-block rounded-full bg-[#f4f7fa] px-2.5 py-0.5 text-[11px] font-medium text-[#5b6b78]">
-                            {v.iliski_pozisyon}
-                          </span>
-                        )}
-                      </div>
+                      )}
 
                       {giris && (
-                        <p className="mb-3 min-h-[2.25rem] text-xs leading-6 text-[#536575]">{giris}</p>
+                        <p className="mt-2.5 text-xs leading-6 text-[#536575]">{giris}</p>
                       )}
 
                       {cenaze && (
-                        <div className="mb-3 flex items-start gap-2">
+                        <div className="mt-2.5 flex items-start gap-2">
                           <span className="material-symbols-outlined mt-0.5 text-[16px] text-[#a16207]">
                             location_on
                           </span>
@@ -212,19 +232,17 @@ export default function VefatEdenler() {
                         </div>
                       )}
 
-                      <div className="mt-auto pt-2">
-                        {irtibat && (
-                          <div className="flex items-start gap-2 border-t border-[#022842]/8 pt-3">
-                            <span className="material-symbols-outlined mt-0.5 text-[16px] text-[#a16207]">
-                              call
-                            </span>
-                            <div>
-                              <p className="text-[11px] font-bold text-[#022842]">İletişim</p>
-                              <p className="mt-0.5 text-xs leading-6 text-[#536575]">{irtibat}</p>
-                            </div>
+                      {irtibat && (
+                        <div className="mt-2.5 flex items-start gap-2 border-t border-[#022842]/8 pt-2.5">
+                          <span className="material-symbols-outlined mt-0.5 text-[16px] text-[#a16207]">
+                            call
+                          </span>
+                          <div>
+                            <p className="text-[11px] font-bold text-[#022842]">İletişim</p>
+                            <p className="mt-0.5 text-xs leading-6 text-[#536575]">{irtibat}</p>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
