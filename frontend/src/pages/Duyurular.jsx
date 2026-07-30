@@ -115,72 +115,67 @@ function getCategoryIcon(category) {
 
 function DuyuruCard({ duyuru }) {
   return (
-    <article className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-[20px] border border-[#e3e9ef] bg-white shadow-[0_12px_30px_rgba(2,40,66,0.07)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.01] hover:border-[#022842]/30 hover:shadow-[0_24px_56px_rgba(2,40,66,0.17)]">
-      <div className="relative aspect-[16/10] overflow-hidden rounded-t-[20px] bg-[#e8eef3]">
-        {duyuru.resim ? (
-          <MediaFrame
-            src={duyuru.resim}
-            alt={duyuru.baslik}
-            className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.045]"
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-br from-[#eef3f7] via-[#e8eff5] to-[#d7e1ea]"
-          />
-        )}
+    <article className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-[22px] border border-[#dde5eb] bg-white shadow-[0_14px_34px_rgba(2,40,66,0.08)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.012] hover:border-[#022842]/28 hover:shadow-[0_24px_56px_rgba(2,40,66,0.16)]">
+      <div className="relative">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-t-[22px] bg-[#e8eef3]">
+          {duyuru.resim ? (
+            <MediaFrame
+              src={duyuru.resim}
+              alt={duyuru.baslik}
+              className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.05]"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-br from-[#eef3f7] via-[#e8eff5] to-[#d7e1ea]"
+            />
+          )}
 
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#022842]/12 to-transparent" />
-      </div>
-
-      <div className="flex flex-1 flex-col px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-5">
-        {(duyuru.kategori || duyuru.tarih) && (
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            {duyuru.kategori && (
-              <span className="inline-flex items-center rounded-xl bg-[#eef3ff] px-3.5 py-1.5 font-semibold text-[#1f4f7f]">
-                {duyuru.kategori}
-              </span>
-            )}
-
-            {duyuru.kategori && duyuru.tarih && (
-              <span aria-hidden="true" className="h-5 w-px bg-[#d7dee6]" />
-            )}
-
-            {duyuru.tarih && (
-              <time dateTime={duyuru.tarih} className="text-sm font-medium text-[#5f6e7d]">
-                {formatDate(duyuru.tarih)}
-              </time>
-            )}
-          </div>
-        )}
-
-        <div className="mt-4 flex items-start gap-3">
-          <span
-            aria-hidden="true"
-            className="mt-1 h-14 w-1.5 shrink-0 rounded-full bg-[linear-gradient(180deg,#2454d8_0%,#022842_100%)]"
-          />
-
-          <div className="min-w-0 flex-1">
-            <h2 className="line-clamp-2 min-h-[3.8rem] text-[1.4rem] font-black leading-[1.15] tracking-tight text-[#081528] transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-[#022842] sm:text-[1.55rem]">
-              {duyuru.baslik}
-            </h2>
-
-            {duyuru.aciklama ? (
-              <p className="mt-4 line-clamp-3 min-h-[5.9rem] text-[15px] leading-7 text-[#5d6977]">
-                {duyuru.aciklama}
-              </p>
-            ) : (
-              <p className="mt-4 min-h-[5.9rem] text-[15px] leading-7 text-[#8a98a2]">
-                Duyuru açıklaması bulunmuyor.
-              </p>
-            )}
-          </div>
+          <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#022842]/14 to-transparent" />
         </div>
 
+        {duyuru.kategori && (
+          <div className="absolute bottom-0 left-4 right-4 z-10 translate-y-1/2">
+            <span className="inline-flex max-w-full items-center rounded-full bg-[#022842] px-4.5 py-1.5 text-[13px] font-semibold leading-5 text-white shadow-[0_10px_22px_rgba(2,40,66,0.22)]">
+              <span className="truncate">{duyuru.kategori}</span>
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className={`flex flex-1 flex-col px-5 pb-5 sm:px-6 sm:pb-6 ${duyuru.kategori ? 'pt-8' : 'pt-5'}`}>
+        {duyuru.tarih && (
+          <time
+            dateTime={duyuru.tarih}
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#6a7784]"
+          >
+            <span className="material-symbols-outlined text-[18px] text-[#7b8794]">
+              calendar_month
+            </span>
+            {formatDate(duyuru.tarih)}
+          </time>
+        )}
+
+        <h2 className="mt-4 line-clamp-2 min-h-[3.9rem] text-[1.45rem] font-black leading-[1.12] tracking-tight text-[#022842] transition-all duration-300 group-hover:translate-x-0.5 sm:text-[1.6rem]">
+          {duyuru.baslik}
+        </h2>
+
+        <span aria-hidden="true" className="mt-4 h-[3px] w-9 rounded-full bg-[#022842] transition-all duration-300 group-hover:w-11" />
+
+        {duyuru.aciklama ? (
+          <p className="mt-4 line-clamp-3 min-h-[5.7rem] text-[15px] leading-7 text-[#5d6977]">
+            {duyuru.aciklama}
+          </p>
+        ) : (
+          <p className="mt-4 min-h-[5.7rem] text-[15px] leading-7 text-[#8a98a2]">
+            Duyuru açıklaması bulunmuyor.
+          </p>
+        )}
+
         <div className="mt-auto pt-5">
-          <span className="inline-flex min-h-[52px] w-full items-center justify-between gap-4 rounded-[16px] border border-[#c7d6f2] bg-[#f8fbff] px-5 text-[15px] font-bold text-[#1a49d6] shadow-[0_8px_20px_rgba(26,73,214,0.07)] transition-all duration-300 group-hover:border-[#022842] group-hover:bg-[#022842] group-hover:text-white group-hover:shadow-[0_12px_26px_rgba(2,40,66,0.22)] sm:w-auto sm:min-w-[210px]">
-            <span>Detaylı bilgi</span>
-            <span aria-hidden="true" className="text-[24px] leading-none transition-transform duration-300 group-hover:translate-x-1">
+          <span className="inline-flex min-h-[50px] w-full items-center justify-between gap-4 rounded-[14px] border border-[#022842]/18 bg-white px-5 text-[15px] font-bold text-[#022842] shadow-[0_8px_22px_rgba(2,40,66,0.06)] transition-all duration-300 group-hover:border-[#022842] group-hover:bg-[#022842] group-hover:text-white group-hover:shadow-[0_14px_30px_rgba(2,40,66,0.18)] sm:w-auto sm:min-w-[190px]">
+            <span>Detaylı Bilgi</span>
+            <span aria-hidden="true" className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-1">
               →
             </span>
           </span>
@@ -489,7 +484,7 @@ export default function Duyurular() {
                   >
                     <span className="inline-flex min-w-0 items-center gap-2">
                       <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                        {aktifKategori ? getCategoryIcon(aktifKategori) : 'grid_view'}
+                        {aktifKategori ? getCategoryIcon(aktifKategori) : 'campaign'}
                       </span>
                       <span className="truncate">
                         {kategori === '' ? 'Tüm Duyurular' : aktifKategoriAdi}
@@ -525,7 +520,7 @@ export default function Duyurular() {
                         }`}
                       >
                         <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                          grid_view
+                          campaign
                         </span>
                         Tüm Duyurular
                       </button>
@@ -630,7 +625,7 @@ export default function Duyurular() {
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="material-symbols-outlined text-[24px] leading-none text-[#022842]">
-                    folder_open
+                    {kategori === '' ? 'campaign' : getCategoryIcon(aktifKategori)}
                   </span>
 
                   <h2 className="text-lg font-extrabold leading-none tracking-tight text-[#022842] md:text-[16px]">
