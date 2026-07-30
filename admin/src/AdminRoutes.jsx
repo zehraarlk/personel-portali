@@ -1,7 +1,6 @@
-import { Route, Routes } from 'react-router-dom';
+﻿import { Route, Routes } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import Home from './pages/Home';
-import ModuleStub from './pages/ModuleStub';
 import ChangePassword from './pages/ChangePassword';
 import SessionHistory from './pages/SessionHistory';
 import {
@@ -58,8 +57,12 @@ import {
   YardimciLinklerEkle,
   YardimciLinklerDuzenle,
 } from './pages/yardimci-linkler/YardimciLinklerPages';
-
-const STUBS = ['vefat', 'dogum-gunu'];
+import {
+  VefatIndex,
+  VefatEkle,
+  VefatDuzenle,
+} from './pages/vefat/VefatPages';
+import { DogumGunuIndex } from './pages/dogum-gunu/DogumGunuPages';
 
 /**
  * /admin altındaki sayfa rotaları.
@@ -113,14 +116,14 @@ export const adminChildRoutes = (
     <Route path="yardimci-linkler/ekle" element={<YardimciLinklerEkle />} />
     <Route path="yardimci-linkler/:id/duzenle" element={<YardimciLinklerDuzenle />} />
 
+    <Route path="vefat" element={<VefatIndex />} />
+    <Route path="vefat/ekle" element={<VefatEkle />} />
+    <Route path="vefat/:id/duzenle" element={<VefatDuzenle />} />
+
+    <Route path="dogum-gunu" element={<DogumGunuIndex />} />
+
     <Route path="profil/sifre-degistir" element={<ChangePassword />} />
     <Route path="profil/oturum-kayitlari" element={<SessionHistory />} />
-    {STUBS.map((slug) => (
-      <Route key={slug} path={slug} element={<ModuleStub slug={slug} />} />
-    ))}
-    {STUBS.map((slug) => (
-      <Route key={`${slug}-ekle`} path={`${slug}/ekle`} element={<ModuleStub slug={slug} />} />
-    ))}
     <Route path="*" element={<Home />} />
   </>
 );

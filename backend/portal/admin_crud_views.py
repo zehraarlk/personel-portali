@@ -1,9 +1,12 @@
 """Admin CRUD — etkinlikler, etkinlikler_duyurular, personeller, yoneticiler."""
+from datetime import date
+
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from django.db import transaction
 
@@ -26,6 +29,7 @@ from .models import (
     AnketKatilimlari,
     YardimciLinkler,
     YardimciLinklerKategori,
+    VefatBilgileri,
     normalize_image_path,
 )
 from .validators import (
@@ -947,3 +951,179 @@ class YardimciLinkViewSet(viewsets.ModelViewSet):
         if kategori:
             qs = qs.filter(kategori_id=kategori)
         return qs
+
+
+# ───────────────────── Vefat Bilgileri ─────────────────────
+
+_TR_MONTHS = (
+    '',
+    'Ocak',
+    'Şubat',
+    'Mart',
+    'Nisan',
+    'Mayıs',
+    'Haziran',
+    'Temmuz',
+    'Ağustos',
+    'Eylül',
+    'Ekim',
+    'Kasım',
+    'Aralık',
+)
+
+
+def _vefat_tarih_metin(tarih):
+    if not tarih:
+        return ''
+    return f'{tarih.day} {_TR_MONTHS[tarih.month]} {tarih.year}'
+
+
+class AdminVefatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VefatBilgileri
+        fields = [
+            'id',
+            'vefat_eden_adi',
+            'iliski_pozisyon',
+            'vefat_tarihi',
+            'vefat_tarihi_metin',
+            'cenaze_mesaji',
+        ]
+
+    def validate_vefat_eden_adi(self, value):
+        name = (value or '').strip()
+        if not name:
+            raise serializers.ValidationError('Vefat eden adı zorunludur.')
+        if len(name) > 255:
+            raise serializers.ValidationError('Ad en fazla 255 karakter olabilir.')
+        return name
+
+    def validate_cenaze_mesaji(self, value):
+        text = (value or '').strip()
+        if not text:
+            raise serializers.ValidationError('Cenaze mesajı zorunludur.')
+        return text
+
+    def validate_vefat_tarihi(self, value):
+        if not value:
+            raise serializers.ValidationError('Vefat tarihi zorunludur.')
+        return value
+
+    def validate_iliski_pozisyon(self, value):
+        if value is None:
+            return ''
+        return (value or '').strip()
+
+    def validate_vefat_tarihi_metin(self, value):
+        if value is None:
+            return ''
+        text = (value or '').strip()
+        if len(text) > 50:
+            raise serializers.ValidationError('Tarih metni en fazla 50 karakter olabilir.')
+        return text
+
+    def create(self, validated_data):
+        if not validated_data.get('vefat_tarihi_metin'):
+            validated_data['vefat_tarihi_metin'] = _vefat_tarih_metin(
+                validated_data.get('vefat_tarihi')
+            )
+        if validated_data.get('iliski_pozisyon') is None:
+            validated_data['iliski_pozisyon'] = ''
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        metin = validated_data.get('vefat_tarihi_metin', instance.vefat_tarihi_metin)
+        if not (metin or '').strip():
+            tarih = validated_data.get('vefat_tarihi', instance.vefat_tarihi)
+            validated_data['vefat_tarihi_metin'] = _vefat_tarih_metin(tarih)
+        return super().update(instance, validated_data)
+
+
+class VefatViewSet(viewsets.ModelViewSet):
+    queryset = VefatBilgileri.objects.all().order_by('-vefat_tarihi', '-id')
+    serializer_class = AdminVefatSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+
+# ───────────────────── Doğum Günü (personellerden) ─────────────────────
+
+_TR_MONTHS_LONG = (
+    '',
+    'Ocak',
+    'Şubat',
+    'Mart',
+    'Nisan',
+    'Mayıs',
+    'Haziran',
+    'Temmuz',
+    'Ağustos',
+    'Eylül',
+    'Ekim',
+    'Kasım',
+    'Aralık',
+)
+
+
+class AdminDogumGunuSerializer(serializers.ModelSerializer):
+    ad_soyad = serializers.SerializerMethodField(read_only=True)
+    foto = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Personeller
+        fields = [
+            'id',
+            'sicil_no',
+            'ad',
+            'soyad',
+            'ad_soyad',
+            'email',
+            'dogum_tarihi',
+            'foto',
+        ]
+
+    def get_ad_soyad(self, obj):
+        return f'{obj.ad} {obj.soyad}'.strip()
+
+    def get_foto(self, obj):
+        return normalize_image_path(obj.foto_url)
+
+
+class DogumGunuViewSet(viewsets.ReadOnlyModelViewSet):
+    """Bugün / bu ay / tüm personel doğum günleri — personeller tablosundan."""
+
+    serializer_class = AdminDogumGunuSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    pagination_class = None
+
+    def get_queryset(self):
+        today = date.today()
+        scope = (self.request.query_params.get('scope') or 'today').strip().lower()
+        qs = Personeller.objects.all()
+        if scope == 'month':
+            qs = qs.filter(dogum_tarihi__month=today.month)
+        elif scope != 'all':
+            qs = qs.filter(
+                dogum_tarihi__month=today.month,
+                dogum_tarihi__day=today.day,
+            )
+        return qs.order_by('ad', 'soyad', 'id')
+
+    def list(self, request, *args, **kwargs):
+        today = date.today()
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        scope = (request.query_params.get('scope') or 'today').strip().lower()
+        if scope not in ('today', 'month', 'all'):
+            scope = 'today'
+        return Response(
+            {
+                'tarih': today.isoformat(),
+                'tarih_tr': f'{today.day} {_TR_MONTHS_LONG[today.month]} {today.year}',
+                'scope': scope,
+                'toplam': len(serializer.data),
+                'kayitlar': serializer.data,
+            }
+        )

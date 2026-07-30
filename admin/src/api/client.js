@@ -471,6 +471,51 @@ export async function listYardimciLinkKategoriler() {
   return parseJson(response);
 }
 
+export async function listVefat() {
+  const response = await fetch(`${API_BASE}/admin/vefat/`);
+  return parseJson(response);
+}
+
+export async function getVefat(id) {
+  const response = await fetch(`${API_BASE}/admin/vefat/${id}/`);
+  return parseJson(response);
+}
+
+export async function createVefat(payload) {
+  const response = await fetch(`${API_BASE}/admin/vefat/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function updateVefat(id, payload) {
+  const response = await fetch(`${API_BASE}/admin/vefat/${id}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function deleteVefat(id) {
+  const response = await fetch(`${API_BASE}/admin/vefat/${id}/`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) {
+    return parseJson(response);
+  }
+  return true;
+}
+
+/** scope: today | month | all */
+export async function listDogumGunu(scope = 'today') {
+  const params = new URLSearchParams();
+  if (scope) params.set('scope', scope);
+  const qs = params.toString();
+  const response = await fetch(`${API_BASE}/admin/dogum-gunu/${qs ? `?${qs}` : ''}`);
+  return parseJson(response);
+}
+
 export async function listSizdenGelenKategoriler() {
   const response = await fetch(`${API_BASE}/admin/sizden-gelenler-kategoriler/`);
   return parseJson(response);
