@@ -619,6 +619,49 @@ export async function fetchAnketDetail(id) {
 }
 
 /**
+ * Doğum günü bilgilerini getirir.
+ *
+ * scope:
+ * - today: Bugün doğan personeller
+ * - month: Bu ay doğan personeller
+ * - all: Tüm personeller
+ *
+ * q:
+ * - Ad veya soyada göre arama
+ */
+export async function fetchDogumGunleri(
+  scope = 'month',
+  q = ''
+) {
+  const params = new URLSearchParams();
+
+  params.set('scope', scope);
+
+  if (q.trim()) {
+    params.set('q', q.trim());
+  }
+
+  const response = await fetch(
+    `${API_BASE}/dogum-gunu/?${params.toString()}`,
+    {
+      headers: authHeaders(),
+    }
+  );
+
+  const data = await response
+    .json()
+    .catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail ||
+        'Doğum günü bilgileri alınamadı'
+    );
+  }
+
+  return data;
+}
+/**
  * cevaplar map: { [soruId]: secenekId | metin }
  * API'ye [{ soru_id, secenek_id?, cevap_metni? }] olarak gönderilir.
  */

@@ -27,6 +27,7 @@ from .serializers import (
     HaberSerializer,
     DuyuruSerializer,
     BirthdaySerializer,
+    DogumGunuSerializer,
     AnasayfaLinkSerializer,
     SiteIkonSerializer,
     SizdenGelenlerSerializer,
@@ -401,4 +402,45 @@ def vefat_list(request):
     return Response({
         'vefatlar': VefatBilgileriSerializer(qs, many=True).data,
         'toplam': qs.count(),
+    })
+
+@api_view(['GET'])
+def dogum_gunu_list(request):
+    """Portal doğum günü listesi: bugün, bu ay veya tüm personel."""
+    today = date.today()
+    scope = (request.query_params.get('scope') or 'month').strip().lower()
+    q = (request.query_params.get('q') or '').strip()
+
+    if scope not in ('today', 'month', 'all'):
+        scope = 'month'
+
+    qs = Personel.objects.all()
+
+    if scope == 'today':
+        qs = qs.filter(
+            dogum_tarihi__month=today.month,
+            dogum_tarihi__day=today.day,
+        )
+    elif scope == 'month':
+        qs = qs.filter(dogum_tarihi__month=today.month)
+
+    if q:
+        qs = qs.filter(Q(ad__icontains=q) | Q(soyad__icontains=q))
+
+    kayitlar = list(qs)
+    kayitlar.sort(
+        key=lambda personel: (
+            personel.dogum_tarihi.month,
+            personel.dogum_tarihi.day,
+            (personel.ad or '').casefold(),
+            (personel.soyad or '').casefold(),
+        )
+    )
+
+    return Response({
+        'tarih': today.isoformat(),
+        'tarih_tr': today.strftime('%d.%m.%Y'),
+        'scope': scope,
+        'toplam': len(kayitlar),
+        'kayitlar': DogumGunuSerializer(kayitlar, many=True).data,
     })

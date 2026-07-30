@@ -1,7 +1,6 @@
 import { Navigate, Routes, Route } from 'react-router-dom';
 import Test from './pages/Test';
 import PersonelDb from './pages/PersonelDb';
-import ComingSoon from './pages/ComingSoon';
 import ChangePassword from './pages/ChangePassword';
 import ChangeEmail from './pages/ChangeEmail';
 import SessionHistory from './pages/SessionHistory';
@@ -12,6 +11,7 @@ import Etkinlikler from './pages/Etkinlikler';
 import EtkinlikDetay from './pages/EtkinlikDetay';
 import Duyurular from './pages/Duyurular';
 import VefatEdenler from './pages/VefatEdenler';
+import DogumGunu from './pages/DogumGunu';
 import YardimciLinkler from './pages/YardimciLinkler';
 import Anketler from './pages/Anketler';
 import AnketDetay from './pages/AnketDetay';
@@ -28,7 +28,6 @@ import { RootEntry, RequirePortal, RequireYonetici } from './auth/RequireAuth';
 import AdminLayout from '@admin/components/AdminLayout.jsx';
 import { adminChildRoutes } from '@admin/AdminRoutes.jsx';
 
-const PLACEHOLDER_PATHS = ['dogum-gunu'];
 
 export default function App() {
   return (
@@ -48,6 +47,7 @@ export default function App() {
         <Route path="/mevzuatlar" element={<Mevzuatlar />} />
         <Route path="/egitimler" element={<Egitimler />} />
         <Route path="/vefat" element={<VefatEdenler />} />
+        <Route path="/dogum-gunu" element={<DogumGunu />} />
         <Route path="/yardimci-linkler" element={<YardimciLinkler />} />
         <Route path="/anketler" element={<Anketler />} />
         <Route path="/anketler/:id" element={<AnketDetay />} />
@@ -59,9 +59,6 @@ export default function App() {
         <Route path="/sizden-gelenler" element={<SizdenGelenler />} />
         <Route path="/sizden-gelenler/detay/:id" element={<SizdenGelenlerDetay />} />
         <Route path="/profil/oturum-kayitlari" element={<SessionHistory />} />
-        {PLACEHOLDER_PATHS.map((slug) => (
-          <Route key={slug} path={`/${slug}`} element={<ComingSoon />} />
-        ))}
       </Route>
 
       <Route element={<RequireYonetici />}>
