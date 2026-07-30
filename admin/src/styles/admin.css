@@ -710,8 +710,10 @@
   white-space: nowrap;
 }
 
-.admin-table--crud td.admin-empty {
+.admin-table--crud td.admin-empty,
+.admin-table--crud td.admin-empty:last-child {
   white-space: normal;
+  text-align: left;
 }
 
 .admin-table th {
