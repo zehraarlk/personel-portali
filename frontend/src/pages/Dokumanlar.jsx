@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchDokumanlar } from '../../api/client';
-import { KAYNAK_PAGES } from './config';
+import { KAYNAK_PAGES, KAYNAK_QUICK_LINKS } from './config';
 import '../../styles/dokumanlar.css';
 
 const page = KAYNAK_PAGES.dokumanlar;
@@ -29,6 +30,13 @@ const CATEGORIES = [
   { id: 'contracts', label: 'Sözleşmeler', icon: 'far fa-file-alt' },
   { id: 'other', label: 'Diğer', icon: 'fas fa-ellipsis-h' },
 ];
+
+const KAYNAK_LINK_ICONS = {
+  protokoller: 'fas fa-handshake',
+  dokumanlar: 'far fa-file-alt',
+  mevzuatlar: 'fas fa-balance-scale',
+  egitimler: 'fas fa-graduation-cap',
+};
 
 const ChevronDownIcon = () => (
   <svg
@@ -446,7 +454,7 @@ export default function Dokumanlar() {
         <section className="documents-heading" aria-labelledby="documents-title">
           <div className="documents-heading__identity">
             <span className="documents-heading__icon" aria-hidden="true">
-              <i className="fas fa-file-alt documents-heading__glyph" />
+              <i className="far fa-file-alt" />
             </span>
 
             <div>
@@ -463,6 +471,30 @@ export default function Dokumanlar() {
             <span>{page.statLabel || 'Aktif doküman'}</span>
           </div>
         </section>
+
+        <nav className="documents-resource-links" aria-label="Kaynak sayfaları">
+          {KAYNAK_QUICK_LINKS.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) =>
+                `documents-resource-link${isActive ? ' is-active' : ''}`
+              }
+            >
+              <span className="documents-resource-link__label">
+                <i
+                  className={KAYNAK_LINK_ICONS[link.iconKey] || 'far fa-folder'}
+                  aria-hidden="true"
+                />
+                {link.label}
+              </span>
+              <i
+                className="fas fa-chevron-right documents-resource-link__arrow"
+                aria-hidden="true"
+              />
+            </NavLink>
+          ))}
+        </nav>
 
         <section className="documents-toolbar" aria-label="Doküman araçları">
           <form className="documents-search" role="search" onSubmit={submitSearch}>

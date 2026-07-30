@@ -447,74 +447,84 @@
   }
 }
 
-.documents-categories {
+.documents-resource-links {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.7rem;
   margin: 1rem 0 1.15rem;
-  padding: 0.45rem;
+  /* Üst araç satırı 3.3rem yüksekliğinde; bu kutunun toplam yüksekliğini de
+     aynı seviyeye getirmek için dış boşluk azaltıldı. */
+  padding: 0.25rem;
   border: 1px solid var(--documents-border);
   border-radius: 12px;
   background: var(--documents-paper);
   box-shadow: 0 5px 18px rgba(9, 49, 75, 0.04);
 }
 
-.documents-category {
+.documents-resource-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-width: 0;
-  min-height: 2.8rem;
-  gap: 0.6rem;
-  padding: 0.45rem 0.65rem;
+  /* 2.675rem + kutunun 0.5rem dikey padding'i + 2px sınır ≈ 3.3rem */
+  min-height: 2.675rem;
+  gap: 0.75rem;
+  padding: 0.35rem 0.75rem;
   border: 1px solid transparent;
   border-radius: 9px;
   color: #49647a;
   background: transparent;
-  font: inherit;
-  cursor: pointer;
-  transition: color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease,
+    transform 0.16s ease;
 }
 
-.documents-category:hover {
+.documents-resource-link:hover {
+  color: var(--documents-navy-dark);
   background: var(--documents-soft);
+  transform: translateY(-1px);
 }
 
-.documents-category.is-active {
+.documents-resource-link:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(6, 59, 90, 0.1);
+}
+
+.documents-resource-link.is-active {
   color: #fff;
   background: linear-gradient(145deg, #074664, var(--documents-navy-dark));
   box-shadow: 0 7px 16px rgba(2, 47, 75, 0.17);
 }
 
-.documents-category__label {
+.documents-resource-link__label {
   display: flex;
   align-items: center;
   min-width: 0;
   gap: 0.55rem;
-  font-size: 0.8rem;
-  font-weight: 650;
   white-space: nowrap;
 }
 
-.documents-category__count {
-  display: grid;
+.documents-resource-link__label i {
+  width: 1rem;
   flex: 0 0 auto;
-  place-items: center;
-  min-width: 1.65rem;
-  height: 1.45rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  color: var(--documents-navy);
-  background: #edf2f6;
-  font-size: 0.69rem;
-  font-weight: 800;
+  text-align: center;
 }
 
-.documents-category.is-active .documents-category__count {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.16);
+.documents-resource-link__arrow {
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  opacity: 0.55;
+  transition: transform 0.16s ease, opacity 0.16s ease;
+}
+
+.documents-resource-link:hover .documents-resource-link__arrow,
+.documents-resource-link.is-active .documents-resource-link__arrow {
+  transform: translateX(2px);
+  opacity: 1;
 }
 
 .documents-result-note {
@@ -545,6 +555,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .documents-card {
@@ -562,10 +573,12 @@
 }
 
 .documents-card:hover {
-  transform: translateY(-3px);
+  background: #f8fbfe;
+  transform: translateY(-4px);
   border-color: rgba(6, 59, 90, 0.18);
   box-shadow: 0 14px 30px rgba(9, 49, 75, 0.09);
 }
+
 
 .documents-card__file {
   position: relative;
@@ -639,7 +652,7 @@
   font-size: 0.76rem;
   line-height: 1.55;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 5;
 }
 
 .documents-card__footer {
@@ -860,9 +873,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .documents-categories {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 960px) {
@@ -874,7 +884,8 @@
     grid-column: 1 / -1;
   }
 
-  .documents-list {
+  .documents-list,
+  .documents-resource-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -928,7 +939,7 @@
   }
 
   .documents-toolbar,
-  .documents-categories,
+  .documents-resource-links,
   .documents-list {
     grid-template-columns: 1fr;
   }
@@ -937,7 +948,7 @@
     min-width: 5.3rem;
   }
 
-  .documents-category {
+  .documents-resource-link {
     min-height: 2.6rem;
   }
 
@@ -963,4 +974,64 @@
   .documents-view-switch {
     order: 3;
   }
+}
+/* Eski JSX hâlâ render edilse bile kategori satırını tamamen gizle. */
+.documents-categories {
+  display: none !important;
+}
+/* ---------------------------------------------------------
+   Satır sırası düzeltmesi
+   JSX içindeki kaynak sırası değişmese bile bağlantı satırını
+   arama/filtre satırının üstünde gösterir.
+---------------------------------------------------------- */
+.documents-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.documents-page > * {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.documents-heading {
+  grid-row: 1;
+}
+
+.documents-resource-links {
+  grid-row: 2;
+  margin: 1rem 0 0;
+}
+
+.documents-toolbar {
+  grid-row: 3;
+}
+
+.documents-categories {
+  grid-row: 4;
+}
+
+.documents-result-note {
+  grid-row: 5;
+}
+
+.documents-state,
+.documents-empty,
+.documents-list {
+  grid-row: 6;
+}
+
+.documents-pagination {
+  grid-row: 7;
+}
+
+/* Arama/filtre satırı ile doküman kartları arasındaki görünür boşluk.
+   Grid içindeki margin yerine kart listesinin kendi üst padding'i kullanılır. */
+.documents-toolbar {
+  margin-bottom: 0 !important;
+}
+
+.documents-list {
+  margin-top: 0 !important;
+  padding-top: 1.30rem !important;
 }
