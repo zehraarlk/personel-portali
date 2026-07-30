@@ -14,7 +14,9 @@ const TITLES = {
 
 export default function ComingSoon() {
   const { pathname } = useLocation();
-  const title = TITLES[pathname] || 'Sayfa';
+  const title =
+    TITLES[pathname] ||
+    (pathname.startsWith('/anketler/') ? 'Anket Detayı' : 'Sayfa');
 
   return (
     <Layout>

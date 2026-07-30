@@ -94,31 +94,24 @@ export function YardimciLinklerIndex() {
 
       <div className="admin-card admin-card--flush admin-yl-card">
         <div className="admin-yl-toolbar">
-          <div className="admin-yl-toolbar__label">
+          <label className="admin-yl-toolbar__label" htmlFor="yl-kat-filter">
             <i className="fas fa-folder-open" aria-hidden="true" />
             <span>Kategori</span>
-          </div>
-          <div className="admin-yl-filters" role="tablist" aria-label="Kategori filtresi">
-            <button
-              type="button"
-              className={`admin-yl-filter${filterKat === '' ? ' is-active' : ''}`}
-              onClick={() => setFilterKat('')}
-            >
-              Tümü
-            </button>
+          </label>
+          <select
+            id="yl-kat-filter"
+            className="admin-toolbar-select"
+            value={filterKat}
+            onChange={(e) => setFilterKat(e.target.value)}
+            aria-label="Kategori filtresi"
+          >
+            <option value="">Tümü</option>
             {kategoriler.map((k) => (
-              <button
-                key={k.id}
-                type="button"
-                className={`admin-yl-filter${
-                  String(filterKat) === String(k.id) ? ' is-active' : ''
-                }`}
-                onClick={() => setFilterKat(String(k.id))}
-              >
+              <option key={k.id} value={String(k.id)}>
                 {k.ad}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
         <div className="admin-table-wrap">
@@ -307,33 +300,22 @@ function YardimciLinkForm({
                     required
                   />
                 </label>
-                <div className="admin-yl-form-kat">
-                  <span className="admin-yl-form-kat__label">Kategori</span>
-                  <div
-                    className="admin-yl-form-kat__options"
-                    role="radiogroup"
+                <label>
+                  Kategori *
+                  <select
+                    value={kategori}
+                    onChange={(e) => setKategori(e.target.value)}
+                    required
                     aria-label="Kategori"
                   >
+                    <option value="">Kategori seçin</option>
                     {kategoriler.map((k) => (
-                      <label
-                        key={k.id}
-                        className={`admin-yl-form-kat__option${
-                          String(kategori) === String(k.id) ? ' is-active' : ''
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="yl-kategori"
-                          value={k.id}
-                          checked={String(kategori) === String(k.id)}
-                          onChange={() => setKategori(String(k.id))}
-                          required
-                        />
+                      <option key={k.id} value={String(k.id)}>
                         {k.ad}
-                      </label>
+                      </option>
                     ))}
-                  </div>
-                </div>
+                  </select>
+                </label>
               </div>
 
               <div className="admin-form__side">

@@ -13,6 +13,8 @@ import EtkinlikDetay from './pages/EtkinlikDetay';
 import Duyurular from './pages/Duyurular';
 import VefatEdenler from './pages/VefatEdenler';
 import YardimciLinkler from './pages/YardimciLinkler';
+import Anketler from './pages/Anketler';
+import AnketDetay from './pages/AnketDetay';
 
 import Protokoller from './pages/kaynaklar/Protokoller';
 import Dokumanlar from './pages/kaynaklar/Dokumanlar';
@@ -26,10 +28,7 @@ import { RootEntry, RequirePortal, RequireYonetici } from './auth/RequireAuth';
 import AdminLayout from '@admin/components/AdminLayout.jsx';
 import { adminChildRoutes } from '@admin/AdminRoutes.jsx';
 
-const PLACEHOLDER_PATHS = [
-  'anketler',
-  'dogum-gunu',
-];
+const PLACEHOLDER_PATHS = ['dogum-gunu'];
 
 export default function App() {
   return (
@@ -50,6 +49,8 @@ export default function App() {
         <Route path="/egitimler" element={<Egitimler />} />
         <Route path="/vefat" element={<VefatEdenler />} />
         <Route path="/yardimci-linkler" element={<YardimciLinkler />} />
+        <Route path="/anketler" element={<Anketler />} />
+        <Route path="/anketler/:id" element={<AnketDetay />} />
 
         <Route path="/test" element={<Test />} />
         <Route path="/test/personel-db" element={<PersonelDb />} />

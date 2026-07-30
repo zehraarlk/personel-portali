@@ -1,13 +1,10 @@
 import axios from 'axios';
 import {
   authHeaders,
-  canAccessPortal,
   getOturumId,
   getPersonelId,
   getYoneticiId,
   getYoneticiOturumId,
-  isPersonelLoggedIn,
-  isYoneticiLoggedIn,
 } from '../auth/session';
 
 const API_BASE =
@@ -597,6 +594,63 @@ export async function fetchVefat(q) {
     throw new Error('Vefat bilgileri alınamadı');
   }
   return response.json();
+}
+
+/** anketler — { anketler: [...], toplam } */
+export async function fetchAnketler() {
+  const response = await fetch(`${API_BASE}/anketler/`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('Anketler alınamadı');
+  }
+  return response.json();
+}
+
+export async function fetchAnketDetail(id) {
+  const response = await fetch(`${API_BASE}/anketler/${id}/`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail || 'Anket detayı alınamadı');
+  }
+  return response.json();
+}
+
+/**
+ * cevaplar map: { [soruId]: secenekId | metin }
+ * API'ye [{ soru_id, secenek_id?, cevap_metni? }] olarak gönderilir.
+ */
+export async function submitAnket(id, cevaplarMap) {
+  const personelId = getPersonelId();
+  if (!personelId) {
+    throw new Error('Ankete katılmak için personel hesabıyla giriş yapmalısınız.');
+  }
+
+  const cevaplar = Object.entries(cevaplarMap || {}).map(([soruId, val]) => {
+    if (typeof val === 'number' || (/^\d+$/.test(String(val)) && String(val).length < 12)) {
+      return { soru_id: Number(soruId), secenek_id: Number(val), cevap_metni: null };
+    }
+    return { soru_id: Number(soruId), secenek_id: null, cevap_metni: String(val || '') };
+  });
+
+  const response = await fetch(`${API_BASE}/anketler/${id}/katil/`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      cevaplar,
+      personel_id: Number(personelId),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.detail || 'Katılım kaydedilemedi');
+  }
+  return data;
 }
 
 export {

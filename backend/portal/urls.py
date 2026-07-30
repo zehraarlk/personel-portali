@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     home_dashboard,
-    site_icons, 
+    site_icons,
     sizden_gelenler_list,
     sizden_gelenler_goruntule,
     videos,
@@ -53,6 +53,8 @@ from .admin_crud_views import (
     AnketKategoriViewSet,
     YardimciLinkViewSet,
     YardimciLinkKategoriViewSet,
+    VefatViewSet,
+    DogumGunuViewSet,
 )
 from .anket_views import (
     anketler_list,
@@ -92,6 +94,8 @@ router.register(
     YardimciLinkKategoriViewSet,
     basename='admin-yardimci-linkler-kategoriler',
 )
+router.register(r'admin/vefat', VefatViewSet, basename='admin-vefat')
+router.register(r'admin/dogum-gunu', DogumGunuViewSet, basename='admin-dogum-gunu')
 
 urlpatterns = [
     path('home/', home_dashboard, name='home-dashboard'),
@@ -123,11 +127,9 @@ urlpatterns = [
     path('dokumanlar/', dokumanlar_list, name='dokumanlar'),
     path('mevzuatlar/', mevzuatlar_list, name='mevzuatlar'),
     path('vefat/', vefat_list, name='vefat'),
-
     path('anketler/', anketler_list, name='anketler'),
     path('anketler/<int:pk>/', anket_detay, name='anket-detay'),
     path('anketler/<int:pk>/katil/', anket_katil, name='anket-katil'),
-
     path('yardimci-linkler/', yardimci_linkler_list, name='yardimci-linkler'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),

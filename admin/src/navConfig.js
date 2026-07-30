@@ -107,7 +107,8 @@ export const ADMIN_STATS = ADMIN_NAV.filter((s) => s.title && s.title !== 'Siste
 /** Hızlı işlemler = aynı sıra; tıklanınca ilgili ekleme sayfasına gider. */
 export const ADMIN_QUICK_ACTIONS = ADMIN_STATS.map((stat) => ({
   key: stat.key,
-  to: `${stat.to}/ekle`,
+  // Doğum günü personeller tablosundan gelir; ekleme personel formuna gider.
+  to: stat.key === 'dogum_gunu' ? `${ADMIN_BASE}/personeller/ekle` : `${stat.to}/ekle`,
   label: stat.label,
   desc: 'Yeni kayıt ekle',
   icon: stat.icon,
