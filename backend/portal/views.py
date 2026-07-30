@@ -21,6 +21,7 @@ from .models import (
     DuyurularKategori,
     Kaynaklar,
     KaynaklarAltKategori,
+    VefatBilgileri,
 )
 from .serializers import (
     HaberSerializer,
@@ -36,6 +37,7 @@ from .serializers import (
     EtkinliklerDurumSerializer,
     EtkinlikDuyuruSerializer,
     DuyurularKategoriSerializer,
+    VefatBilgileriSerializer,
 )
 
 
@@ -376,4 +378,26 @@ def mevzuatlar_list(request):
         'mevzuatlar': items,
         'toplam': len(items),
         'alt_kategoriler': alt_kategoriler_data,
+    })
+
+@api_view(['GET'])
+def vefat_list(request):
+    """Vefat duyuruları — en yeni tarih en üstte."""
+    q = (request.query_params.get('q') or '').strip()
+
+    qs = VefatBilgileri.objects.order_by('-vefat_tarihi', '-id')
+
+    if q:
+        q_fold = _tr_casefold(q)
+        matched_ids = [
+            row.id
+            for row in qs
+            if q_fold in _tr_casefold(row.vefat_eden_adi)
+            or q_fold in _tr_casefold(row.iliski_pozisyon)
+        ]
+        qs = qs.filter(id__in=matched_ids)
+
+    return Response({
+        'vefatlar': VefatBilgileriSerializer(qs, many=True).data,
+        'toplam': qs.count(),
     })

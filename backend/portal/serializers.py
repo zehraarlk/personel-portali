@@ -15,6 +15,7 @@ from .models import (
     EtkinliklerDurum,
     EtkinliklerDuyurular,
     DuyurularKategori,
+    VefatBilgileri,
 )
 
 
@@ -183,3 +184,14 @@ class EtkinlikDuyuruSerializer(serializers.ModelSerializer):
     def get_kategori_slug(self, obj):
         return obj.kategori.slug if obj.kategori else None
 
+class VefatBilgileriSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VefatBilgileri
+        fields = [
+            'id',
+            'vefat_eden_adi',
+            'iliski_pozisyon',
+            'vefat_tarihi',
+            'vefat_tarihi_metin',
+            'cenaze_mesaji',
+        ]

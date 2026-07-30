@@ -11,6 +11,7 @@ import Videos from './pages/Videos';
 import Etkinlikler from './pages/Etkinlikler';
 import EtkinlikDetay from './pages/EtkinlikDetay';
 import Duyurular from './pages/Duyurular';
+import VefatEdenler from './pages/VefatEdenler';
 
 import Protokoller from './pages/kaynaklar/Protokoller';
 import Dokumanlar from './pages/kaynaklar/Dokumanlar';
@@ -27,7 +28,6 @@ import { adminChildRoutes } from '@admin/AdminRoutes.jsx';
 const PLACEHOLDER_PATHS = [
   'anketler',
   'yardimci-linkler',
-  'vefat',
   'dogum-gunu',
 ];
 
@@ -48,6 +48,7 @@ export default function App() {
         <Route path="/dokumanlar" element={<Dokumanlar />} />
         <Route path="/mevzuatlar" element={<Mevzuatlar />} />
         <Route path="/egitimler" element={<Egitimler />} />
+        <Route path="/vefat" element={<VefatEdenler />} />
 
         <Route path="/test" element={<Test />} />
         <Route path="/test/personel-db" element={<PersonelDb />} />
