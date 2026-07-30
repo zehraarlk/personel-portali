@@ -9,7 +9,6 @@ const ORANGE = '#f5a623';
 export default function YardimciLinkler() {
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
-  const [search, setSearch] = useState('');
   const [seciliKategori, setSeciliKategori] = useState(null);
   const [kategorilerPaneliAcik, setKategorilerPaneliAcik] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -35,13 +34,14 @@ export default function YardimciLinkler() {
     };
   }, []);
 
+  // Artık "Ara" butonuna basmaya gerek yok; her tuş vuruşunda anında filtreleniyor.
   const filtered = useMemo(() => {
-    const q = search.trim().toLocaleLowerCase('tr-TR');
+    const q = query.trim().toLocaleLowerCase('tr-TR');
     if (!q) return items;
     return items.filter((item) =>
       (item.baslik || '').toLocaleLowerCase('tr-TR').includes(q),
     );
-  }, [items, search]);
+  }, [items, query]);
 
   const gruplanmis = useMemo(() => {
     const map = new Map();
@@ -59,14 +59,8 @@ export default function YardimciLinkler() {
     setSeciliKategori((eski) => (eski === kategoriAdi ? null : kategoriAdi));
   };
 
-  const submitSearch = (e) => {
-    e.preventDefault();
-    setSearch(query.trim());
-  };
-
   const clearSearch = () => {
     setQuery('');
-    setSearch('');
   };
 
   return (
@@ -112,14 +106,19 @@ export default function YardimciLinkler() {
           font-size: 13.5px;
           font-weight: 500;
           cursor: pointer;
-          transition: background 0.15s ease, color 0.15s ease;
+          transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         }
         .yl-kategori-satir:hover {
           background: rgba(28,58,94,0.05);
         }
         .yl-kategori-satir.acik {
-          color: ${BLUE};
-          font-weight: 600;
+          background: #fdf1dc;
+          border-top-color: ${ORANGE};
+          color: #1a1a1a;
+          font-weight: 700;
+        }
+        .yl-kategori-satir.acik + .yl-kategori-satir {
+          border-top-color: ${ORANGE};
         }
         .yl-kategori-sag {
           display: flex;
@@ -136,8 +135,8 @@ export default function YardimciLinkler() {
           color: #666;
         }
         .yl-kategori-satir.acik .yl-kategori-badge {
-          background: rgba(28,58,94,0.14);
-          color: ${BLUE};
+          background: ${ORANGE};
+          color: #fff;
         }
         .yl-kategori-satir .yl-kategori-chevron {
           font-size: 12px;
@@ -205,7 +204,7 @@ export default function YardimciLinkler() {
           padding: 14px 12px 12px;
           position: relative;
           transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-          aspect-ratio: 1 / 1;  
+          aspect-ratio: 1 / 1;
           justify-content: center;
         }
         .yl-card:hover {
@@ -246,12 +245,12 @@ export default function YardimciLinkler() {
           margin-bottom: 10px;
         }
         .yl-card-logo img {
-          max-width: 60%;
-          max-height: 60%;
+          max-width: 70%;
+          max-height: 70%;
           object-fit: contain;
         }
         .yl-card-title {
-          font-size: 12.5px;
+          font-size: 15px;
           font-weight: 500;
           color: #222;
           text-align: center;
@@ -273,73 +272,54 @@ export default function YardimciLinkler() {
         </header>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '20px 0 28px' }}>
-          <form
-            onSubmit={submitSearch}
-            role="search"
-            style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-          >
-            <div style={{ position: 'relative', width: 360 }}>
-              <i
-                className="fas fa-magnifying-glass"
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  left: 14,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#9a9a95',
-                  fontSize: 14,
-                }}
-              />
-              <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Link adı ara…"
-                  autoComplete="off"
-                  style={{
-                  width: 360,
-                  padding: '10px 12px 10px 38px',
-                  borderRadius: 10,
-                  background: '#ffff',           // kutunun arka plan rengi
-                  border: '1px solid rgba(0,0,0,0.12)',  // kenarlık rengi
-                  color: '#222',                   // yazı rengi
-                }}
-             />
-            </div>
-            <button
-              type="submit"
+          <div style={{ position: 'relative', width: 500 }}>
+            <i
+              className="fas fa-magnifying-glass"
+              aria-hidden="true"
               style={{
-                padding: '0 20px',
+                position: 'absolute',
+                left: 14,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9a9a95',
+                fontSize: 14,
+              }}
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Link adı ara…"
+              autoComplete="off"
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '10px 12px 10px 38px',
+                borderRadius: 10,
+                background: '#fff',
+                border: '1px solid rgba(0,0,0,0.12)',
+                color: '#222',
+                height: 40,
+              }}
+            />
+          </div>
+          {query ? (
+            <button
+              type="button"
+              onClick={clearSearch}
+              style={{
+                padding: '0 18px',
                 height: 40,
                 borderRadius: 10,
-                border: 'none',
-                background: BLUE,
-                color: '#fff',
-                fontWeight: 500,
+                border: '0.5px solid rgba(0,0,0,0.18)',
+                background: 'transparent',
+                color: '#333',
                 fontSize: 14,
               }}
             >
-              Ara
+              Temizle
             </button>
-            {search ? (
-              <button
-                type="button"
-                onClick={clearSearch}
-                style={{
-                  padding: '0 18px',
-                  height: 40,
-                  borderRadius: 10,
-                  border: '0.5px solid rgba(0,0,0,0.18)',
-                  background: 'transparent',
-                  color: '#333',
-                  fontSize: 14,
-                }}
-              >
-                Temizle
-              </button>
-            ) : null}
-          </form>
+          ) : null}
 
           {/* Kategoriler: satırın en sağında, açılır menü */}
           <div style={{ marginLeft: 'auto', position: 'relative' }}>
@@ -428,38 +408,38 @@ export default function YardimciLinkler() {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(6, minmax(0, 210px)',
+                        gridTemplateColumns: 'repeat(6, minmax(0, 210px))',
                         gap: 16,
                         paddingTop: 18,
                       }}
                     >
-                    {kategoriLinkleri.map((item) => (
-                      <a
-                        key={item.id}
-                        href={item.hedef_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="yl-card"
-                      >
-                        <span className="yl-card-ext">
-                          <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
-                        </span>
-                        <div className="yl-card-logo">
-                          {item.logo_url ? (
-                            <img
-                              src={item.logo_url}
-                              alt=""
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <i className="fas fa-link" style={{ fontSize: 22, color: BLUE }} aria-hidden="true" />
-                          )}
-                        </div>
-                        <p className="yl-card-title">{item.baslik}</p>
-                      </a>
-                    ))}
+                      {kategoriLinkleri.map((item) => (
+                        <a
+                          key={item.id}
+                          href={item.hedef_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="yl-card"
+                        >
+                          <span className="yl-card-ext">
+                            <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
+                          </span>
+                          <div className="yl-card-logo">
+                            {item.logo_url ? (
+                              <img
+                                src={item.logo_url}
+                                alt=""
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <i className="fas fa-link" style={{ fontSize: 22, color: BLUE }} aria-hidden="true" />
+                            )}
+                          </div>
+                          <p className="yl-card-title">{item.baslik}</p>
+                        </a>
+                      ))}
                     </div>
                   </div>
                 </div>
