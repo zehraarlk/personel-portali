@@ -569,6 +569,26 @@ export async function fetchMevzuatlar(
   return response.json();
 }
 
+/**
+ * Yardımcı Linkler
+ * { linkler: [...], toplam }
+ */
+export async function fetchYardimciLinkler(kategori = '') {
+  const qs = kategori
+    ? `?kategori=${encodeURIComponent(kategori)}`
+    : '';
+
+  const response = await fetch(
+    `${API_BASE}/yardimci-linkler/${qs}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Yardımcı linkler alınamadı');
+  }
+
+  return response.json();
+}
+
 export {
   canAccessPortal,
   isPersonelLoggedIn,
