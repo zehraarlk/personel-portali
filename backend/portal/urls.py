@@ -54,6 +54,12 @@ from .admin_crud_views import (
     YardimciLinkViewSet,
     YardimciLinkKategoriViewSet,
 )
+from .anket_views import (
+    anketler_list,
+    anket_detay,
+    anket_katil,
+)
+from .yardimci_linkler_views import yardimci_linkler_list
 
 router = DefaultRouter()
 router.register(r'admin/etkinlikler', EtkinlikViewSet, basename='admin-etkinlikler')
@@ -117,6 +123,12 @@ urlpatterns = [
     path('dokumanlar/', dokumanlar_list, name='dokumanlar'),
     path('mevzuatlar/', mevzuatlar_list, name='mevzuatlar'),
     path('vefat/', vefat_list, name='vefat'),
+
+    path('anketler/', anketler_list, name='anketler'),
+    path('anketler/<int:pk>/', anket_detay, name='anket-detay'),
+    path('anketler/<int:pk>/katil/', anket_katil, name='anket-katil'),
+
+    path('yardimci-linkler/', yardimci_linkler_list, name='yardimci-linkler'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),
     path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),

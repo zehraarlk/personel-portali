@@ -569,11 +569,25 @@ export async function fetchMevzuatlar(
   return response.json();
 }
 
-export {
-  canAccessPortal,
-  isPersonelLoggedIn,
-  isYoneticiLoggedIn,
-} from '../auth/session';
+/**
+ * Yardımcı Linkler
+ * { linkler: [...], toplam }
+ */
+export async function fetchYardimciLinkler(kategori = '') {
+  const qs = kategori
+    ? `?kategori=${encodeURIComponent(kategori)}`
+    : '';
+
+  const response = await fetch(
+    `${API_BASE}/yardimci-linkler/${qs}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Yardımcı linkler alınamadı');
+  }
+
+  return response.json();
+}
 
 /** vefat — { vefatlar: [...], toplam } */
 export async function fetchVefat(q) {
@@ -584,3 +598,9 @@ export async function fetchVefat(q) {
   }
   return response.json();
 }
+
+export {
+  canAccessPortal,
+  isPersonelLoggedIn,
+  isYoneticiLoggedIn,
+} from '../auth/session';

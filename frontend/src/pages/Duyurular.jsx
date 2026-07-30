@@ -9,7 +9,7 @@ const EMPTY_DATA = {
   kategoriler: [],
 };
 
-const DUYURULAR_PER_PAGE = 9;
+const DUYURULAR_PER_PAGE = 12;
 
 const SORT_OPTIONS = [
   { value: 'yeni', label: 'En Yeni', icon: 'new_releases' },
@@ -114,98 +114,73 @@ function getCategoryIcon(category) {
 }
 
 function DuyuruCard({ duyuru }) {
-  const kategoriIkon = getCategoryIcon({ ad: duyuru.kategori });
   return (
-    <article className="group relative flex h-full cursor-pointer select-none flex-col rounded-xl border border-[#022842]/10 bg-white shadow-[0_6px_20px_rgba(2,40,66,0.07)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:border-[#f5a623]/70 hover:shadow-[0_26px_52px_rgba(2,40,66,0.22),0_0_0_3px_rgba(245,166,35,0.16)]">
-      {/* Hover sırasında kartın tamamını belirginleştiren ince sarı çerçeve */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-30 rounded-xl border-2 border-[#f5a623] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-      />
-      {/* Kıvrık sayfa köşesi — dosya/belge hissi */}
-      <span
-        aria-hidden="true"
-        className="absolute right-0 top-0 z-20 h-0 w-0 border-b-[26px] border-l-[26px] border-b-transparent border-l-[#eef5fa] drop-shadow-[-2px_2px_3px_rgba(2,40,66,0.14)]"
-      />
+    <article className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-[22px] border border-[#dde5eb] bg-white shadow-[0_14px_34px_rgba(2,40,66,0.08)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.012] hover:border-[#022842]/28 hover:shadow-[0_24px_56px_rgba(2,40,66,0.16)]">
+      <div className="relative">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-t-[22px] bg-[#e8eef3]">
+          {duyuru.resim ? (
+            <MediaFrame
+              src={duyuru.resim}
+              alt={duyuru.baslik}
+              className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.05]"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-br from-[#eef3f7] via-[#e8eff5] to-[#d7e1ea]"
+            />
+          )}
 
-      <div className="relative aspect-[16/10] overflow-hidden rounded-t-xl bg-[#dce6ed]">
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#e7eff5] via-[#d9e8f2] to-[#bfd5e4]">
-          <span className="material-symbols-outlined text-6xl text-[#022842]/20">
-            {kategoriIkon}
-          </span>
+          <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#022842]/14 to-transparent" />
         </div>
 
-        {duyuru.resim && (
-          <MediaFrame
-            src={duyuru.resim}
-            alt={duyuru.baslik}
-            className="absolute inset-0 transition duration-500 group-hover:scale-[1.03]"
-          />
+        {duyuru.kategori && (
+          <div className="absolute bottom-0 left-4 right-4 z-10 translate-y-1/2">
+            <span className="inline-flex max-w-full items-center rounded-full bg-[#022842] px-4.5 py-1.5 text-[13px] font-semibold leading-5 text-white shadow-[0_10px_22px_rgba(2,40,66,0.22)]">
+              <span className="truncate">{duyuru.kategori}</span>
+            </span>
+          </div>
         )}
+      </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#011f34]/55 via-transparent to-transparent transition-opacity duration-300 group-hover:opacity-90" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#f5a623]/20 via-transparent to-[#022842]/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
+      <div className={`flex flex-1 flex-col px-5 pb-5 sm:px-6 sm:pb-6 ${duyuru.kategori ? 'pt-8' : 'pt-5'}`}>
         {duyuru.tarih && (
           <time
             dateTime={duyuru.tarih}
-            className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-[#022842]/80 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-white backdrop-blur-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:border-[#f5a623]/70 group-hover:shadow-[0_6px_16px_rgba(2,40,66,0.28)]"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#6a7784]"
           >
-            <span className="material-symbols-outlined text-[14px]">
+            <span className="material-symbols-outlined text-[18px] text-[#7b8794]">
               calendar_month
             </span>
             {formatDate(duyuru.tarih)}
           </time>
         )}
 
-        <div className="absolute inset-x-6 -bottom-px border-t border-dashed border-[#022842]/20" />
-      </div>
-
-      {/* Kategori mührü — sarı, sayfanın vurgu rengi olarak ölçülü kullanılıyor */}
-      <div className="relative z-10 -mt-6 flex items-start pl-5">
-        <div className="flex h-12 w-12 -rotate-6 items-center justify-center rounded-full border-2 border-dashed border-[#f5a623] bg-white text-[#022842] shadow-[0_3px_10px_rgba(2,40,66,0.16)] ring-4 ring-[#f5a623]/10 transition-all duration-300 group-hover:rotate-0 group-hover:scale-110 group-hover:bg-[#fff4d9] group-hover:shadow-[0_8px_20px_rgba(245,166,35,0.28)] group-hover:ring-[#f5a623]/25">
-          <span className="material-symbols-outlined text-[22px]">
-            {kategoriIkon}
-          </span>
-        </div>
-
-        {duyuru.kategori && (
-          <span className="ml-2 mt-1 inline-flex max-w-[62%] items-center gap-1.5 truncate rounded-lg bg-[#022842] px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm ring-1 ring-[#f5a623]/35 transition-all duration-300 group-hover:translate-x-1 group-hover:ring-[#f5a623]/70">
-            <span
-              aria-hidden="true"
-              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f5a623]"
-            />
-            <span className="truncate">{duyuru.kategori}</span>
-          </span>
-        )}
-
-      </div>
-
-      <div className="flex flex-1 flex-col px-5 pb-5 pt-3">
-        <h2 className="line-clamp-2 min-h-[3.25rem] text-lg font-extrabold leading-[1.45] tracking-tight text-[#0b1c30] transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-[#022842]">
+        <h2 className="mt-4 line-clamp-2 min-h-[3.9rem] text-[1.45rem] font-black leading-[1.12] tracking-tight text-[#022842] transition-all duration-300 group-hover:translate-x-0.5 sm:text-[1.6rem]">
           {duyuru.baslik}
         </h2>
 
+        <span aria-hidden="true" className="mt-4 h-[3px] w-9 rounded-full bg-[#022842] transition-all duration-300 group-hover:w-11" />
+
         {duyuru.aciklama ? (
-          <p className="mt-2 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-[#61717d] transition-colors duration-300 group-hover:text-[#405565]">
+          <p className="mt-4 line-clamp-3 min-h-[5.7rem] text-[15px] leading-7 text-[#5d6977]">
             {duyuru.aciklama}
           </p>
         ) : (
-          <p className="mt-2 min-h-[4.5rem] text-sm leading-6 text-[#8a98a2]">
+          <p className="mt-4 min-h-[5.7rem] text-[15px] leading-7 text-[#8a98a2]">
             Duyuru açıklaması bulunmuyor.
           </p>
         )}
 
-        <div className="mt-auto pt-4">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#022842] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition-all duration-300 group-hover:gap-2.5 group-hover:bg-[#f5a623] group-hover:text-[#022842] group-hover:shadow-[0_7px_18px_rgba(245,166,35,0.32)]">
-            Detaylı bilgi
-            <span className="material-symbols-outlined text-[15px] [animation-duration:0.9s] [animation-iteration-count:infinite] [animation-name:none] [animation-timing-function:ease-in-out] group-hover:[animation-name:duyuru-arrow-slide]">
-              arrow_forward
+        <div className="mt-auto pt-5">
+          <span className="inline-flex min-h-[50px] w-full items-center justify-between gap-4 rounded-[14px] border border-[#022842]/18 bg-white px-5 text-[15px] font-bold text-[#022842] shadow-[0_8px_22px_rgba(2,40,66,0.06)] transition-all duration-300 group-hover:border-[#022842] group-hover:bg-[#022842] group-hover:text-white group-hover:shadow-[0_14px_30px_rgba(2,40,66,0.18)] sm:w-auto sm:min-w-[190px]">
+            <span>Detaylı Bilgi</span>
+            <span aria-hidden="true" className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-1">
+              →
             </span>
           </span>
         </div>
       </div>
-
     </article>
   );
 }
@@ -395,12 +370,6 @@ export default function Duyurular() {
   return (
     <Layout videoPage>
       <div className="min-h-full w-full bg-[#f7fafc]">
-        <style>{`
-          @keyframes duyuru-arrow-slide {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(5px); }
-          }
-        `}</style>
         {loading && (
           <div className="mx-auto w-full max-w-[1440px] px-4 py-8 md:px-8">
             <div className="rounded-2xl border border-outline-variant/20 bg-white p-8 text-on-surface-variant shadow-sm">
@@ -515,7 +484,7 @@ export default function Duyurular() {
                   >
                     <span className="inline-flex min-w-0 items-center gap-2">
                       <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                        {aktifKategori ? getCategoryIcon(aktifKategori) : 'grid_view'}
+                        {aktifKategori ? getCategoryIcon(aktifKategori) : 'campaign'}
                       </span>
                       <span className="truncate">
                         {kategori === '' ? 'Tüm Duyurular' : aktifKategoriAdi}
@@ -551,7 +520,7 @@ export default function Duyurular() {
                         }`}
                       >
                         <span className="material-symbols-outlined text-[18px] text-[#022842]">
-                          grid_view
+                          campaign
                         </span>
                         Tüm Duyurular
                       </button>
@@ -656,7 +625,7 @@ export default function Duyurular() {
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="material-symbols-outlined text-[24px] leading-none text-[#022842]">
-                    folder_open
+                    {kategori === '' ? 'campaign' : getCategoryIcon(aktifKategori)}
                   </span>
 
                   <h2 className="text-lg font-extrabold leading-none tracking-tight text-[#022842] md:text-[16px]">
@@ -708,7 +677,7 @@ export default function Duyurular() {
                 </div>
               ) : filtrelenmisDuyurular.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {sayfadakiDuyurular.map((duyuru) => (
                       <DuyuruCard key={duyuru.id} duyuru={duyuru} />
                     ))}
