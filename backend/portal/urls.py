@@ -12,6 +12,7 @@ from .views import (
     egitimler_list,
     dokumanlar_list,
     mevzuatlar_list,
+    vefat_list,
 )
 from .profile_views import (
     profile_me,
@@ -115,6 +116,7 @@ urlpatterns = [
     path('egitimler/', egitimler_list, name='egitimler'),
     path('dokumanlar/', dokumanlar_list, name='dokumanlar'),
     path('mevzuatlar/', mevzuatlar_list, name='mevzuatlar'),
+    path('vefat/', vefat_list, name='vefat'),
 
     path('admin/profile/', admin_profile_me, name='admin-profile-me'),
     path('admin/profile/sessions/', admin_profile_sessions, name='admin-profile-sessions'),

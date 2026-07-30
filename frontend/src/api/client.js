@@ -574,3 +574,13 @@ export {
   isPersonelLoggedIn,
   isYoneticiLoggedIn,
 } from '../auth/session';
+
+/** vefat — { vefatlar: [...], toplam } */
+export async function fetchVefat(q) {
+  const qs = q ? `?q=${encodeURIComponent(q)}` : '';
+  const response = await fetch(`${API_BASE}/vefat/${qs}`);
+  if (!response.ok) {
+    throw new Error('Vefat bilgileri alınamadı');
+  }
+  return response.json();
+}
