@@ -3,32 +3,17 @@ import { NavLink } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchDokumanlar } from '../../api/client';
 import { KAYNAK_PAGES, KAYNAK_QUICK_LINKS } from './config';
+import '../../styles/etkinlikler.css';
 import '../../styles/dokumanlar.css';
 
 const page = KAYNAK_PAGES.dokumanlar;
 const DEFAULT_PAGE_SIZE = 8;
 
 
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'En yeni' },
-  { value: 'oldest', label: 'En eski' },
-  { value: 'az', label: 'A–Z' },
-  { value: 'za', label: 'Z–A' },
-];
-
 const PAGE_SIZE_OPTIONS = [
   { value: 8, label: '8 / sayfa' },
   { value: 12, label: '12 / sayfa' },
   { value: 16, label: '16 / sayfa' },
-];
-
-const CATEGORIES = [
-  { id: 'all', label: 'Tümü', icon: 'fas fa-th-large' },
-  { id: 'forms', label: 'Formlar', icon: 'far fa-clipboard' },
-  { id: 'notifications', label: 'Bildirimler', icon: 'fas fa-bullhorn' },
-  { id: 'policies', label: 'Politikalar', icon: 'fas fa-shield-alt' },
-  { id: 'contracts', label: 'Sözleşmeler', icon: 'far fa-file-alt' },
-  { id: 'other', label: 'Diğer', icon: 'fas fa-ellipsis-h' },
 ];
 
 const KAYNAK_LINK_ICONS = {
@@ -279,31 +264,6 @@ function normalizeText(value) {
     .toLocaleLowerCase('tr-TR');
 }
 
-function getItemCategory(item) {
-  const explicitCategory = normalizeText(
-    item.kategori_slug ||
-      item.kategori_adi ||
-      item.kategori ||
-      item.dokuman_kategorisi ||
-      item.grup ||
-      item.tur_adi
-  );
-
-  const titleAndDescription = normalizeText(
-    `${item.baslik || ''} ${item.aciklama || ''}`
-  );
-  const source = explicitCategory || titleAndDescription;
-
-  if (/form|dilekçe|talep/.test(source)) return 'forms';
-  if (/bildirim|duyuru|ilan|haber/.test(source)) return 'notifications';
-  if (/politika|prosedür|prosedur|yönerge|yonerge|talimat|kvkk|aydınlatma|aydinlatma/.test(source)) {
-    return 'policies';
-  }
-  if (/sözleşme|sozlesme|protokol|mutabakat/.test(source)) return 'contracts';
-
-  return 'other';
-}
-
 function parseDocumentDate(value) {
   if (!value) return 0;
 
@@ -327,8 +287,6 @@ export default function Dokumanlar() {
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -364,29 +322,10 @@ export default function Dokumanlar() {
     };
   }, [search]);
 
-  const categoryCounts = useMemo(() => {
-    const counts = CATEGORIES.reduce(
-      (result, category) => ({ ...result, [category.id]: 0 }),
-      { all: items.length }
-    );
-
-    items.forEach((item) => {
-      const category = getItemCategory(item);
-      counts[category] = (counts[category] || 0) + 1;
-    });
-
-    counts.all = items.length;
-    return counts;
-  }, [items]);
-
   const filteredItems = useMemo(() => {
     const normalizedQuery = normalizeText(search);
 
     const result = items.filter((item) => {
-      const matchesCategory =
-        activeCategory === 'all' || getItemCategory(item) === activeCategory;
-
-      if (!matchesCategory) return false;
       if (!normalizedQuery) return true;
 
       const searchableText = normalizeText(
@@ -396,28 +335,11 @@ export default function Dokumanlar() {
       return searchableText.includes(normalizedQuery);
     });
 
-    return [...result].sort((first, second) => {
-      if (sortBy === 'oldest') {
-        return parseDocumentDate(first.tarih) - parseDocumentDate(second.tarih);
-      }
-
-      if (sortBy === 'az') {
-        return String(first.baslik || '').localeCompare(
-          String(second.baslik || ''),
-          'tr-TR'
-        );
-      }
-
-      if (sortBy === 'za') {
-        return String(second.baslik || '').localeCompare(
-          String(first.baslik || ''),
-          'tr-TR'
-        );
-      }
-
-      return parseDocumentDate(second.tarih) - parseDocumentDate(first.tarih);
-    });
-  }, [items, activeCategory, search, sortBy]);
+    return [...result].sort(
+      (first, second) =>
+        parseDocumentDate(second.tarih) - parseDocumentDate(first.tarih)
+    );
+  }, [items, search]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const visibleItems = filteredItems.slice(
@@ -427,7 +349,7 @@ export default function Dokumanlar() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, activeCategory, sortBy, pageSize]);
+  }, [search, pageSize]);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -438,141 +360,86 @@ export default function Dokumanlar() {
     setSearch(query.trim());
   };
 
-  const clearFilters = () => {
+  const clearSearch = () => {
     setQuery('');
     setSearch('');
-    setActiveCategory('all');
-  };
-
-  const changeCategory = (category) => {
-    setActiveCategory(category);
   };
 
   return (
     <Layout>
       <div className="documents-page">
-        <section className="documents-heading" aria-labelledby="documents-title">
-          <div className="documents-heading__identity">
-            <span className="documents-heading__icon" aria-hidden="true">
+        <header className="documents-head" aria-labelledby="documents-title">
+          <div className="documents-head__left">
+            <span className="documents-head__icon" aria-hidden="true">
               <i className="far fa-file-alt" />
             </span>
-
             <div>
               <h1 id="documents-title">{page.title}</h1>
               <p>{page.description}</p>
             </div>
           </div>
+        </header>
 
-          <div className="documents-stat" aria-live="polite">
-            <span className="documents-stat__icon" aria-hidden="true">
-              <i className="far fa-folder-open" />
-            </span>
-            <strong>{loading || error ? '—' : items.length}</strong>
-            <span>{page.statLabel || 'Aktif doküman'}</span>
-          </div>
-        </section>
+        <div className="documents-bar">
+          <section className="documents-toolbar" aria-label="Doküman arama">
+            <form className="documents-search" role="search" onSubmit={submitSearch}>
+              <label className="documents-search__field" htmlFor={page.searchId}>
+                <i className="fas fa-search" aria-hidden="true" />
+                <input
+                  id={page.searchId}
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={
+                    page.searchPlaceholder ||
+                    'Doküman adı, açıklama veya anahtar kelime ile ara...'
+                  }
+                  autoComplete="off"
+                />
+              </label>
 
-        <section className="documents-toolbar" aria-label="Doküman araçları">
-          <form className="documents-search" role="search" onSubmit={submitSearch}>
-            <label className="documents-search__field" htmlFor={page.searchId}>
-              <i className="fas fa-search" aria-hidden="true" />
-              <input
-                id={page.searchId}
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={
-                  page.searchPlaceholder ||
-                  'Doküman adı, açıklama veya anahtar kelime ile ara...'
+              <button className="documents-search__button" type="submit">
+                Ara
+              </button>
+
+              {search ? (
+                <button
+                  className="documents-search__clear"
+                  type="button"
+                  onClick={clearSearch}
+                >
+                  Temizle
+                </button>
+              ) : null}
+            </form>
+          </section>
+
+          <nav className="documents-tabs" aria-label="Kaynaklar">
+            {KAYNAK_QUICK_LINKS.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `documents-tabs__link${isActive ? ' is-active' : ''}`
                 }
-                autoComplete="off"
-              />
-            </label>
-
-            <button className="documents-search__button" type="submit">
-              Ara
-              <i className="fas fa-chevron-right" aria-hidden="true" />
-            </button>
-          </form>
-
-          <DocumentsDropdown
-            id="documents-category-filter"
-            label="Kategori seç"
-            value={activeCategory}
-            icon="fas fa-th-large"
-            options={CATEGORIES.map((category) => ({
-              value: category.id,
-              label:
-                category.id === 'all' ? 'Tüm Kategoriler' : category.label,
-              icon: category.icon,
-              badge: categoryCounts[category.id] || 0,
-            }))}
-            onChange={changeCategory}
-          />
-
-          <DocumentsDropdown
-            id="documents-sort-filter"
-            label="Dokümanları sırala"
-            value={sortBy}
-            icon="fas fa-sort"
-            options={SORT_OPTIONS}
-            onChange={setSortBy}
-          />
-        </section>
-
-        <nav className="documents-categories" aria-label="Doküman kategorileri">
-          {CATEGORIES.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              className={`documents-category${
-                activeCategory === category.id ? ' is-active' : ''
-              }`}
-              onClick={() => changeCategory(category.id)}
-              aria-pressed={activeCategory === category.id}
-            >
-              <span className="documents-category__label">
-                <i className={category.icon} aria-hidden="true" />
-                {category.label}
-              </span>
-              <span className="documents-category__count">
-                {categoryCounts[category.id] || 0}
-              </span>
-            </button>
-          ))}
-        </nav>
-
-        <nav className="documents-resource-links" aria-label="Kaynak sayfaları">
-          {KAYNAK_QUICK_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) =>
-                `documents-resource-link${isActive ? ' is-active' : ''}`
-              }
-            >
-              <span className="documents-resource-link__label">
+              >
                 <i
                   className={KAYNAK_LINK_ICONS[link.iconKey] || 'far fa-folder'}
                   aria-hidden="true"
                 />
                 {link.label}
-              </span>
-              <i
-                className="fas fa-chevron-right documents-resource-link__arrow"
-                aria-hidden="true"
-              />
-            </NavLink>
-          ))}
-        </nav>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
 
         {search && !loading && !error ? (
           <div className="documents-result-note">
             <span>
               “<strong>{search}</strong>” için {filteredItems.length} sonuç
             </span>
-            <button type="button" onClick={clearFilters}>
-              Filtreleri temizle
+            <button type="button" onClick={clearSearch}>
+              Aramayı temizle
             </button>
           </div>
         ) : null}
@@ -597,9 +464,9 @@ export default function Dokumanlar() {
               <i className="far fa-folder-open" />
             </span>
             <h2>Doküman bulunamadı</h2>
-            <p>Arama ifadenizi veya kategori seçiminizi değiştirerek tekrar deneyin.</p>
-            <button type="button" onClick={clearFilters}>
-              Filtreleri temizle
+            <p>Arama ifadenizi değiştirerek tekrar deneyin.</p>
+            <button type="button" onClick={clearSearch}>
+              Aramayı temizle
             </button>
           </div>
         ) : null}
@@ -608,6 +475,7 @@ export default function Dokumanlar() {
           <section
             className={`documents-list documents-list--${viewMode}`}
             aria-label="Doküman listesi"
+            style={{ marginTop: '1.5rem' }}
           >
             {visibleItems.map((item) => {
               const href = getDocumentHref(item);
@@ -615,7 +483,11 @@ export default function Dokumanlar() {
               const isDownloadable = Boolean(item.dosya_yolu);
 
               return (
-                <article className="documents-card" key={item.id}>
+                <article
+                  className="documents-card"
+                  key={item.id}
+                  style={{ borderRadius: '24px', overflow: 'hidden' }}
+                >
                   <span
                     className={`documents-card__file documents-card__file--${getFileTone(
                       fileType
