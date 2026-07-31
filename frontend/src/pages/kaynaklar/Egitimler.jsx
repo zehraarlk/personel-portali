@@ -202,11 +202,7 @@ export default function Egitimler() {
               role="search"
               style={{ flexWrap: 'nowrap' }}
             >
-              <label
-                className="prt-search__field"
-                htmlFor="egitim-search"
-                style={{ flex: '0 0 600px' }}
-              >
+              <label className="prt-search__field" htmlFor="egitim-search">
                 <i className={icon('arama')} aria-hidden="true" />
                 <input
                   id="egitim-search"
