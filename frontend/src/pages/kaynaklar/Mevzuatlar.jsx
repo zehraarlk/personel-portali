@@ -138,9 +138,9 @@ export default function Mevzuatlar() {
           </div>
         </header>
 
-        <div className="protokoller-bar">
-          <div className="protokoller-toolbar">
-            <label className="protokoller-toolbar__field" htmlFor="mevzuat-ara">
+        <div className="mevzuat-toolbar-row">
+          <div className="prt-search mevzuat-toolbar-row__search">
+            <label className="prt-search__field" htmlFor="mevzuat-ara">
               <i className="fas fa-search" aria-hidden="true" />
               <input
                 id="mevzuat-ara"
@@ -152,15 +152,13 @@ export default function Mevzuatlar() {
               />
             </label>
             {query ? (
-              <div className="protokoller-toolbar__actions">
-                <button type="button" className="protokoller-toolbar__ghost" onClick={clearSearch}>
-                  Temizle
-                </button>
-              </div>
+              <button type="button" className="prt-search__clear" onClick={clearSearch}>
+                Temizle
+              </button>
             ) : null}
           </div>
 
-          <nav className="protokoller-quick" aria-label="Hızlı erişim">
+          <nav className="prt-tabs mevzuat-toolbar-row__tabs" aria-label="Hızlı erişim">
             {QUICK_LINKS.map((item) => {
               const active =
                 location.pathname === item.to ||
@@ -169,11 +167,11 @@ export default function Mevzuatlar() {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`protokoller-quick__btn${active ? ' is-active' : ''}`}
+                  className={`prt-tabs__link${active ? ' is-active' : ''}`}
                   aria-current={active ? 'page' : undefined}
                 >
                   <i className={item.icon} aria-hidden="true" />
-                  <span>{item.label}</span>
+                  {item.label}
                 </Link>
               );
             })}
