@@ -10,7 +10,7 @@ export default function YardimciLinkler() {
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
   const [seciliKategori, setSeciliKategori] = useState(null);
-  const [kategorilerPaneliAcik, setKategorilerPaneliAcik] = useState(true);
+  const [kategorilerPaneliAcik, setKategorilerPaneliAcik] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -67,9 +67,11 @@ export default function YardimciLinkler() {
     <Layout>
       <style>{`
         .yl-kategoriler-panel {
+          background: #ffffff;
           border: 1px solid rgba(0,0,0,0.08);
           border-radius: 12px;
           overflow: hidden;
+          isolation: isolate;
         }
         .yl-kategoriler-baslik {
           display: flex;
@@ -97,6 +99,7 @@ export default function YardimciLinkler() {
           justify-content: space-between;
           gap: 10px;
           width: 100%;
+          box-sizing: border-box;
           text-align: left;
           padding: 13px 16px;
           border: none;
@@ -233,7 +236,7 @@ export default function YardimciLinkler() {
           border-color: rgba(28,58,94,0.35);
         }
         .yl-card-logo {
-          width: 60%;
+          width: 70%;
           aspect-ratio: 1 / 1;
           border-radius: 10px;
           background: #ffffff;
@@ -245,8 +248,8 @@ export default function YardimciLinkler() {
           margin-bottom: 10px;
         }
         .yl-card-logo img {
-          max-width: 70%;
-          max-height: 70%;
+          max-width: 60%;
+          max-height: 60%;
           object-fit: contain;
         }
         .yl-card-title {
@@ -348,6 +351,19 @@ export default function YardimciLinkler() {
 
             {kategorilerPaneliAcik && (
               <div className="yl-kategoriler-panel" style={{ position: 'absolute', top: 46, right: 0, width: 260, zIndex: 20, boxShadow: '0 10px 24px rgba(0,0,0,0.12)' }}>
+                <button
+                  type="button"
+                  className={`yl-kategori-satir${!seciliKategori ? ' acik' : ''}`}
+                  onClick={() => setSeciliKategori(null)}
+                  aria-pressed={!seciliKategori}
+                  style={{ borderTop: 'none' }}
+                >
+                  <span>Tümü</span>
+                  <span className="yl-kategori-sag">
+                    <span className="yl-kategori-badge">{filtered.length}</span>
+                    <i className="fas fa-chevron-right yl-kategori-chevron" aria-hidden="true" />
+                  </span>
+                </button>
                 {gruplanmis.map(([kategoriAdi, kategoriLinkleri]) => {
                   const secili = seciliKategori === kategoriAdi;
                   return (

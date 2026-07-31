@@ -71,8 +71,7 @@ export default function Etkinlikler() {
     });
   }, [siraliEtkinlikler, isSearching, normalizedSearch]);
 
-  const featured = isSearching ? null : siraliEtkinlikler[0] ?? null;
-  const rest = isSearching ? searchSonuclari : siraliEtkinlikler.slice(1);
+  const rest = isSearching ? searchSonuclari : siraliEtkinlikler;
 
   const years = useMemo(() => {
     const set = new Set(rest.map((e) => formatTarih(e.tarih).yil));
@@ -141,58 +140,7 @@ export default function Etkinlikler() {
 
         {!loading && !error && siraliEtkinlikler.length > 0 && (
           <>
-            {/* 1. Sıradaki Etkinlik (Hero) */}
-            {featured && (
-              <Link to={`/etkinlikler/${featured.id}`} className="etkinlik-hero">
-                <div className="etkinlik-hero-media">
-                  {featured.resim ? (
-                    <MediaFrame
-                      src={featured.resim}
-                      alt={featured.baslik}
-                      dark
-                      className="absolute inset-0"
-                    />
-                  ) : (
-                    <div className="etkinlik-hero-media--placeholder" />
-                  )}
-                  <div className="etkinlik-hero-shade" />
-                </div>
-
-                <div className="etkinlik-hero-body">
-                  <div className="etkinlik-hero-top">
-                    <span className="etkinlik-hero-tag">
-                      <i className="fas fa-star" aria-hidden="true" />
-                      Sıradaki Etkinlik
-                    </span>
-                  </div>
-
-                  <h2 className="etkinlik-hero-title">{featured.baslik}</h2>
-
-                  <div className="etkinlik-hero-date">
-                    <div className="etkinlik-hero-date-block">
-                      <span className="etkinlik-hero-date-gun">{formatTarih(featured.tarih).gun}</span>
-                      <span className="etkinlik-hero-date-ay">{formatTarih(featured.tarih).ay}</span>
-                    </div>
-                    <div className="etkinlik-hero-date-text">
-                      <strong>{formatTarih(featured.tarih).tam}</strong>
-                      <span>{formatTarih(featured.tarih).gunAdi}</span>
-                      {featured.bitis_tarihi && (
-                        <span className="etkinlik-hero-date-bitis">
-                          {formatTarih(featured.bitis_tarihi).tam} tarihine kadar
-                        </span>
-                      )}
-                    </div>
-                    {featured.durum_ref && (
-                      <span className="etkinlik-hero-badge">{featured.durum_ref}</span>
-                    )}
-                  </div>
-
-                  {featured.aciklama && <p className="etkinlik-hero-desc">{featured.aciklama}</p>}
-                </div>
-              </Link>
-            )}
-
-            {/* 2. Arama ve Filtre Toolbar'ı (Sıradaki Etkinliğin Altına Alındı) */}
+            {/* Arama ve Filtre Toolbar'ı */}
             <div className="etkinlikler-toolbar">
               <div className="etkinlikler-searchbar">
                 <i className="fas fa-magnifying-glass" aria-hidden="true" />

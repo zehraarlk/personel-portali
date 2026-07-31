@@ -10,8 +10,17 @@ import '../../styles/egitimler.css';
 const ORANGE = '#f5a623';
 const BLUE = '#1c3a5e';
 const LINK_BLUE = '#3762e3';
+const RED = '#dc2626';
 const GRAY_ICON = '#8a8a85';
 const PAGE_SIZE = 6;
+
+/**
+ * Backend tablosundaki alan adı henüz netleşmediği için, olası tüm
+ * isimlendirmeleri sırayla deniyoruz ve ilk dolu olanı kullanıyoruz. Şu anda
+ * üç buton da (Resmi Sayfa / Video / Sunum) aynı linke gidiyor; ileride her
+ * biri için ayrı sütun eklenirse bu fonksiyon otomatik olarak kendi alanını
+ * bulup kullanacak, ekstra bir değişiklik gerekmeyecek.
+ */
 
 function resolveLink(item, keys) {
   for (const key of keys) {
@@ -90,6 +99,59 @@ export default function Egitimler() {
 
   return (
     <Layout>
+      {/* Resmi Sayfa / Video / Sunum butonları için hover + tıklama (active) efektleri.
+          Inline style'lar :hover ve :active durumlarını desteklemediği için buradan yönetiliyor. */}
+      <style>{`
+        .eg-link-btn {
+          transition: background-color 0.15s ease, border-color 0.15s ease,
+            color 0.15s ease, transform 0.08s ease;
+        }
+        .eg-link-btn i {
+          transition: color 0.15s ease;
+        }
+        .eg-link-btn--resmi:hover {
+          background: ${BLUE} !important;
+          border-color: ${BLUE} !important;
+          color: #fff !important;
+        }
+        .eg-link-btn--resmi:hover i {
+          color: #fff !important;
+        }
+        .eg-link-btn--resmi:active {
+          background: #0f253a !important;
+          border-color: #0f253a !important;
+          transform: scale(0.94);
+        }
+
+        .eg-link-btn--video:hover {
+          background: ${RED} !important;
+          border-color: ${RED} !important;
+          color: #fff !important;
+        }
+        .eg-link-btn--video:hover i {
+          color: #fff !important;
+        }
+        .eg-link-btn--video:active {
+          background: #a71d1d !important;
+          border-color: #a71d1d !important;
+          transform: scale(0.94);
+        }
+
+        .eg-link-btn--sunum:hover {
+          background: ${ORANGE} !important;
+          border-color: ${ORANGE} !important;
+          color: #fff !important;
+        }
+        .eg-link-btn--sunum:hover i {
+          color: #fff !important;
+        }
+        .eg-link-btn--sunum:active {
+          background: #c8830f !important;
+          border-color: #c8830f !important;
+          transform: scale(0.94);
+        }
+      `}</style>
+
       <div className="etkinlikler-page" style={{ minHeight: '85vh', paddingBottom: 40 }}>
         <header className="etkinlikler-head">
           <div className="etkinlikler-head-left">
@@ -347,6 +409,7 @@ export default function Egitimler() {
                         href={ortakLink}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="eg-link-btn eg-link-btn--resmi"
                         style={{
                           flex: 1,
                           height: 34,
@@ -369,6 +432,7 @@ export default function Egitimler() {
                         href={ortakLink}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="eg-link-btn eg-link-btn--video"
                         style={{
                           flex: 1,
                           height: 34,
@@ -385,12 +449,13 @@ export default function Egitimler() {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        <i className="fas fa-circle-play" style={{ color: '#dc2626' }} aria-hidden="true" />Video
+                        <i className="fas fa-circle-play" style={{ color: RED }} aria-hidden="true" />Video
                       </a>
                       <a
                         href={ortakLink}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="eg-link-btn eg-link-btn--sunum"
                         style={{
                           flex: 1,
                           height: 34,
