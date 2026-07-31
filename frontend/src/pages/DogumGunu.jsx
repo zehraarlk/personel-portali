@@ -5,7 +5,6 @@ import { fetchDogumGunleri } from '../api/client';
 const KAPSAMLAR = [
   { value: 'today', label: 'Bugün' },
   { value: 'month', label: 'Bu Ay' },
-  { value: 'all', label: 'Tümü' },
 ];
 
 function tarihParcala(isoTarih) {
@@ -171,17 +170,17 @@ function PersonAvatar({ personel }) {
   const fotoGoster = Boolean(personel.foto) && !fotoHatali;
 
   return (
-    <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(2,40,66,0.10)] ring-1 ring-[#cfdee5]">
-      <div className="absolute inset-[5px] rounded-full bg-gradient-to-br from-[#f8fbfc] to-[#edf4f6]" />
+    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(2,40,66,0.10)] ring-1 ring-[#cfdee5]">
+      <div className="absolute inset-[4px] rounded-full bg-gradient-to-br from-[#f8fbfc] to-[#edf4f6]" />
       {fotoGoster ? (
         <img
           src={personel.foto}
           alt={personel.ad_soyad}
-          className="relative z-10 h-[50px] w-[50px] rounded-full object-cover"
+          className="relative z-10 h-[44px] w-[44px] rounded-full object-cover"
           onError={() => setFotoHatali(true)}
         />
       ) : (
-        <span className="relative z-10 flex h-[50px] w-[50px] items-center justify-center rounded-full bg-gradient-to-br from-[#174a64] to-[#022842] text-[14px] font-black tracking-wide text-white">
+        <span className="relative z-10 flex h-[44px] w-[44px] items-center justify-center rounded-full bg-gradient-to-br from-[#174a64] to-[#022842] text-[13px] font-black tracking-wide text-white">
           {basHarfler(personel.ad_soyad)}
         </span>
       )}
@@ -238,20 +237,20 @@ export default function DogumGunu() {
         <span className="pointer-events-none absolute right-[29%] top-8 h-1.5 w-1.5 rotate-45 rounded-sm bg-[#d7e5ea]" />
 
         <header className="relative z-10">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#174a64] to-[#022842] shadow-[0_8px_18px_rgba(2,40,66,0.20)] sm:h-14 sm:w-14">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#174a64] to-[#022842] shadow-[0_6px_14px_rgba(2,40,66,0.18)] sm:h-10 sm:w-10">
                 <i
-                  className="fas fa-cake-candles text-[22px] text-white sm:text-[24px]"
+                  className="fas fa-cake-candles text-[15px] text-white sm:text-[16px]"
                   aria-hidden="true"
                 />
               </div>
 
               <div className="min-w-0">
-                <h1 className="m-0 truncate text-[26px] font-black leading-tight tracking-[-0.03em] text-[#022842] sm:text-[31px]">
+                <h1 className="m-0 truncate text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-[#022842] sm:text-[20px]">
                   Doğum Günü Bilgisi
                 </h1>
-                <p className="mt-0.5 text-[13px] font-medium text-[#5c6f7a] sm:text-[14px]">
+                <p className="mt-0.5 text-[12px] font-medium text-[#5c6f7a] sm:text-[13px]">
                   Personelimizin doğum günü listesi
                 </p>
               </div>
@@ -262,8 +261,8 @@ export default function DogumGunu() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-3 lg:grid-cols-[auto_minmax(280px,410px)] lg:items-center lg:justify-between">
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Doğum günü kapsamı">
+          <div className="mt-4 grid gap-2.5 lg:grid-cols-[auto_minmax(240px,360px)] lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Doğum günü kapsamı">
               {KAPSAMLAR.map((item) => {
                 const aktif = scope === item.value;
 
@@ -274,14 +273,14 @@ export default function DogumGunu() {
                     role="tab"
                     aria-selected={aktif}
                     onClick={() => setScope(item.value)}
-                    className={`inline-flex h-11 min-w-[102px] items-center justify-center gap-2 rounded-[13px] px-4 text-[14px] font-bold transition duration-200 ${
+                    className={`inline-flex h-8 min-w-[78px] items-center justify-center gap-1.5 rounded-[10px] px-3 text-[12px] font-bold transition duration-200 ${
                       aktif
-                        ? 'bg-gradient-to-r from-[#174a64] to-[#022842] text-white shadow-[0_7px_16px_rgba(2,40,66,0.23)]'
+                        ? 'bg-gradient-to-r from-[#174a64] to-[#022842] text-white shadow-[0_5px_12px_rgba(2,40,66,0.2)]'
                         : 'border border-[#d2dfe5] bg-white/95 text-[#022842] shadow-none hover:border-[#aebfc8] hover:bg-white'
                     }`}
                   >
                     <span
-                      className={`material-symbols-outlined text-[18px] ${aktif ? 'text-white' : 'text-[#022842]'}`}
+                      className={`material-symbols-outlined text-[15px] ${aktif ? 'text-white' : 'text-[#022842]'}`}
                       aria-hidden="true"
                     >
                       calendar_month
@@ -291,14 +290,14 @@ export default function DogumGunu() {
                 );
               })}
             </div>
-            <div className="flex h-11 w-full items-center rounded-[13px] border border-[#c7d7de] bg-white/95 px-4 shadow-[0_2px_8px_rgba(2,40,66,0.04)] focus-within:border-[#7f9faf] focus-within:ring-2 focus-within:ring-[#dbe8ed]">
+            <div className="flex h-8 w-full items-center rounded-[10px] border border-[#c7d7de] bg-white/95 px-3 shadow-[0_2px_8px_rgba(2,40,66,0.04)] focus-within:border-[#7f9faf] focus-within:ring-2 focus-within:ring-[#dbe8ed]">
               <button
                 type="button"
                 onClick={() => aramaRef.current?.focus()}
-                className="mr-2 flex shrink-0 items-center text-[#7a8b94] hover:text-[#022842]"
+                className="mr-1.5 flex shrink-0 items-center text-[#7a8b94] hover:text-[#022842]"
                 aria-label="Arama kutusuna odaklan"
               >
-                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+                <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
                   search
                 </span>
               </button>
@@ -309,7 +308,7 @@ export default function DogumGunu() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="İsim veya soyisim ile ara..."
-                className="h-full w-full border-0 bg-transparent text-[14px] font-medium text-[#022842] outline-none placeholder:font-normal placeholder:text-[#8b9aa2]"
+                className="h-full w-full border-0 bg-transparent text-[12px] font-medium text-[#022842] outline-none placeholder:font-normal placeholder:text-[#8b9aa2]"
               />
 
               {query && (
@@ -319,10 +318,10 @@ export default function DogumGunu() {
                     setQuery('');
                     aramaRef.current?.focus();
                   }}
-                  className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#edf3f5] text-[#657984] hover:bg-[#e3ecef] hover:text-[#022842]"
+                  className="ml-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#edf3f5] text-[#657984] hover:bg-[#e3ecef] hover:text-[#022842]"
                   aria-label="Aramayı temizle"
                 >
-                  <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                     close
                   </span>
                 </button>
@@ -372,7 +371,7 @@ export default function DogumGunu() {
           )}
 
           {!loading && !error && veri.kayitlar.length > 0 && (
-            <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {veri.kayitlar.map((personel) => {
                 const kalanGun = kalanGunHesapla(personel, bugun);
                 const bugunMu = kalanGun === 0;
@@ -388,21 +387,21 @@ export default function DogumGunu() {
                 return (
                   <article
                     key={personel.id}
-                    className="group relative min-h-[118px] overflow-hidden rounded-[18px] border border-[#cfdee5] bg-white/95 px-5 py-4 shadow-[0_4px_14px_rgba(2,40,66,0.07)] transition duration-200 hover:-translate-y-0.5 hover:border-[#9fb6c1] hover:shadow-[0_7px_18px_rgba(2,40,66,0.10)]"
+                    className="group relative min-h-[108px] overflow-hidden rounded-[16px] border border-[#cfdee5] bg-white/95 px-3.5 py-3.5 shadow-[0_4px_14px_rgba(2,40,66,0.07)] transition duration-200 hover:-translate-y-0.5 hover:border-[#9fb6c1] hover:shadow-[0_7px_18px_rgba(2,40,66,0.10)]"
                   >
                     <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[radial-gradient(circle,rgba(111,147,165,0.08),rgba(255,255,255,0)_72%)]" />
 
-                    <div className="relative z-10 flex min-h-[84px] items-center gap-4">
+                    <div className="relative z-10 flex min-h-[76px] items-center gap-3">
                       <PersonAvatar personel={personel} />
 
                       <div className="min-w-0 flex-1">
-                        <h2 className="m-0 truncate text-[18px] font-black tracking-[-0.02em] text-[#022842] sm:text-[19px]">
+                        <h2 className="m-0 truncate text-[15px] font-black tracking-[-0.02em] text-[#022842] sm:text-[16px]">
                           {adSoyadDuzenle(personel.ad_soyad)}
                         </h2>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[13px] font-semibold text-[#60747f] sm:text-[14px]">
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[18px] text-[#315e75]" aria-hidden="true">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] font-semibold text-[#60747f]">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[16px] text-[#315e75]" aria-hidden="true">
                               cake
                             </span>
                             {personel.tarih_metni}
@@ -412,7 +411,7 @@ export default function DogumGunu() {
                             <>
                               <span className="text-[#aebdc4]" aria-hidden="true">·</span>
                               <span
-                                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold ${
+                                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-extrabold ${
                                   bugunMu || yakinda
                                     ? 'border-[#efd38d] bg-[#fff7dc] text-[#8a6505]'
                                     : 'border-[#bfd3dc] bg-[#edf5f8] text-[#315e75]'

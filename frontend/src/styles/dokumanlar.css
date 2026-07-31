@@ -11,6 +11,8 @@
   --documents-accent: #f08a24;
   --documents-accent-deep: #e06a10;
 
+  width: min(1280px, 100%);
+  margin: 0 auto;
   color: var(--documents-text);
 }
 
@@ -653,19 +655,9 @@
   clip-path: polygon(0 0, 100% 100%, 0 100%);
 }
 
-.documents-card__file strong {
-  max-width: 2.45rem;
-  overflow: hidden;
-  font-size: 0.66rem;
-  line-height: 1;
-  text-overflow: ellipsis;
-}
-
-.documents-card__file small {
-  margin-top: 0.48rem;
-  font-size: 0.48rem;
-  font-weight: 700;
-  opacity: 0.92;
+.documents-card__file-icon {
+  font-size: 1.4rem;
+  color: var(--documents-navy, #022842);
 }
 
 .documents-card__file--blue { background: linear-gradient(145deg, #2b8be0, #0863b4); }
@@ -674,6 +666,14 @@
 .documents-card__file--orange { background: linear-gradient(145deg, #ff7849, #ee4c1c); }
 .documents-card__file--amber { background: linear-gradient(145deg, #ffc64a, #f5a400); }
 .documents-card__file--navy { background: linear-gradient(145deg, #0f648d, #063b5a); }
+.documents-card__file--plain {
+  background: #f4f7fa;
+  box-shadow: none;
+}
+
+.documents-card__file--plain::after {
+  display: none;
+}
 
 .documents-card__content {
   min-width: 0;
