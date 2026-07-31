@@ -1,5 +1,53 @@
 /* Mevzuatlar — alt kategori filtre çubuğu (protokoller.css'i tamamlar) */
 
+/* Protokoller sayfasının "prt-*" bileşenlerini (arama + kısayollar) bu
+   sayfada da kullanabilmek için gereken renk değişkenlerini köprülüyoruz. */
+.protokoller-page {
+  --prt-navy: #022842;
+  --prt-navy-mid: #0a4a6e;
+  --prt-muted: #4f6270;
+  --prt-line: rgba(2, 40, 66, 0.12);
+  --prt-accent: #f08a24;
+  --prt-accent-deep: #e06a10;
+  --prt-soft: rgba(240, 138, 36, 0.14);
+}
+
+/* --- Arama + kısayollar: solda arama, sağda kısayol butonları --- */
+
+.mevzuat-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 1.15rem;
+}
+
+.mevzuat-toolbar-row__search {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.mevzuat-toolbar-row__tabs {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+
+.mevzuat-toolbar-row__search .prt-search__field,
+.mevzuat-toolbar-row__tabs .prt-tabs__link {
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+  .mevzuat-toolbar-row__search,
+  .mevzuat-toolbar-row__tabs {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
 .mevzuat-filter-bar {
   display: flex;
   align-items: center;
@@ -45,22 +93,23 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 2.75rem;
+  min-height: 2.6rem;
   padding: 0 1.1rem;
-  border-radius: 12px;
-  border: 1px solid var(--p-line, rgba(2, 40, 66, 0.1));
+  border-radius: 999px;
+  border: 1px solid var(--prt-line, rgba(2, 40, 66, 0.12));
   background: #fff;
-  color: var(--p-navy, #022842);
-  font-size: 0.9rem;
+  color: var(--prt-navy, #022842);
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(2, 40, 66, 0.06);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 2px 10px rgba(2, 40, 66, 0.05);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .mevzuat-menu__btn:hover {
-  background: #eef4f8;
-  border-color: rgba(2, 40, 66, 0.2);
+  background: #fff8f0;
+  border-color: rgba(240, 138, 36, 0.45);
+  box-shadow: 0 2px 10px rgba(240, 138, 36, 0.12);
 }
 
 .mevzuat-menu__overlay {
@@ -77,7 +126,7 @@
   width: 240px;
   overflow: hidden;
   background: #fff;
-  border: 1px solid var(--p-line, rgba(2, 40, 66, 0.1));
+  border: 1px solid var(--prt-line, rgba(2, 40, 66, 0.12));
   border-radius: 14px;
   box-shadow: 0 16px 36px rgba(2, 40, 66, 0.14);
 }
@@ -93,18 +142,28 @@
   text-align: left;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--p-navy-2, #0a3a5c);
+  color: var(--prt-navy-mid, #0a4a6e);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.mevzuat-menu__item i {
+  color: var(--prt-accent-deep, #e06a10);
+  opacity: 0.85;
 }
 
 .mevzuat-menu__item:hover {
-  background: #f4f7fa;
+  background: #fff8f0;
 }
 
 .mevzuat-menu__item.is-active {
-  background: var(--p-navy, #022842);
+  background: linear-gradient(135deg, var(--prt-navy-mid, #0a4a6e), var(--prt-navy, #022842));
   color: #fff;
+}
+
+.mevzuat-menu__item.is-active i {
+  color: #ffc078;
+  opacity: 1;
 }
 
 /* --- Sayfalama --- */
@@ -222,8 +281,8 @@
 }
 
 .mevzuat-card:hover .mevzuat-card__icon {
-  background: rgba(245, 166, 35, 0.16);
-  color: var(--p-accent, #f5a623);
+  background: var(--prt-soft, rgba(240, 138, 36, 0.14));
+  color: var(--prt-accent-deep, #e06a10);
 }
 
 .mevzuat-card__title {
@@ -284,7 +343,7 @@
 }
 
 .mevzuat-card:hover .mevzuat-card__link {
-  color: var(--p-accent, #f5a623);
+  color: var(--prt-accent-deep, #e06a10);
 }
 
 .mevzuat-card:hover .mevzuat-card__link i {
