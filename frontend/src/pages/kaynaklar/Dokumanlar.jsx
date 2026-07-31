@@ -249,6 +249,15 @@ function getFileTone(fileType) {
   return 'navy';
 }
 
+function getFileIcon(fileType) {
+  if (['DOC', 'DOCX'].includes(fileType)) return 'fas fa-file-word';
+  if (['XLS', 'XLSX', 'CSV'].includes(fileType)) return 'fas fa-file-excel';
+  if (fileType === 'PDF') return 'fas fa-file-pdf';
+  if (['PPT', 'PPTX'].includes(fileType)) return 'fas fa-file-powerpoint';
+  if (['ZIP', 'RAR', '7Z'].includes(fileType)) return 'fas fa-file-archive';
+  return 'fas fa-file-alt';
+}
+
 function normalizeText(value) {
   return String(value || '')
     .trim()
@@ -425,14 +434,8 @@ export default function Dokumanlar() {
                   key={item.id}
                   style={{ borderRadius: '24px', overflow: 'hidden' }}
                 >
-                  <span
-                    className={`documents-card__file documents-card__file--${getFileTone(
-                      fileType
-                    )}`}
-                    aria-hidden="true"
-                  >
-                    <strong>{fileType}</strong>
-                    <small>{fileType}</small>
+                  <span className="documents-card__file documents-card__file--plain" aria-hidden="true">
+                    <i className="far fa-file-alt documents-card__file-icon" />
                   </span>
 
                   <div className="documents-card__content">
