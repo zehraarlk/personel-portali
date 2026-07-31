@@ -67,56 +67,59 @@ export default function Protokoller() {
     <Layout>
       <div className="prt-page">
         <header className="prt-head">
-          <div className="prt-head__icon" aria-hidden="true">
-            <i className={icon('protokoller')} />
-          </div>
-          <div className="prt-head__text">
-            <p className="prt-head__eyebrow">Kaynaklar</p>
-            <h1>{page.title}</h1>
-            <p>{page.description}</p>
+          <div className="prt-head__left">
+            <span className="prt-head__icon" aria-hidden="true">
+              <i className={icon('protokoller')} />
+            </span>
+            <div>
+              <h1>{page.title}</h1>
+              <p>{page.description}</p>
+            </div>
           </div>
         </header>
 
-        <nav className="prt-tabs" aria-label="Kaynaklar">
-          {KAYNAK_QUICK_LINKS.map((item) => {
-            const active = item.to === '/protokoller';
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`prt-tabs__link${active ? ' is-active' : ''}`}
-                aria-current={active ? 'page' : undefined}
-              >
-                <i className={icon(item.iconKey)} aria-hidden="true" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <section className="prt-toolbar" aria-label="Arama">
-          <form className="prt-search" onSubmit={onSearch} role="search">
-            <label className="prt-search__field" htmlFor={page.searchId}>
-              <i className={icon('arama')} aria-hidden="true" />
-              <input
-                id={page.searchId}
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={page.searchPlaceholder}
-                autoComplete="off"
-              />
-            </label>
-            <button type="submit" className="prt-search__btn">
-              Ara
-            </button>
-            {search ? (
-              <button type="button" className="prt-search__clear" onClick={clearSearch}>
-                Temizle
+        <div className="prt-bar">
+          <section className="prt-toolbar" aria-label="Arama">
+            <form className="prt-search" onSubmit={onSearch} role="search">
+              <label className="prt-search__field" htmlFor={page.searchId}>
+                <i className={icon('arama')} aria-hidden="true" />
+                <input
+                  id={page.searchId}
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={page.searchPlaceholder}
+                  autoComplete="off"
+                />
+              </label>
+              <button type="submit" className="prt-search__btn">
+                Ara
               </button>
-            ) : null}
-          </form>
-        </section>
+              {search ? (
+                <button type="button" className="prt-search__clear" onClick={clearSearch}>
+                  Temizle
+                </button>
+              ) : null}
+            </form>
+          </section>
+
+          <nav className="prt-tabs" aria-label="Kaynaklar">
+            {KAYNAK_QUICK_LINKS.map((item) => {
+              const active = item.to === '/protokoller';
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`prt-tabs__link${active ? ' is-active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <i className={icon(item.iconKey)} aria-hidden="true" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
         <div className="prt-results" aria-live="polite">
           {!loading && !error ? (
