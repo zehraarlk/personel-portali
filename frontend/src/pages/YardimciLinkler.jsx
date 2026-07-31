@@ -236,7 +236,7 @@ export default function YardimciLinkler() {
           border-color: rgba(28,58,94,0.35);
         }
         .yl-card-logo {
-          width: 70%;
+          width: 90%;
           aspect-ratio: 1 / 1;
           border-radius: 10px;
           background: #ffffff;
@@ -248,8 +248,8 @@ export default function YardimciLinkler() {
           margin-bottom: 10px;
         }
         .yl-card-logo img {
-          max-width: 60%;
-          max-height: 60%;
+          max-width: 70%;
+          max-height: 70%;
           object-fit: contain;
         }
         .yl-card-title {
@@ -453,7 +453,6 @@ export default function YardimciLinkler() {
                               <i className="fas fa-link" style={{ fontSize: 22, color: BLUE }} aria-hidden="true" />
                             )}
                           </div>
-                          <p className="yl-card-title">{item.baslik}</p>
                         </a>
                       ))}
                     </div>
