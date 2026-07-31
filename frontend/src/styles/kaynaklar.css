@@ -1,0 +1,21 @@
+/* Ortak kaynaklar kabuğu — Eğitimler / etkinlikler-page ile aynı kenar boşluğu */
+
+.kaynaklar-page {
+  --prt-navy: #022842;
+  --prt-navy-mid: #0a4a6e;
+  --prt-muted: #4f6270;
+  --prt-line: rgba(2, 40, 66, 0.12);
+  --prt-accent: #f08a24;
+  --prt-accent-deep: #e06a10;
+  --prt-soft: rgba(240, 138, 36, 0.14);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.25rem 0 2.75rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 560px) {
+  .kaynaklar-page {
+    padding: 16px 12px 32px;
+  }
+}

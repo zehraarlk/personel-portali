@@ -45,8 +45,8 @@ export const KAYNAK_PAGES = {
   mevzuatlar: {
     title: 'Mevzuatlar',
     description:
-      'Yönetmelik, yönerge ve ilgili mevzuat metinlerini inceleyin.',
-    searchPlaceholder: 'Mevzuat adı ara…',
+      'Personelimizi ilgilendiren kanun, yönetmelik ve mevzuat metinlerine buradan ulaşabilirsiniz.',
+    searchPlaceholder: 'Kanun veya mevzuat adı ara…',
     searchId: 'mevzuat-ara',
     statLabel: 'aktif mevzuat',
     iconKey: 'mevzuatlar',

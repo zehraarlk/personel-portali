@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { NavLink } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchDokumanlar } from '../../api/client';
-import { KAYNAK_PAGES, KAYNAK_QUICK_LINKS } from './config';
+import KaynaklarChrome from './KaynaklarChrome';
 import '../../styles/etkinlikler.css';
 import '../../styles/dokumanlar.css';
 
-const page = KAYNAK_PAGES.dokumanlar;
 const DEFAULT_PAGE_SIZE = 8;
 
 
@@ -15,13 +13,6 @@ const PAGE_SIZE_OPTIONS = [
   { value: 12, label: '12 / sayfa' },
   { value: 16, label: '16 / sayfa' },
 ];
-
-const KAYNAK_LINK_ICONS = {
-  protokoller: 'fas fa-handshake',
-  dokumanlar: 'far fa-file-alt',
-  mevzuatlar: 'fas fa-balance-scale',
-  egitimler: 'fas fa-graduation-cap',
-};
 
 const ChevronDownIcon = () => (
   <svg
@@ -299,26 +290,29 @@ export default function Dokumanlar() {
     setLoading(true);
     setError('');
 
-    fetchDokumanlar(search)
-      .then((data) => {
-        if (!cancelled) {
-          setItems(Array.isArray(data.dokumanlar) ? data.dokumanlar : []);
-        }
-      })
-      .catch((requestError) => {
-        if (!cancelled) {
-          setItems([]);
-          setError(
-            requestError.message || 'Dokümanlar yüklenirken bir sorun oluştu.'
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const timer = setTimeout(() => {
+      fetchDokumanlar(search)
+        .then((data) => {
+          if (!cancelled) {
+            setItems(Array.isArray(data.dokumanlar) ? data.dokumanlar : []);
+          }
+        })
+        .catch((requestError) => {
+          if (!cancelled) {
+            setItems([]);
+            setError(
+              requestError.message || 'Dokümanlar yüklenirken bir sorun oluştu.'
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    }, 300);
 
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [search]);
 
@@ -355,9 +349,9 @@ export default function Dokumanlar() {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
-  const submitSearch = (event) => {
-    event.preventDefault();
-    setSearch(query.trim());
+  const handleQueryChange = (value) => {
+    setQuery(value);
+    setSearch(value.trim());
   };
 
   const clearSearch = () => {
@@ -367,71 +361,14 @@ export default function Dokumanlar() {
 
   return (
     <Layout>
-      <div className="documents-page">
-        <header className="documents-head" aria-labelledby="documents-title">
-          <div className="documents-head__left">
-            <span className="documents-head__icon" aria-hidden="true">
-              <i className="far fa-file-alt" />
-            </span>
-            <div>
-              <h1 id="documents-title">{page.title}</h1>
-              <p>{page.description}</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="documents-bar">
-          <section className="documents-toolbar" aria-label="Doküman arama">
-            <form className="documents-search" role="search" onSubmit={submitSearch}>
-              <label className="documents-search__field" htmlFor={page.searchId}>
-                <i className="fas fa-search" aria-hidden="true" />
-                <input
-                  id={page.searchId}
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={
-                    page.searchPlaceholder ||
-                    'Doküman adı, açıklama veya anahtar kelime ile ara...'
-                  }
-                  autoComplete="off"
-                />
-              </label>
-
-              <button className="documents-search__button" type="submit">
-                Ara
-              </button>
-
-              {search ? (
-                <button
-                  className="documents-search__clear"
-                  type="button"
-                  onClick={clearSearch}
-                >
-                  Temizle
-                </button>
-              ) : null}
-            </form>
-          </section>
-
-          <nav className="documents-tabs" aria-label="Kaynaklar">
-            {KAYNAK_QUICK_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `documents-tabs__link${isActive ? ' is-active' : ''}`
-                }
-              >
-                <i
-                  className={KAYNAK_LINK_ICONS[link.iconKey] || 'far fa-folder'}
-                  aria-hidden="true"
-                />
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
+      <div className="kaynaklar-page documents-page">
+        <KaynaklarChrome
+          pageKey="dokumanlar"
+          query={query}
+          onQueryChange={handleQueryChange}
+          onClear={clearSearch}
+          iconClassName="far fa-file-alt"
+        />
 
         {search && !loading && !error ? (
           <div className="documents-result-note">

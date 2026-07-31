@@ -11,10 +11,6 @@
   --documents-accent: #f08a24;
   --documents-accent-deep: #e06a10;
 
-  width: 90%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0.5rem 0 2.75rem;
   color: var(--documents-text);
 }
 
@@ -957,10 +953,6 @@
 }
 
 @media (max-width: 680px) {
-  .documents-page {
-    width: 94%;
-  }
-
   .documents-search__button,
   .documents-search__clear {
     flex: 1 1 auto;
