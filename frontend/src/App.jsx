@@ -10,6 +10,7 @@ import Videos from './pages/Videos';
 import Etkinlikler from './pages/Etkinlikler';
 import EtkinlikDetay from './pages/EtkinlikDetay';
 import Duyurular from './pages/Duyurular';
+import DuyuruDetay from './pages/DuyuruDetay';
 import VefatEdenler from './pages/VefatEdenler';
 import DogumGunu from './pages/DogumGunu';
 import YardimciLinkler from './pages/YardimciLinkler';
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/etkinlikler" element={<Etkinlikler />} />
         <Route path="/etkinlikler/:id" element={<EtkinlikDetay />} />
         <Route path="/duyurular" element={<Duyurular />} />
+        <Route path="/duyurular/:id" element={<DuyuruDetay />} />
         <Route path="/protokoller" element={<Protokoller />} />
         <Route path="/dokumanlar" element={<Dokumanlar />} />
         <Route path="/mevzuatlar" element={<Mevzuatlar />} />
