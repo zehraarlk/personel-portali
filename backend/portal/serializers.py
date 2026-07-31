@@ -49,6 +49,36 @@ class BirthdaySerializer(serializers.ModelSerializer):
         return f'{obj.ad} {obj.soyad}'
 
 
+class DogumGunuSerializer(serializers.ModelSerializer):
+    """Portal listesi için doğum yılını ve özel personel alanlarını dışarı açmaz."""
+
+    foto = serializers.CharField(read_only=True)
+    ad_soyad = serializers.SerializerMethodField()
+    gun = serializers.SerializerMethodField()
+    ay = serializers.SerializerMethodField()
+    tarih_metni = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Personel
+        fields = ['id', 'ad', 'soyad', 'ad_soyad', 'foto', 'gun', 'ay', 'tarih_metni']
+
+    def get_ad_soyad(self, obj):
+        return f'{obj.ad} {obj.soyad}'.strip()
+
+    def get_gun(self, obj):
+        return obj.dogum_tarihi.day
+
+    def get_ay(self, obj):
+        return obj.dogum_tarihi.month
+
+    def get_tarih_metni(self, obj):
+        aylar = (
+            '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+        )
+        return f'{obj.dogum_tarihi.day} {aylar[obj.dogum_tarihi.month]}'
+
+
 class AnasayfaLinkSerializer(serializers.ModelSerializer):
     logo = serializers.CharField(read_only=True)
 
