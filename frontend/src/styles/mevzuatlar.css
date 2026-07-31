@@ -379,7 +379,7 @@
 
 .mevzuat-head-left {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -389,6 +389,7 @@
   flex-shrink: 0;
   width: 42px;
   height: 42px;
+  margin-top: 1px;
   border-radius: 12px;
   background: #022842;
   color: #f5a623;
@@ -401,12 +402,14 @@
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: #022842;
 }
 
 .mevzuat-head-left p {
   margin: 0;
   font-size: 13px;
+  line-height: 1.45;
   color: #5b6b78;
-  max-width: 32rem;
+  max-width: 40rem;
 }
