@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchMevzuatlar } from '../../api/client';
+import KaynaklarChrome from './KaynaklarChrome';
 import '../../styles/protokoller.css';
 import '../../styles/mevzuatlar.css';
-
-const QUICK_LINKS = [
-  { to: '/protokoller', label: 'Protokoller', icon: 'fas fa-file-signature' },
-  { to: '/dokumanlar', label: 'Dokümanlar', icon: 'fas fa-file-alt' },
-  { to: '/mevzuatlar', label: 'Mevzuatlar', icon: 'fas fa-balance-scale' },
-  { to: '/egitimler', label: 'Eğitimler', icon: 'fas fa-graduation-cap' },
-];
 
 const SAYFA_BASI = 9;
 
@@ -122,61 +116,14 @@ export default function Mevzuatlar() {
 
   return (
     <Layout>
-      <div className="protokoller-page">
-        <header className="mevzuat-head">
-          <div className="mevzuat-head-left">
-            <span className="mevzuat-head-icon">
-              <i className="fas fa-balance-scale" aria-hidden="true" />
-            </span>
-            <div>
-              <h1>Mevzuatlar</h1>
-              <p>
-                Personelimizi ilgilendiren kanun, yönetmelik ve mevzuat metinlerine buradan
-                ulaşabilirsiniz.
-              </p>
-            </div>
-          </div>
-        </header>
-
-        <div className="mevzuat-toolbar-row">
-          <div className="prt-search mevzuat-toolbar-row__search">
-            <label className="prt-search__field" htmlFor="mevzuat-ara">
-              <i className="fas fa-search" aria-hidden="true" />
-              <input
-                id="mevzuat-ara"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Kanun veya mevzuat adı ara…"
-                autoComplete="off"
-              />
-            </label>
-            {query ? (
-              <button type="button" className="prt-search__clear" onClick={clearSearch}>
-                Temizle
-              </button>
-            ) : null}
-          </div>
-
-          <nav className="prt-tabs mevzuat-toolbar-row__tabs" aria-label="Hızlı erişim">
-            {QUICK_LINKS.map((item) => {
-              const active =
-                location.pathname === item.to ||
-                location.pathname.startsWith(`${item.to}/`);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`prt-tabs__link${active ? ' is-active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  <i className={item.icon} aria-hidden="true" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+      <div className="kaynaklar-page">
+        <KaynaklarChrome
+          pageKey="mevzuatlar"
+          query={query}
+          onQueryChange={setQuery}
+          onClear={clearSearch}
+          iconClassName="fas fa-balance-scale"
+        />
 
         <div className="mevzuat-filter-bar" ref={filtreRef}>
           <p className="mevzuat-filter-bar__label">

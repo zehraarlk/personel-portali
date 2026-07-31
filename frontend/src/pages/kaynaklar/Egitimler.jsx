@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchEgitimler } from '../../api/client';
-import useSiteIcons from '../../hooks/useSiteIcons';
-import { KAYNAK_QUICK_LINKS } from './config';
+import KaynaklarChrome from './KaynaklarChrome';
 import '../../styles/etkinlikler.css';
 import '../../styles/protokoller.css';
 import '../../styles/egitimler.css';
@@ -42,11 +40,8 @@ const ORTAK_LINK_ALANLARI = [
 ];
 
 export default function Egitimler() {
-  const location = useLocation();
-  const { icon } = useSiteIcons();
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
-  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
@@ -73,7 +68,7 @@ export default function Egitimler() {
   }, []);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLocaleLowerCase('tr-TR');
+    const q = query.trim().toLocaleLowerCase('tr-TR');
     if (!q) return items;
     return items.filter((item) => {
       const haystack = `${item.baslik || ''} ${item.aciklama || ''}`.toLocaleLowerCase(
@@ -81,21 +76,18 @@ export default function Egitimler() {
       );
       return haystack.includes(q);
     });
-  }, [items, search]);
+  }, [items, query]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const submitSearch = (e) => {
-    e.preventDefault();
-    setSearch(query.trim());
+  useEffect(() => {
     setPage(1);
-  };
+  }, [query]);
 
   const clearSearch = () => {
     setQuery('');
-    setSearch('');
     setPage(1);
   };
 
@@ -154,108 +146,18 @@ export default function Egitimler() {
         }
       `}</style>
 
-      <div className="etkinlikler-page" style={{ minHeight: '85vh', paddingBottom: 40 }}>
-        <header className="etkinlikler-head">
-          <div className="etkinlikler-head-left">
-            <span className="etkinlikler-head-icon">
-              <i className="fas fa-graduation-cap" aria-hidden="true" />
-            </span>
-            <div>
-              <h1>Eğitimler</h1>
-              <p>Personel eğitim materyallerine ve ilgili kaynaklara buradan erişin.</p>
-            </div>
-          </div>
-        </header>
+      <div className="kaynaklar-page etkinlikler-page" style={{ minHeight: '85vh' }}>
+        <KaynaklarChrome
+          pageKey="egitimler"
+          query={query}
+          onQueryChange={setQuery}
+          onClear={clearSearch}
+          iconClassName="fas fa-graduation-cap"
+        />
 
-        {/* Protokoller sayfasındaki görünüşle birebir aynı, ama arama çubuğu +
-            "Ara" butonu + kaynak sekmeleri tek bir satırda yan yana duruyor.
-            CSS'teki .prt-search / .prt-tabs varsayılan olarak dar ekranda alt
-            satıra geçebiliyor (flex-wrap: wrap); burada bunu inline stille
-            geçersiz kılıp tek satırda tutuyoruz (protokoller.css'e dokunmadan,
-            sadece bu sayfaya özel). */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            margin: '20px 0 24px',
-            overflowX: 'auto',
-            // Protokoller sayfasındaki .prt-* class'ları renklerini bu CSS
-            // değişkenlerinden alıyor (bkz. protokoller.css > .prt-page).
-            // Sadece değişkenleri tanımlıyoruz, .prt-page class'ının kendi
-            // width/padding gibi layout kurallarını almıyoruz.
-            '--prt-navy': '#022842',
-            '--prt-navy-mid': '#0a4a6e',
-            '--prt-muted': '#4f6270',
-            '--prt-line': 'rgba(2, 40, 66, 0.12)',
-            '--prt-accent': '#f08a24',
-            '--prt-accent-deep': '#e06a10',
-            '--prt-soft': 'rgba(240, 138, 36, 0.14)',
-          }}
-        >
-          <section className="prt-toolbar" aria-label="Arama" style={{ margin: 0 }}>
-            <form
-              className="prt-search"
-              onSubmit={submitSearch}
-              role="search"
-              style={{ flexWrap: 'nowrap' }}
-            >
-              <label className="prt-search__field" htmlFor="egitim-search">
-                <i className={icon('arama')} aria-hidden="true" />
-                <input
-                  id="egitim-search"
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Eğitim adı ara…"
-                  autoComplete="off"
-                />
-              </label>
-              <button type="submit" className="prt-search__btn" style={{ flexShrink: 0 }}>
-                Ara
-              </button>
-              {search ? (
-                <button
-                  type="button"
-                  className="prt-search__clear"
-                  onClick={clearSearch}
-                  style={{ flexShrink: 0 }}
-                >
-                  Temizle
-                </button>
-              ) : null}
-            </form>
-          </section>
-
-          <nav
-            className="prt-tabs"
-            aria-label="Kaynaklar"
-            style={{ margin: 0, flexWrap: 'nowrap', flexShrink: 0 }}
-          >
-            {KAYNAK_QUICK_LINKS.map((item) => {
-              const active =
-                location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`prt-tabs__link${active ? ' is-active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  <i className={icon(item.iconKey)} aria-hidden="true" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {search && !loading && !error ? (
+        {query.trim() && !loading && !error ? (
           <p className="protokoller-filter-note">
-            "<strong>{search}</strong>" için {filtered.length} sonuç
+            "<strong>{query.trim()}</strong>" için {filtered.length} sonuç
           </p>
         ) : null}
 
