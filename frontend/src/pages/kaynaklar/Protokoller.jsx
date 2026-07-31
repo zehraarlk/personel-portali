@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchProtokoller } from '../../api/client';
 import useSiteIcons from '../../hooks/useSiteIcons';
-import { KAYNAK_PAGES, KAYNAK_QUICK_LINKS } from './config';
+import KaynaklarChrome from './KaynaklarChrome';
+import { KAYNAK_PAGES } from './config';
 import '../../styles/protokoller.css';
-import '../../styles/mevzuatlar.css';
 
 function normalizeIcon(ikon) {
   const raw = (ikon || 'fas fa-file-signature').trim();
@@ -17,7 +16,6 @@ const page = KAYNAK_PAGES.protokoller;
 
 export default function Protokoller() {
   const { icon } = useSiteIcons();
-  const location = useLocation();
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,58 +58,13 @@ export default function Protokoller() {
 
   return (
     <Layout>
-      <div className="protokoller-page">
-        <header className="mevzuat-head">
-          <div className="mevzuat-head-left">
-            <span className="mevzuat-head-icon">
-              <i className={icon('protokoller')} aria-hidden="true" />
-            </span>
-            <div>
-              <h1>{page.title}</h1>
-              <p>{page.description}</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="mevzuat-toolbar-row">
-          <div className="prt-search mevzuat-toolbar-row__search">
-            <label className="prt-search__field" htmlFor={page.searchId}>
-              <i className={icon('arama')} aria-hidden="true" />
-              <input
-                id={page.searchId}
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={page.searchPlaceholder}
-                autoComplete="off"
-              />
-            </label>
-            {query ? (
-              <button type="button" className="prt-search__clear" onClick={clearSearch}>
-                Temizle
-              </button>
-            ) : null}
-          </div>
-
-          <nav className="prt-tabs mevzuat-toolbar-row__tabs" aria-label="Hızlı erişim">
-            {KAYNAK_QUICK_LINKS.map((item) => {
-              const active =
-                location.pathname === item.to ||
-                location.pathname.startsWith(`${item.to}/`);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`prt-tabs__link${active ? ' is-active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  <i className={icon(item.iconKey)} aria-hidden="true" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+      <div className="kaynaklar-page">
+        <KaynaklarChrome
+          pageKey="protokoller"
+          query={query}
+          onQueryChange={setQuery}
+          onClear={clearSearch}
+        />
 
         <div className="prt-results" aria-live="polite">
           {!loading && !error ? (
