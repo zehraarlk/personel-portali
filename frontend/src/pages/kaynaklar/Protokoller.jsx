@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchProtokoller } from '../../api/client';
 import useSiteIcons from '../../hooks/useSiteIcons';
 import { KAYNAK_PAGES, KAYNAK_QUICK_LINKS } from './config';
 import '../../styles/protokoller.css';
+import '../../styles/mevzuatlar.css';
 
 function normalizeIcon(ikon) {
   const raw = (ikon || 'fas fa-file-signature').trim();
@@ -16,9 +17,9 @@ const page = KAYNAK_PAGES.protokoller;
 
 export default function Protokoller() {
   const { icon } = useSiteIcons();
+  const location = useLocation();
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
-  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -43,7 +44,7 @@ export default function Protokoller() {
   }, []);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLocaleLowerCase('tr-TR');
+    const q = query.trim().toLocaleLowerCase('tr-TR');
     if (!q) return items;
     return items.filter((item) => {
       const haystack = `${item.baslik || ''} ${item.aciklama || ''}`.toLocaleLowerCase(
@@ -51,25 +52,19 @@ export default function Protokoller() {
       );
       return haystack.includes(q);
     });
-  }, [items, search]);
-
-  const onSearch = (e) => {
-    e.preventDefault();
-    setSearch(query.trim());
-  };
+  }, [items, query]);
 
   const clearSearch = () => {
     setQuery('');
-    setSearch('');
   };
 
   return (
     <Layout>
-      <div className="prt-page">
-        <header className="prt-head">
-          <div className="prt-head__left">
-            <span className="prt-head__icon" aria-hidden="true">
-              <i className={icon('protokoller')} />
+      <div className="protokoller-page">
+        <header className="mevzuat-head">
+          <div className="mevzuat-head-left">
+            <span className="mevzuat-head-icon">
+              <i className={icon('protokoller')} aria-hidden="true" />
             </span>
             <div>
               <h1>{page.title}</h1>
@@ -78,34 +73,31 @@ export default function Protokoller() {
           </div>
         </header>
 
-        <div className="prt-bar">
-          <section className="prt-toolbar" aria-label="Arama">
-            <form className="prt-search" onSubmit={onSearch} role="search">
-              <label className="prt-search__field" htmlFor={page.searchId}>
-                <i className={icon('arama')} aria-hidden="true" />
-                <input
-                  id={page.searchId}
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={page.searchPlaceholder}
-                  autoComplete="off"
-                />
-              </label>
-              <button type="submit" className="prt-search__btn">
-                Ara
+        <div className="mevzuat-toolbar-row">
+          <div className="prt-search mevzuat-toolbar-row__search">
+            <label className="prt-search__field" htmlFor={page.searchId}>
+              <i className={icon('arama')} aria-hidden="true" />
+              <input
+                id={page.searchId}
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={page.searchPlaceholder}
+                autoComplete="off"
+              />
+            </label>
+            {query ? (
+              <button type="button" className="prt-search__clear" onClick={clearSearch}>
+                Temizle
               </button>
-              {search ? (
-                <button type="button" className="prt-search__clear" onClick={clearSearch}>
-                  Temizle
-                </button>
-              ) : null}
-            </form>
-          </section>
+            ) : null}
+          </div>
 
-          <nav className="prt-tabs" aria-label="Kaynaklar">
+          <nav className="prt-tabs mevzuat-toolbar-row__tabs" aria-label="Hızlı erişim">
             {KAYNAK_QUICK_LINKS.map((item) => {
-              const active = item.to === '/protokoller';
+              const active =
+                location.pathname === item.to ||
+                location.pathname.startsWith(`${item.to}/`);
               return (
                 <Link
                   key={item.to}
@@ -124,9 +116,9 @@ export default function Protokoller() {
         <div className="prt-results" aria-live="polite">
           {!loading && !error ? (
             <p className="prt-results__count">
-              {search ? (
+              {query.trim() ? (
                 <>
-                  “<strong>{search}</strong>” için <strong>{filtered.length}</strong> sonuç
+                  “<strong>{query.trim()}</strong>” için <strong>{filtered.length}</strong> sonuç
                 </>
               ) : (
                 <>
@@ -156,7 +148,7 @@ export default function Protokoller() {
             <i className={icon('protokoller')} aria-hidden="true" />
             <h2>Sonuç bulunamadı</h2>
             <p>Aramanızı değiştirerek tekrar deneyebilirsiniz.</p>
-            {search ? (
+            {query.trim() ? (
               <button type="button" className="prt-search__btn" onClick={clearSearch}>
                 Aramayı temizle
               </button>
