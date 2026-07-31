@@ -118,7 +118,7 @@ export default function YardimciLinkler() {
           background: #fdf1dc;
           border-top-color: ${ORANGE};
           color: #1a1a1a;
-          font-weight: 700;
+          font-weight: 600;
         }
         .yl-kategori-satir.acik + .yl-kategori-satir {
           border-top-color: ${ORANGE};
