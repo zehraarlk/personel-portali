@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Footer from '../components/Footer';
 import MediaFrame from '../components/MediaFrame';
@@ -114,8 +115,15 @@ function getCategoryIcon(category) {
 }
 
 function DuyuruCard({ duyuru }) {
+  const detayYolu = `/duyurular/${encodeURIComponent(duyuru.id)}`;
+
   return (
-    <article className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-[22px] border border-[#dde5eb] bg-white shadow-[0_14px_34px_rgba(2,40,66,0.08)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.012] hover:border-[#022842]/28 hover:shadow-[0_24px_56px_rgba(2,40,66,0.16)]">
+    <Link
+      to={detayYolu}
+      state={{ duyuru }}
+      aria-label={`${duyuru.baslik} duyurusunun detayını aç`}
+      className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-[22px] border border-[#dde5eb] bg-white shadow-[0_14px_34px_rgba(2,40,66,0.08)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.012] hover:border-[#022842]/28 hover:shadow-[0_24px_56px_rgba(2,40,66,0.16)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#022842]/20"
+    >
       <div className="relative">
         <div className="relative aspect-[16/10] overflow-hidden rounded-t-[22px] bg-[#e8eef3]">
           {duyuru.resim ? (
@@ -143,7 +151,11 @@ function DuyuruCard({ duyuru }) {
         )}
       </div>
 
-      <div className={`flex flex-1 flex-col px-5 pb-5 sm:px-6 sm:pb-6 ${duyuru.kategori ? 'pt-8' : 'pt-5'}`}>
+      <div
+        className={`flex flex-1 flex-col px-5 pb-5 sm:px-6 sm:pb-6 ${
+          duyuru.kategori ? 'pt-8' : 'pt-5'
+        }`}
+      >
         {duyuru.tarih && (
           <time
             dateTime={duyuru.tarih}
@@ -156,11 +168,14 @@ function DuyuruCard({ duyuru }) {
           </time>
         )}
 
-        <h2 className="mt-4 line-clamp-2 min-h-[3.9rem] text-[1.45rem] font-black leading-[1.12] tracking-tight text-[#022842] transition-all duration-300 group-hover:translate-x-0.5 sm:text-[1.6rem]">
+        <h2 className="mt-4 line-clamp-2 min-h-[3.3rem] text-[1.3rem] font-black leading-[1.12] tracking-tight text-[#022842] transition-all duration-300 group-hover:translate-x-0.5 sm:text-[1.45rem]">
           {duyuru.baslik}
         </h2>
 
-        <span aria-hidden="true" className="mt-4 h-[3px] w-9 rounded-full bg-[#022842] transition-all duration-300 group-hover:w-11" />
+        <span
+          aria-hidden="true"
+          className="mt-2 h-[3px] w-9 rounded-full bg-[#022842] transition-all duration-300 group-hover:w-11"
+        />
 
         {duyuru.aciklama ? (
           <p className="mt-4 line-clamp-3 min-h-[5.7rem] text-[15px] leading-7 text-[#5d6977]">
@@ -175,13 +190,16 @@ function DuyuruCard({ duyuru }) {
         <div className="mt-auto pt-5">
           <span className="inline-flex min-h-[50px] w-full items-center justify-between gap-4 rounded-[14px] border border-[#022842]/18 bg-white px-5 text-[15px] font-bold text-[#022842] shadow-[0_8px_22px_rgba(2,40,66,0.06)] transition-all duration-300 group-hover:border-[#022842] group-hover:bg-[#022842] group-hover:text-white group-hover:shadow-[0_14px_30px_rgba(2,40,66,0.18)] sm:w-auto sm:min-w-[190px]">
             <span>Detaylı Bilgi</span>
-            <span aria-hidden="true" className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-1">
+            <span
+              aria-hidden="true"
+              className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-1"
+            >
               →
             </span>
           </span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
