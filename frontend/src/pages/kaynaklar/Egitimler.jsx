@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { fetchEgitimler } from '../../api/client';
+import useSiteIcons from '../../hooks/useSiteIcons';
 import { KAYNAK_QUICK_LINKS } from './config';
 import '../../styles/etkinlikler.css';
 import '../../styles/protokoller.css';
@@ -42,6 +43,7 @@ const ORTAK_LINK_ALANLARI = [
 
 export default function Egitimler() {
   const location = useLocation();
+  const { icon } = useSiteIcons();
   const [items, setItems] = useState([]);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
@@ -165,128 +167,89 @@ export default function Egitimler() {
           </div>
         </header>
 
+        {/* Protokoller sayfasındaki görünüşle birebir aynı, ama arama çubuğu +
+            "Ara" butonu + kaynak sekmeleri tek bir satırda yan yana duruyor.
+            CSS'teki .prt-search / .prt-tabs varsayılan olarak dar ekranda alt
+            satıra geçebiliyor (flex-wrap: wrap); burada bunu inline stille
+            geçersiz kılıp tek satırda tutuyoruz (protokoller.css'e dokunmadan,
+            sadece bu sayfaya özel). */}
         <div
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
+            flexWrap: 'nowrap',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 10,
+            gap: 16,
             margin: '20px 0 24px',
+            overflowX: 'auto',
+            // Protokoller sayfasındaki .prt-* class'ları renklerini bu CSS
+            // değişkenlerinden alıyor (bkz. protokoller.css > .prt-page).
+            // Sadece değişkenleri tanımlıyoruz, .prt-page class'ının kendi
+            // width/padding gibi layout kurallarını almıyoruz.
+            '--prt-navy': '#022842',
+            '--prt-navy-mid': '#0a4a6e',
+            '--prt-muted': '#4f6270',
+            '--prt-line': 'rgba(2, 40, 66, 0.12)',
+            '--prt-accent': '#f08a24',
+            '--prt-accent-deep': '#e06a10',
+            '--prt-soft': 'rgba(240, 138, 36, 0.14)',
           }}
         >
-          <form
-            onSubmit={submitSearch}
-            role="search"
-            style={{ display: 'flex', gap: 10, alignItems: 'center' }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                width: 600,
-                height: 50,
-                background: 'rgba(28,58,94,0.10)',
-                borderRadius: 999,
-                paddingLeft: 20,
-                overflow: 'hidden',
-              }}
+          <section className="prt-toolbar" aria-label="Arama" style={{ margin: 0 }}>
+            <form
+              className="prt-search"
+              onSubmit={submitSearch}
+              role="search"
+              style={{ flexWrap: 'nowrap' }}
             >
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Eğitim adı ara…"
-                autoComplete="off"
-                style={{
-                  flex: 1,
-                  height: '100%',
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: 15,
-                  color: '#333',
-                }}
-              />
-              <button
-                type="submit"
-                aria-label="Ara"
-                style={{
-                  width: 42,
-                  height: 42,
-                  margin: 4,
-                  flexShrink: 0,
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: '#f5a623',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                }}
+              <label
+                className="prt-search__field"
+                htmlFor="egitim-search"
+                style={{ flex: '0 0 600px' }}
               >
-                <i className="fas fa-magnifying-glass" style={{ fontSize: 15 }} aria-hidden="true" />
+                <i className={icon('arama')} aria-hidden="true" />
+                <input
+                  id="egitim-search"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Eğitim adı ara…"
+                  autoComplete="off"
+                />
+              </label>
+              <button type="submit" className="prt-search__btn" style={{ flexShrink: 0 }}>
+                Ara
               </button>
-            </div>
-            {search ? (
-              <button
-                type="button"
-                onClick={clearSearch}
-                style={{
-                  padding: '0 18px',
-                  height: 42,
-                  borderRadius: 10,
-                  border: '0.5px solid rgba(0,0,0,0.18)',
-                  background: 'transparent',
-                  color: '#333',
-                  fontSize: 14,
-                }}
-              >
-                Temizle
-              </button>
-            ) : null}
-          </form>
-
+              {search ? (
+                <button
+                  type="button"
+                  className="prt-search__clear"
+                  onClick={clearSearch}
+                  style={{ flexShrink: 0 }}
+                >
+                  Temizle
+                </button>
+              ) : null}
+            </form>
+          </section>
 
           <nav
-            aria-label="Kaynaklar hızlı erişim"
-            style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}
+            className="prt-tabs"
+            aria-label="Kaynaklar"
+            style={{ margin: 0, flexWrap: 'nowrap', flexShrink: 0 }}
           >
             {KAYNAK_QUICK_LINKS.map((item) => {
               const active =
                 location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
-              const TAB_ICONS = {
-                protokoller: 'fas fa-pen-fancy',
-                dokumanlar: 'far fa-file-alt',
-                mevzuatlar: 'fas fa-balance-scale',
-                egitimler: 'fas fa-graduation-cap',
-              };
-              const tabIcon = TAB_ICONS[item.iconKey] || 'fas fa-circle';
               return (
                 <Link
                   key={item.to}
                   to={item.to}
+                  className={`prt-tabs__link${active ? ' is-active' : ''}`}
                   aria-current={active ? 'page' : undefined}
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: 8,
-                    border: active ? '0.5px solid rgba(0,0,0,0.35)' : '0.5px solid rgba(0,0,0,0.15)',
-                    background: active ? 'rgba(0,0,0,0.04)' : 'transparent',
-                    fontSize: 14,
-                    fontWeight: active ? 500 : 400,
-                    color: active ? '#111' : '#555',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 7,
-                  }}
+                  style={{ whiteSpace: 'nowrap' }}
                 >
-                  <i
-                    className={tabIcon}
-                    style={{ color: active ? ORANGE : undefined }}
-                    aria-hidden="true"
-                  />
+                  <i className={icon(item.iconKey)} aria-hidden="true" />
                   {item.label}
                 </Link>
               );
