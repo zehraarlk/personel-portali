@@ -24,15 +24,10 @@ export default function EtkinlikDetay() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Slider kontrolü için indeks state'i
-  const [startIndex, setStartIndex] = useState(0);
-  const VISIBLE_COUNT = 3; // Ekranda aynı anda görünecek kart sayısı
-
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    setStartIndex(0); // Sayfa/id değişince slider sıfırlansın
 
     fetchEtkinlikler(null)
       .then((data) => {
@@ -64,48 +59,44 @@ export default function EtkinlikDetay() {
     };
   }, [id]);
 
-  const tarih = useMemo(() => (etkinlik ? formatTarih(etkinlik.tarih) : null), [etkinlik]);
-  const bitisTarih = useMemo(
-    () => (etkinlik?.bitis_tarihi ? formatTarih(etkinlik.bitis_tarihi) : null),
-    [etkinlik],
+  // Yan paneldeki "Diğer Etkinlikler" listesi için sayfalama (scroll yerine ok tuşları)
+  const [digerIndex, setDigerIndex] = useState(0);
+  const DIGER_VISIBLE_COUNT = 6;
+
+  useEffect(() => {
+    setDigerIndex(0);
+  }, [id]);
+
+  const digerPageCount = Math.max(1, Math.ceil(diger.length / DIGER_VISIBLE_COUNT));
+  const digerPage = Math.floor(digerIndex / DIGER_VISIBLE_COUNT);
+
+  const handleDigerPrev = () => {
+    setDigerIndex((prev) => Math.max(0, prev - DIGER_VISIBLE_COUNT));
+  };
+
+  const handleDigerNext = () => {
+    setDigerIndex((prev) =>
+      Math.min((digerPageCount - 1) * DIGER_VISIBLE_COUNT, prev + DIGER_VISIBLE_COUNT),
+    );
+  };
+
+  const visibleDiger = useMemo(
+    () => diger.slice(digerIndex, digerIndex + DIGER_VISIBLE_COUNT),
+    [diger, digerIndex],
   );
-
-  // Kaydırma Fonksiyonları
-  const handlePrev = () => {
-    setStartIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setStartIndex((prev) => Math.min(diger.length - VISIBLE_COUNT, prev + 1));
-  };
-
-  // Ekranda gösterilecek mevcut kartlar
-  const visibleDiger = useMemo(() => {
-    return diger.slice(startIndex, startIndex + VISIBLE_COUNT);
-  }, [diger, startIndex]);
 
   return (
     <Layout>
       <div className="etkinlik-detay-page">
-        <button type="button" className="etkinlik-detay-back" onClick={() => navigate('/etkinlikler')}>
+        <button type="button" className="etkinlik-detay-back" onClick={() => navigate(-1)}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          Etkinliklere Dön
+          Geri Dön
         </button>
 
         {loading && (
           <div className="etkinlik-detay-skeleton">
             <div className="etkinlik-detay-skeleton-hero" />
             <div className="etkinlik-detay-skeleton-row" />
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="etkinlikler-empty">
-            <i className="fas fa-calendar-xmark" aria-hidden="true" />
-            <p>{error}</p>
-            <Link to="/etkinlikler" className="etkinlik-detay-empty-link">
-              Tüm etkinliklere göz at
-            </Link>
           </div>
         )}
 
@@ -137,20 +128,6 @@ export default function EtkinlikDetay() {
               </article>
 
               <aside className="etkinlik-detay-side-panel">
-                <div className="etkinlik-detay-date-box">
-                  <div className="etkinlik-detay-date-badge">
-                    <span className="etkinlik-detay-date-gun">{tarih.gun}</span>
-                    <span className="etkinlik-detay-date-ay">{tarih.ay}</span>
-                  </div>
-                  <div className="etkinlik-detay-date-text">
-                    <strong>{tarih.tam}</strong>
-                    <span>{tarih.gunAdi}</span>
-                    {bitisTarih && (
-                      <span>({bitisTarih.tam} tarihine kadar)</span>
-                    )}
-                  </div>
-                </div>
-
                 {(etkinlik.konum || etkinlik.adres) && (
                   <div className="etkinlik-detay-konum-box">
                     <i className="fas fa-location-dot" aria-hidden="true" />
@@ -158,75 +135,77 @@ export default function EtkinlikDetay() {
                   </div>
                 )}
 
-                {etkinlik.aciklama && (
-                  <div className="etkinlik-detay-aciklama-wrapper">
-                    <h2>Etkinlik Hakkında</h2>
-                    <p className="etkinlik-detay-aciklama">{etkinlik.aciklama}</p>
+                {diger.length > 0 && (
+                  <div className="etkinlik-detay-side-diger">
+                    <div className="etkinlik-detay-side-diger-head">
+                      <h2>
+                        <i className="fas fa-calendar-week" aria-hidden="true" />
+                        Diğer Etkinlikler
+                      </h2>
+
+                      {diger.length > DIGER_VISIBLE_COUNT && (
+                        <div className="etkinlik-detay-side-diger-controls">
+                          <button
+                            type="button"
+                            className="etkinlik-slider-btn"
+                            onClick={handleDigerPrev}
+                            disabled={digerPage === 0}
+                            aria-label="Önceki Etkinlikler"
+                          >
+                            <i className="fas fa-chevron-up" />
+                          </button>
+                          <button
+                            type="button"
+                            className="etkinlik-slider-btn"
+                            onClick={handleDigerNext}
+                            disabled={digerPage >= digerPageCount - 1}
+                            aria-label="Sonraki Etkinlikler"
+                          >
+                            <i className="fas fa-chevron-down" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="etkinlik-detay-side-diger-list">
+                      {visibleDiger.map((e) => {
+                        const t = formatTarih(e.tarih);
+                        return (
+                          <Link
+                            key={e.id}
+                            to={`/etkinlikler/${e.id}`}
+                            className="etkinlik-detay-side-diger-card"
+                          >
+                            {e.resim && (
+                              <div className="etkinlik-detay-side-diger-media">
+                                <MediaFrame
+                                  src={e.resim}
+                                  alt={e.baslik}
+                                  className="absolute inset-0"
+                                />
+                              </div>
+                            )}
+                            <div className="etkinlik-detay-side-diger-body">
+                              <span className="etkinlik-detay-side-diger-tarih">{t.tam}</span>
+                              <h3>{e.baslik}</h3>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </aside>
             </div>
 
-            {/* Alt Kısım: Ok Tuşlu Slider Yapısı */}
-            {diger.length > 0 && (
+            {/* Alt Kısım: Ana Etkinliğin Tüm Genişlikte Açıklaması */}
+            {etkinlik.aciklama && (
               <section className="etkinlik-detay-full-section">
-                <div className="etkinlik-detay-slider-header">
-                  <h2>
-                    <i className="fas fa-calendar-week" aria-hidden="true" />
-                    Diğer Etkinlikler
-                  </h2>
-                  
-                  {/* Etkinlik sayısı gösterilenden fazlaysa ok butonlarını göster */}
-                  {diger.length > VISIBLE_COUNT && (
-                    <div className="etkinlik-detay-slider-controls">
-                      <button
-                        type="button"
-                        className="etkinlik-slider-btn"
-                        onClick={handlePrev}
-                        disabled={startIndex === 0}
-                        aria-label="Önceki Etkinlikler"
-                      >
-                        <i className="fas fa-chevron-left" />
-                      </button>
-                      <button
-                        type="button"
-                        className="etkinlik-slider-btn"
-                        onClick={handleNext}
-                        disabled={startIndex >= diger.length - VISIBLE_COUNT}
-                        aria-label="Sonraki Etkinlikler"
-                      >
-                        <i className="fas fa-chevron-right" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="etkinlik-detay-diger-list">
-                  {visibleDiger.map((e) => {
-                    const t = formatTarih(e.tarih);
-                    return (
-                      <Link
-                        key={e.id}
-                        to={`/etkinlikler/${e.id}`}
-                        className="etkinlik-detay-diger-card"
-                      >
-                        {e.resim && (
-                          <div className="etkinlik-detay-diger-media">
-                            <MediaFrame
-                              src={e.resim}
-                              alt={e.baslik}
-                              className="absolute inset-0"
-                            />
-                          </div>
-                        )}
-                        <div className="etkinlik-detay-diger-body">
-                          <span className="etkinlik-detay-diger-tarih">{t.tam}</span>
-                          <h3>{e.baslik}</h3>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
+                <h2>
+                  <i className="fas fa-align-left" aria-hidden="true" />
+                  Etkinlik Hakkında
+                </h2>
+                <p className="etkinlik-detay-aciklama">{etkinlik.aciklama}</p>
               </section>
             )}
           </>

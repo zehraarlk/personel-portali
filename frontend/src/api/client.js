@@ -1,10 +1,13 @@
 import axios from 'axios';
 import {
   authHeaders,
+  canAccessPortal,
   getOturumId,
   getPersonelId,
   getYoneticiId,
   getYoneticiOturumId,
+  isPersonelLoggedIn,
+  isYoneticiLoggedIn,
 } from '../auth/session';
 
 const API_BASE =
@@ -586,6 +589,12 @@ export async function fetchYardimciLinkler(kategori = '') {
   return response.json();
 }
 
+export {
+  canAccessPortal,
+  isPersonelLoggedIn,
+  isYoneticiLoggedIn,
+} from '../auth/session';
+
 /** vefat — { vefatlar: [...], toplam } */
 export async function fetchVefat(q) {
   const qs = q ? `?q=${encodeURIComponent(q)}` : '';
@@ -596,108 +605,82 @@ export async function fetchVefat(q) {
   return response.json();
 }
 
-/** anketler — { anketler: [...], toplam } */
-export async function fetchAnketler() {
-  const response = await fetch(`${API_BASE}/anketler/`, {
-    headers: authHeaders(),
-  });
-  if (!response.ok) {
-    throw new Error('Anketler alınamadı');
+/**
+ * Doğum Günleri
+ * { kayitlar: [...], toplam, tarih }
+ */
+export async function fetchDogumGunleri(scope = 'month', q = '') {
+  const params = new URLSearchParams();
+
+  if (scope) {
+    params.set('scope', scope);
   }
+
+  if (q) {
+    params.set('q', q);
+  }
+
+  const queryString = params.toString();
+  const qs = queryString ? `?${queryString}` : '';
+
+  const response = await fetch(`${API_BASE}/dogum-gunu/${qs}`);
+
+  if (!response.ok) {
+    throw new Error('Doğum günü bilgileri alınamadı');
+  }
+
   return response.json();
 }
 
+/**
+ * Anketler
+ * { anketler: [...] }
+ */
+export async function fetchAnketler() {
+  const response = await fetch(`${API_BASE}/anketler/`);
+
+  if (!response.ok) {
+    throw new Error('Anketler yüklenemedi');
+  }
+
+  return response.json();
+}
+
+/**
+ * Anket Detay
+ * { anket: {...}, sorular: [...], participated / katildi_mi }
+ */
 export async function fetchAnketDetail(id) {
   const response = await fetch(`${API_BASE}/anketler/${id}/`, {
     headers: authHeaders(),
   });
+
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.detail || 'Anket detayı alınamadı');
+    throw new Error('Anket yüklenemedi');
   }
+
   return response.json();
 }
 
 /**
- * Doğum günü bilgilerini getirir.
- *
- * scope:
- * - today: Bugün doğan personeller
- * - month: Bu ay doğan personeller
- * - all: Tüm personeller
- *
- * q:
- * - Ad veya soyada göre arama
+ * Ankete katılım gönderme
+ * cevaplar: { [soru_id]: secenek_id | metin }
  */
-export async function fetchDogumGunleri(
-  scope = 'month',
-  q = ''
-) {
-  const params = new URLSearchParams();
-
-  params.set('scope', scope);
-
-  if (q.trim()) {
-    params.set('q', q.trim());
-  }
-
-  const response = await fetch(
-    `${API_BASE}/dogum-gunu/?${params.toString()}`,
-    {
-      headers: authHeaders(),
-    }
-  );
-
-  const data = await response
-    .json()
-    .catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(
-      data.detail ||
-        'Doğum günü bilgileri alınamadı'
-    );
-  }
-
-  return data;
-}
-/**
- * cevaplar map: { [soruId]: secenekId | metin }
- * API'ye [{ soru_id, secenek_id?, cevap_metni? }] olarak gönderilir.
- */
-export async function submitAnket(id, cevaplarMap) {
-  const personelId = getPersonelId();
-  if (!personelId) {
-    throw new Error('Ankete katılmak için personel hesabıyla giriş yapmalısınız.');
-  }
-
-  const cevaplar = Object.entries(cevaplarMap || {}).map(([soruId, val]) => {
-    if (typeof val === 'number' || (/^\d+$/.test(String(val)) && String(val).length < 12)) {
-      return { soru_id: Number(soruId), secenek_id: Number(val), cevap_metni: null };
-    }
-    return { soru_id: Number(soruId), secenek_id: null, cevap_metni: String(val || '') };
-  });
-
+export async function submitAnket(id, cevaplar) {
   const response = await fetch(`${API_BASE}/anketler/${id}/katil/`, {
     method: 'POST',
-    headers: {
-      ...authHeaders(),
-      'Content-Type': 'application/json',
-    },
+    headers: jsonHeaders(),
     body: JSON.stringify({
+      personel_id: getPersonelId() || undefined,
       cevaplar,
-      personel_id: Number(personelId),
     }),
   });
+
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(data.detail || 'Katılım kaydedilemedi');
+
+  if (!response.ok || data.status === 'error') {
+    throw new Error(data.message || data.detail || 'Katılım kaydedilemedi');
   }
+
   return data;
 }
-
-export {
-  canAccessPortal,
-  isPersonelLoggedIn,
-  isYoneticiLoggedIn,
-} from '../auth/session';

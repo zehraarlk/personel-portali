@@ -106,8 +106,8 @@ export default function SizdenGelenlerDetayB() {
                 />
               </button>
 
-              <div className="p-6 sm:p-10">
-                <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold">
+              <div className="p-5 sm:p-7">
+                <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold">
                   <span className="rounded-full bg-gray-100 border border-gray-200 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide text-[#022842]">
                     {icerik.kategori}
                   </span>
@@ -121,11 +121,11 @@ export default function SizdenGelenlerDetayB() {
                   </span>
                 </div>
 
-                <h1 className="mb-5 text-2xl font-bold text-[#022842] sm:text-3xl leading-snug">
+                <h1 className="mb-3 text-2xl font-bold text-[#022842] sm:text-3xl leading-snug">
                   {icerik.baslik}
                 </h1>
 
-                <p className="text-base leading-8 text-[#536575]">{icerik.ozet}</p>
+                <p className="text-base leading-7 text-[#536575]">{icerik.ozet}</p>
               </div>
             </div>
 
@@ -136,14 +136,14 @@ export default function SizdenGelenlerDetayB() {
 
               <div className="flex-1 overflow-y-auto p-3">
                 {panelGosterilenler.length > 0 ? (
-                  <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-2">
                     {panelGosterilenler.map((item) => (
                       <Link
                         key={item.id}
                         to={`/sizden-gelenler/detay/${item.id}${refSayfa ? `?ref=${refSayfa}` : ''}`}
                         className="group flex items-center gap-3 rounded-xl p-2 transition hover:bg-[#f8fbfd]"
                       >
-                        <div className="h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
+                        <div className="h-[58px] w-[68px] shrink-0 overflow-hidden rounded-lg bg-[#dce6ed]">
                           <img
                             src={item.resim}
                             alt={item.kategori}
@@ -154,7 +154,7 @@ export default function SizdenGelenlerDetayB() {
                           <p className="line-clamp-2 text-xs font-bold leading-snug text-[#022842] group-hover:text-[#0a3a5c]">
                             {item.baslik}
                           </p>
-                          <p className="mt-1 text-[10px] font-medium text-[#8696a4]">
+                          <p className="mt-1 text-[10.5px] font-medium text-[#8696a4]">
                             {formatTarih(item.tarih)}
                           </p>
                         </div>
