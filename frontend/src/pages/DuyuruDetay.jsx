@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import Layout from '../components/Layout';
-import Footer from '../components/Footer';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchDuyurular } from '../api/client';
+import Layout from '../components/Layout';
+import MediaFrame from '../components/MediaFrame';
+import '../styles/duyuru-detay.css';
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('tr-TR', {
   day: '2-digit',
@@ -10,81 +11,136 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('tr-TR', {
   year: 'numeric',
 });
 
+const OTHER_ANNOUNCEMENTS_PAGE_SIZE = 6;
+
 function formatDate(value) {
   if (!value) return '';
 
-  const [year, month, day] = String(value).split('-').map(Number);
-  const date = new Date(year, month - 1, day);
+  const normalizedValue = String(value);
+  const isoDateMatch = normalizedValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
-  return Number.isNaN(date.getTime()) ? value : DATE_FORMATTER.format(date);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+
+    return Number.isNaN(localDate.getTime())
+      ? normalizedValue
+      : DATE_FORMATTER.format(localDate);
+  }
+
+  const date = new Date(normalizedValue);
+  return Number.isNaN(date.getTime())
+    ? normalizedValue
+    : DATE_FORMATTER.format(date);
 }
 
 function getDuyuruMetni(duyuru) {
   return duyuru?.icerik || duyuru?.detay || duyuru?.aciklama || '';
 }
 
+function AnnouncementMedia({ announcement, eager = false, contain = false }) {
+  if (announcement?.resim) {
+    if (contain) {
+      // Ana görseli arka plan olarak çiziyoruz. Bu yöntem global img/MediaFrame
+      // stillerinin yeniden object-fit: cover uygulamasını tamamen engeller.
+      return (
+        <div
+          className="duyuru-detay-hero-picture"
+          role="img"
+          aria-label={announcement.baslik || 'Duyuru görseli'}
+          style={{
+            backgroundImage: `url(${JSON.stringify(announcement.resim)})`,
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'contain',
+          }}
+        />
+      );
+    }
+
+    return (
+      <MediaFrame
+        src={announcement.resim}
+        alt={announcement.baslik || 'Duyuru görseli'}
+        className="absolute inset-0"
+        eager={eager}
+        dark={eager}
+      />
+    );
+  }
+
+  return (
+    <div className="duyuru-detay-media-placeholder" aria-hidden="true">
+      <i className="fas fa-bullhorn" />
+    </div>
+  );
+}
+
 export default function DuyuruDetay() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const stateDuyuru = location.state?.duyuru;
-
   const stateDuyuruUygun =
     stateDuyuru && String(stateDuyuru.id) === String(id)
       ? stateDuyuru
       : null;
 
   const [duyuru, setDuyuru] = useState(stateDuyuruUygun);
+  const [duyurular, setDuyurular] = useState(
+    stateDuyuruUygun ? [stateDuyuruUygun] : [],
+  );
   const [loading, setLoading] = useState(!stateDuyuruUygun);
   const [error, setError] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
+  const [otherPage, setOtherPage] = useState(0);
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'auto',
-    });
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
 
   useEffect(() => {
-    if (stateDuyuruUygun) {
-      setDuyuru(stateDuyuruUygun);
-      setLoading(false);
-      setError('');
-
-      return undefined;
-    }
-
     let cancelled = false;
 
-    async function loadDuyuru() {
-      setLoading(true);
+    async function loadDuyurular() {
+      if (!stateDuyuruUygun) {
+        setLoading(true);
+      }
+
       setError('');
 
       try {
         const result = await fetchDuyurular();
-
-        const duyurular = Array.isArray(result.duyurular)
+        const gelenDuyurular = Array.isArray(result?.duyurular)
           ? result.duyurular
           : [];
-
-        const bulunanDuyuru = duyurular.find(
+        const bulunanDuyuru = gelenDuyurular.find(
           (item) => String(item.id) === String(id),
         );
 
-        if (!cancelled) {
-          if (bulunanDuyuru) {
-            setDuyuru(bulunanDuyuru);
-          } else {
-            setDuyuru(null);
-            setError('Aradığınız duyuru bulunamadı.');
-          }
+        if (cancelled) return;
+
+        setDuyurular(gelenDuyurular);
+
+        if (bulunanDuyuru) {
+          setDuyuru(bulunanDuyuru);
+        } else if (stateDuyuruUygun) {
+          setDuyuru(stateDuyuruUygun);
+        } else {
+          setDuyuru(null);
+          setError('Aradığınız duyuru bulunamadı.');
         }
       } catch (requestError) {
-        if (!cancelled) {
+        if (cancelled) return;
+
+        if (stateDuyuruUygun) {
+          setDuyuru(stateDuyuruUygun);
+          setDuyurular([stateDuyuruUygun]);
+        } else {
           setDuyuru(null);
           setError(
-            requestError.message || 'Duyuru bilgileri yüklenemedi.',
+            requestError?.message || 'Duyuru bilgileri yüklenemedi.',
           );
         }
       } finally {
@@ -94,151 +150,193 @@ export default function DuyuruDetay() {
       }
     }
 
-    loadDuyuru();
+    loadDuyurular();
 
     return () => {
       cancelled = true;
     };
   }, [id, reloadToken, stateDuyuruUygun]);
 
-  const duyuruMetni = useMemo(
-    () => getDuyuruMetni(duyuru),
-    [duyuru],
+  const duyuruMetni = useMemo(() => getDuyuruMetni(duyuru), [duyuru]);
+
+  const digerDuyurular = useMemo(
+    () =>
+      duyurular
+        .filter((item) => String(item.id) !== String(id))
+        .sort((a, b) => new Date(a.tarih || 0) - new Date(b.tarih || 0)),
+    [duyurular, id],
   );
 
+  const otherPageCount = Math.max(
+    1,
+    Math.ceil(digerDuyurular.length / OTHER_ANNOUNCEMENTS_PAGE_SIZE),
+  );
+
+  const gorunenDigerDuyurular = useMemo(() => {
+    const start = otherPage * OTHER_ANNOUNCEMENTS_PAGE_SIZE;
+
+    return digerDuyurular.slice(
+      start,
+      start + OTHER_ANNOUNCEMENTS_PAGE_SIZE,
+    );
+  }, [digerDuyurular, otherPage]);
+
+  useEffect(() => {
+    setOtherPage(0);
+  }, [id, digerDuyurular.length]);
+
   return (
-    <Layout videoPage>
-      <div className="min-h-full w-full bg-[#f7fafc]">
-        <main className="mx-auto w-full max-w-[920px] px-3 pb-6 pt-3 sm:px-5 sm:pb-8 sm:pt-5 lg:px-6">
-          <Link
-            to="/duyurular"
-            className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold text-[#022842] transition hover:bg-[#eaf2f8] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#022842]/15 sm:text-sm"
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              arrow_back
-            </span>
+    <Layout>
+      <div className="duyuru-detay-page">
+        <button
+          type="button"
+          className="duyuru-detay-back"
+          onClick={() => navigate(-1)}
+        >
+          <i className="fas fa-arrow-left" aria-hidden="true" />
+          Geri Dön
+        </button>
 
-            Duyurulara Dön
-          </Link>
+        {loading && (
+          <div className="duyuru-detay-skeleton" aria-label="Duyuru yükleniyor">
+            <div className="duyuru-detay-skeleton-hero" />
+            <div className="duyuru-detay-skeleton-row" />
+          </div>
+        )}
 
-          {loading && (
-            <div className="rounded-[18px] border border-[#dde5eb] bg-white p-5 shadow-[0_10px_26px_rgba(2,40,66,0.08)] sm:p-6">
-              <div className="flex items-center gap-3 text-[#4f6474]">
-                <span className="material-symbols-outlined animate-spin text-[#022842]">
-                  progress_activity
-                </span>
-
-                Duyuru bilgileri yükleniyor…
-              </div>
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="rounded-[18px] border border-[#b42318]/20 bg-white p-5 shadow-[0_10px_26px_rgba(2,40,66,0.08)] sm:p-6">
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-[#b42318]">
-                  error
-                </span>
-
-                <div className="flex-1">
-                  <h1 className="text-xl font-black text-[#0b1c30]">
-                    Duyuru görüntülenemedi
-                  </h1>
-
-                  <p className="mt-2 text-sm leading-6 text-[#61717d]">
-                    {error}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setReloadToken((value) => value + 1)
-                    }
-                    className="mt-5 inline-flex h-11 items-center gap-2 rounded-xl bg-[#022842] px-4 text-sm font-bold text-white transition hover:bg-[#0a3a5c]"
-                  >
-                    <span className="material-symbols-outlined text-[19px]">
-                      refresh
-                    </span>
-
-                    Yeniden dene
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!loading && !error && duyuru && (
-            <article className="overflow-hidden rounded-[18px] border border-[#dbe4eb] bg-white shadow-[0_12px_32px_rgba(2,40,66,0.09)]">
-              {duyuru.resim && (
-                <div className="px-[14px] pb-1 pt-[14px] sm:px-[16px] sm:pb-1 sm:pt-[16px]">
-                  <div className="flex h-[30vh] min-h-[200px] items-center justify-center sm:h-[34vh] sm:min-h-[230px] lg:h-[300px]">
-                    <img
-                      src={duyuru.resim}
-                      alt={duyuru.baslik}
-                      loading="eager"
-                      decoding="async"
-                      className="block max-h-full max-w-full object-contain"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div
-                className={`px-4 pb-5 sm:px-6 sm:pb-6 md:px-7 md:pb-8 ${
-                  duyuru.resim
-                    ? 'pt-2 sm:pt-3 md:pt-3'
-                    : 'pt-5 sm:pt-6 md:pt-8'
-                }`}
+        {!loading && error && (
+          <section className="duyuru-detay-error" role="alert">
+            <i className="fas fa-circle-exclamation" aria-hidden="true" />
+            <div>
+              <h1>Duyuru görüntülenemedi</h1>
+              <p>{error}</p>
+              <button
+                type="button"
+                onClick={() => setReloadToken((value) => value + 1)}
               >
-                <div className="flex flex-wrap items-center gap-2.5">
-                  {duyuru.kategori && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#022842] px-3 py-1.5 text-xs font-bold text-white shadow-[0_6px_14px_rgba(2,40,66,0.16)]">
-                      <span className="material-symbols-outlined text-[16px]">
-                        campaign
+                <i className="fas fa-rotate-right" aria-hidden="true" />
+                Yeniden dene
+              </button>
+            </div>
+          </section>
+        )}
+
+        {!loading && !error && duyuru && (
+          <>
+            <div className="duyuru-detay-top-grid">
+              <article className="duyuru-detay-hero">
+                <div className="duyuru-detay-media">
+                  <AnnouncementMedia announcement={duyuru} eager contain />
+                  <div className="duyuru-detay-shade" />
+                </div>
+
+                <div className="duyuru-detay-hero-overlay">
+                  <div className="duyuru-detay-meta">
+                    {duyuru.kategori && (
+                      <span className="duyuru-detay-badge">
+                        {duyuru.kategori}
                       </span>
+                    )}
 
-                      {duyuru.kategori}
-                    </span>
-                  )}
+                    {duyuru.tarih && (
+                      <time dateTime={duyuru.tarih}>
+                        <i className="far fa-calendar-alt" aria-hidden="true" />
+                        {formatDate(duyuru.tarih)}
+                      </time>
+                    )}
+                  </div>
 
-                  {duyuru.tarih && (
-                    <time
-                      dateTime={duyuru.tarih}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#667784] sm:text-sm"
-                    >
-                      <span className="material-symbols-outlined text-[17px]">
-                        calendar_month
-                      </span>
+                  <h1 className="duyuru-detay-title">{duyuru.baslik}</h1>
+                </div>
+              </article>
 
-                      {formatDate(duyuru.tarih)}
-                    </time>
+              <aside className="duyuru-detay-side-panel">
+                <div className="duyuru-detay-side-head">
+                  <h2>
+                    <i className="fas fa-bullhorn" aria-hidden="true" />
+                    Diğer Duyurular
+                  </h2>
+
+                  {digerDuyurular.length > OTHER_ANNOUNCEMENTS_PAGE_SIZE && (
+                    <div className="duyuru-detay-controls">
+                      <button
+                        type="button"
+                        className="duyuru-detay-slider-btn"
+                        onClick={() =>
+                          setOtherPage((page) => Math.max(0, page - 1))
+                        }
+                        disabled={otherPage === 0}
+                        aria-label="Önceki duyurular"
+                      >
+                        <i className="fas fa-chevron-up" aria-hidden="true" />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="duyuru-detay-slider-btn"
+                        onClick={() =>
+                          setOtherPage((page) =>
+                            Math.min(otherPageCount - 1, page + 1),
+                          )
+                        }
+                        disabled={otherPage >= otherPageCount - 1}
+                        aria-label="Sonraki duyurular"
+                      >
+                        <i className="fas fa-chevron-down" aria-hidden="true" />
+                      </button>
+                    </div>
                   )}
                 </div>
 
-                <h1 className="mt-3 max-w-4xl text-[1.4rem] font-black leading-[1.18] tracking-tight text-[#022842] sm:text-[1.7rem] md:text-[1.9rem]">
-                  {duyuru.baslik}
-                </h1>
+                {gorunenDigerDuyurular.length > 0 ? (
+                  <div className="duyuru-detay-side-list">
+                    {gorunenDigerDuyurular.map((item) => (
+                      <Link
+                        key={item.id}
+                        to={`/duyurular/${item.id}`}
+                        state={{ duyuru: item }}
+                        className="duyuru-detay-side-card"
+                      >
+                        <div className="duyuru-detay-side-media">
+                          <AnnouncementMedia announcement={item} />
+                        </div>
 
-                <div
-                  aria-hidden="true"
-                  className="mt-3 h-0.5 w-12 rounded-full bg-[#022842]"
-                />
-
-                {duyuruMetni ? (
-                  <div className="mt-4 whitespace-pre-line text-[14px] leading-6 text-[#445563] sm:text-[15px] sm:leading-7">
-                    {duyuruMetni}
+                        <div className="duyuru-detay-side-body">
+                          {item.tarih && (
+                            <time dateTime={item.tarih}>
+                              {formatDate(item.tarih)}
+                            </time>
+                          )}
+                          <h3>{item.baslik}</h3>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 ) : (
-                  <p className="mt-4 rounded-xl bg-[#f3f7fa] px-4 py-3 text-[14px] leading-6 text-[#71808c]">
-                    Bu duyuru için ayrıntılı açıklama bulunmuyor.
-                  </p>
+                  <div className="duyuru-detay-empty">
+                    <i className="far fa-bell-slash" aria-hidden="true" />
+                    <p>Gösterilecek başka duyuru bulunmuyor.</p>
+                  </div>
                 )}
-              </div>
-            </article>
-          )}
-        </main>
+              </aside>
+            </div>
 
-        <Footer />
+            <section className="duyuru-detay-full-section">
+              <h2>
+                <i className="fas fa-align-left" aria-hidden="true" />
+                Duyuru Hakkında
+              </h2>
+
+              {duyuruMetni ? (
+                <p className="duyuru-detay-description">{duyuruMetni}</p>
+              ) : (
+                <p className="duyuru-detay-description duyuru-detay-description--empty">
+                  Bu duyuru için ayrıntılı açıklama bulunmuyor.
+                </p>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </Layout>
   );
