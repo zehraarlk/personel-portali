@@ -1,0 +1,85 @@
+<!doctype html>
+<html class="light" lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/webp" href="../images/favicon.webp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personel Portalı</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="css/global.css" />
+    <script src="js/tw-theme.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="css/login.css" />
+  </head>
+  <body class="min-h-screen overflow-x-hidden" data-auth="public" data-route="/giris">
+    <div class="login-page">
+      <main class="login-box">
+        <div class="login-logo-wrap">
+          <img class="login-logo" src="https://personel.gebze.bel.tr/public/img/logo/logo1.png" alt="Gebze Belediyesi İnsan Kaynakları" />
+        </div>
+        <p class="login-subtitle">PERSONEL GİRİŞ EKRANI</p>
+
+        <div id="login-alert" class="login-alert" role="alert" aria-live="polite"></div>
+
+        <form id="login-form" class="login-form" novalidate>
+          <div class="login-field">
+            <label for="sicil_no" class="login-label">
+              Sicil Numarası <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="sicil_no"
+              name="sicil_no"
+              type="text"
+              class="login-input"
+              placeholder="Sicil Numaranız..."
+              autocomplete="username"
+            />
+            <p id="sicil-no-error" class="login-field-error">Sicil numarası boş bırakılamaz.</p>
+          </div>
+
+          <div class="login-field">
+            <div class="login-field-row">
+              <label for="password" class="login-label login-label--inline">
+                Şifre <span class="required" aria-hidden="true">*</span>
+              </label>
+              <a href="sifre-sifirla.html" class="login-forgot-link">Şifremi Unuttum ?</a>
+            </div>
+            <div class="login-password-wrap">
+              <input
+                id="password"
+                type="password"
+                class="login-input"
+                placeholder="Şifreniz"
+                autocomplete="current-password"
+              />
+              <button type="button" id="password-toggle" class="login-password-toggle" aria-label="Şifreyi göster">
+                <i id="password-toggle-icon" class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p id="sifre-error" class="login-field-error">Şifre boş bırakılamaz.</p>
+          </div>
+
+          <button type="submit" id="login-submit" class="login-submit">Giriş Yap</button>
+
+          <div class="login-divider" aria-hidden="true">YA DA</div>
+
+          <a href="sifre-sifirla.html" class="login-secondary-btn">Şifrenizi Sıfırlamak için Tıklayınız.</a>
+          <a href="admin-giris.html" class="login-secondary-btn">Yönetim Paneli için Tıklayınız.</a>
+        </form>
+      </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/session-sync.js"></script>
+    <script src="js/session-lifecycle.js"></script>
+    <script src="js/site-icons.js"></script>
+    <script src="js/auth-bootstrap.js"></script>
+    <script src="js/giris.js"></script>
+  </body>
+</html>

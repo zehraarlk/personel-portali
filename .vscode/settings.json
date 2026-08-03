@@ -5,5 +5,7 @@
   "python.terminal.activateEnvironment": true,
   "[python]": {
     "editor.formatOnSave": false
-  }
+  },
+  "liveServer.settings.multiRootWorkspaceName": "personel-portali-main",
+  "liveServer.settings.port": 8080
 }

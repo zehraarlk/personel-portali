@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
@@ -15,9 +15,32 @@ export function useAdminPage() {
   return useOutletContext();
 }
 
+function relayoutAdminShell() {
+  const main = document.querySelector('.admin-main');
+  if (!main) return;
+  const prev = main.style.minHeight;
+  main.style.minHeight = '0px';
+  void main.offsetHeight;
+  main.style.minHeight = prev;
+}
+
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pageTitle, setPageTitle] = useState('Dashboard');
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(relayoutAdminShell);
+    });
+    window.addEventListener('load', relayoutAdminShell);
+    const vv = window.visualViewport;
+    if (vv) vv.addEventListener('resize', relayoutAdminShell);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener('load', relayoutAdminShell);
+      if (vv) vv.removeEventListener('resize', relayoutAdminShell);
+    };
+  }, []);
 
   const ui = useMemo(
     () => ({

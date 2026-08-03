@@ -1,0 +1,32 @@
+/* MediaFrame — position'ı Tailwind absolute ile çakışmasın */
+
+.media-frame {
+  overflow: hidden;
+  background: #d8e2ea;
+  isolation: isolate;
+}
+
+/* Varsayılan: relative (içindeki absolute img için).
+   .absolute varsa Tailwind konumunu koru — aksi halde çerçeve 0 yüksekliğe çöker. */
+.media-frame:not(.absolute) {
+  position: relative;
+}
+
+.media-frame.absolute {
+  position: absolute !important;
+}
+
+.media-frame--dark {
+  background: #1e293b;
+}
+
+.media-fill {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}

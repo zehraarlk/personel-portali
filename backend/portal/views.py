@@ -22,6 +22,7 @@ from .models import (
     Kaynaklar,
     KaynaklarAltKategori,
     VefatBilgileri,
+    normalize_image_path,
 )
 from .serializers import (
     HaberSerializer,
@@ -44,17 +45,36 @@ from .serializers import (
 
 @api_view(['GET'])
 def home_dashboard(request):
-    """Eski ana_sayfa.php mantığı: haberler, duyurular, doğum günleri, otomasyon."""
+    """Eski ana_sayfa.php mantığı: haberler, duyurular, doğum günleri, otomasyon.
+
+    Slider ve bant, detay sayfalarıyla aynı kayıtlardan beslenir:
+    haberler → etkinlikler, duyurular → etkinlikler_duyurular (sayfa_tipi=duyuru).
+    """
     today = date.today()
     birthdays = Personel.objects.filter(
         dogum_tarihi__month=today.month,
         dogum_tarihi__day=today.day,
     )
 
+    # Ana sayfa slider: etkinlik detayına gidebilen kayıtlar
+    etkinlikler = Etkinlikler.objects.order_by('-tarih', '-id')[:12]
+    haberler = [
+        {
+            'id': e.id,
+            'baslik': e.baslik,
+            'resim': normalize_image_path(e.resim or ''),
+        }
+        for e in etkinlikler
+    ]
+
+    duyuru_qs = EtkinliklerDuyurular.objects.filter(sayfa_tipi='duyuru').order_by(
+        '-tarih', '-id'
+    )[:15]
+
     return Response(
         {
-            'haberler': HaberSerializer(Haber.objects.order_by('-id'), many=True).data,
-            'duyurular': DuyuruSerializer(Duyuru.objects.order_by('-id'), many=True).data,
+            'haberler': haberler,
+            'duyurular': EtkinlikDuyuruSerializer(duyuru_qs, many=True).data,
             'dogum_gunleri': BirthdaySerializer(birthdays, many=True).data,
             'otomasyon': AnasayfaLinkSerializer(
                 AnasayfaLink.objects.order_by('id'), many=True
