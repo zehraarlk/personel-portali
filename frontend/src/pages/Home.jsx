@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. useNavigate import edildi
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import MediaFrame from '../components/MediaFrame';
 import { fetchHomeDashboard } from '../api/client';
@@ -45,15 +45,9 @@ export default function Home() {
   const otomasyon = data?.otomasyon ?? [];
   const aktif = haberler[haberIndex];
 
-  // Haber detayına veya etkinliğe yönlendiren fonksiyon
   const handleHaberClick = (haber) => {
-    if (!haber) return;
-    
-    // Eğer haber verisinde spesifik bir etkinlik ID'si varsa onu kullan, 
-    // yoksa doğrudan haberin kendi ID'si etkinlik ID'si olarak kullanılıyorsa haber.id ile yönlendir:
-    const targetEtkinlikId = haber.etkinlik_id || haber.id;
-    
-    navigate(`/etkinlikler/${targetEtkinlikId}`);
+    if (!haber?.id) return;
+    navigate(`/etkinlikler/${haber.id}`);
   };
 
   const handlePrev = () => {
@@ -284,9 +278,11 @@ export default function Home() {
                 style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
               >
                 {[...duyurular, ...duyurular].map((d, index) => (
-                  <div
+                  <Link
                     key={`${d.id}-${index}`}
-                    className="flex flex-col shrink-0 w-44 gap-0.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 px-2.5 py-2 transition cursor-pointer"
+                    to={`/duyurular/${d.id}`}
+                    aria-label={`${d.baslik || 'Duyuru'} detayını aç`}
+                    className="flex flex-col shrink-0 w-44 gap-0.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 px-2.5 py-2 transition cursor-pointer text-left no-underline text-inherit"
                   >
                     <span className="whitespace-normal line-clamp-1 text-[11px] font-bold leading-snug text-white/95">
                       {d.baslik}
@@ -296,7 +292,7 @@ export default function Home() {
                         {d.aciklama || d.icerik}
                       </span>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

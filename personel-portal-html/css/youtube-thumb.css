@@ -1,0 +1,41 @@
+/* YouTube kapak: 16:9 kutu içinde net, şeritsiz görünüm */
+
+.youtube-thumb {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+}
+
+.youtube-thumb__img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0;
+  object-fit: cover;
+  object-position: center center;
+  transition: transform 0.5s ease;
+}
+
+/* hq/sd 4:3 + gömülü siyah şerit — içeriği dolduracak kadar büyüt */
+.youtube-thumb__img--letterbox {
+  transform: scale(1.34);
+  transform-origin: center center;
+  transition: transform 0.5s ease;
+}
+
+.group:hover .youtube-thumb__img--letterbox,
+.group:focus-within .youtube-thumb__img--letterbox {
+  transform: scale(1.4);
+}
+
+.group:hover .youtube-thumb__img:not(.youtube-thumb__img--letterbox),
+.group:focus-within .youtube-thumb__img:not(.youtube-thumb__img--letterbox) {
+  transform: scale(1.03);
+  transition: transform 0.5s ease;
+}
