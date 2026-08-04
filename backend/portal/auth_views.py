@@ -1,7 +1,7 @@
 """Personel / yönetici giriş ve şifre sıfırlama API."""
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 
 from .admin_profile_views import resolve_yonetici, yonetici_payload
@@ -24,6 +24,25 @@ def _client_meta(request):
 def _kapanis_tipi(raw, default='manuel'):
     tip = (raw or default).strip().lower()
     return tip if tip in KAPANIS_TIPLERI else default
+
+
+def _as_aware(dt):
+    """DB'den gelen naive datetime ile timezone.now() farkını güvenli hesapla."""
+    if dt is None:
+        return None
+    if timezone.is_naive(dt):
+        return timezone.make_aware(dt, timezone.get_current_timezone())
+    return dt
+
+
+def _age_seconds(dt, now=None):
+    aware = _as_aware(dt)
+    if aware is None:
+        return None
+    now = now or timezone.now()
+    if timezone.is_naive(now):
+        now = timezone.make_aware(now, timezone.get_current_timezone())
+    return (now - aware).total_seconds()
 
 
 def _close_open_personel_sessions(personel_id, *, except_id=None, tip='otomatik'):
@@ -255,7 +274,10 @@ def auth_session_resume(request):
         if (
             recent
             and recent.cikis_zamani
+
             and (now - recent.cikis_zamani).total_seconds() <= 20
+
+            and (_age_seconds(recent.cikis_zamani, now) or 999) <= 20
         ):
             recent.cikis_zamani = None
             recent.kapanis_tipi = None
@@ -343,6 +365,7 @@ def auth_forgot_password(request):
 
 
 @api_view(['POST'])
+@authentication_classes([])
 def auth_logout(request):
     """
     Personel oturum kapatma.
@@ -382,6 +405,7 @@ def auth_logout(request):
 
 
 @api_view(['POST'])
+@authentication_classes([])
 def auth_admin_logout(request):
     tip = _kapanis_tipi(request.data.get('kapanis_tipi'), 'manuel')
     raw_oturum = request.data.get('oturum_id')

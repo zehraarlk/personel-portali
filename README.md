@@ -1,6 +1,27 @@
 # Personel Portalı
 
-React + Django (DRF) + PostgreSQL ile geliştirilen personel yönetim portalı.
+Gebze Belediyesi personel portalı. Duyurular, etkinlikler, videolar, anketler, kaynaklar ve yönetim paneli; ortak bir Django API üzerinden çalışır.
+
+Üç arayüz aynı backend’i kullanır:
+
+| Arayüz | Teknoloji | Klasör | Port |
+|--------|-----------|--------|------|
+| Personel sitesi | React + Vite | `frontend/` | `5173` |
+| Yönetim paneli | React + Vite | `admin/` (React) veya `personel-portal-html/admin/` | `5173/admin` veya `8080` |
+| HTML kopya | HTML + CSS + vanilla JS | `personel-portal-html/` | `8080` |
+
+---
+
+## Gereksinimler
+
+- Python 3.11+
+- Node.js 20+
+- PostgreSQL 16 (veya Docker)
+- Windows için PowerShell (hızlı başlat scriptleri)
+
+---
+
+## Proje yapısı
 
 ```
 personel-portali/
@@ -20,23 +41,82 @@ personel-portali/
 
 ## Hızlı başlat (Windows)
 
-Kurulum bittikten sonra backend + frontend'i birlikte açmak için:
+Önce bir kez kurulum yapın (aşağıdaki “Kurulum” bölümü). Sonra:
+
+### React (personel + admin)
 
 ```powershell
 .\baslat.ps1
 ```
 
-- Frontend: http://localhost:5173
-- Sistem test: http://localhost:5173/test
-- API health: http://127.0.0.1:8000/api/health/
+| Adres | Açıklama |
+|-------|----------|
+| http://127.0.0.1:5173/ | Ana sayfa |
+| http://127.0.0.1:5173/giris | Personel girişi |
+| http://127.0.0.1:5173/admin/ | Yönetim paneli |
+| http://127.0.0.1:5173/test | Sistem testleri |
+| http://127.0.0.1:8000/api/ | Django API |
+| http://127.0.0.1:8000/admin/ | Django Admin |
 
 ## 1) Yerelde Docker ile çalıştırma (önerilen)
 
-```bash
-# backend/.env dosyasını oluştur
-cp backend/.env.example backend/.env
+```powershell
+.\personel-portal-html.ps1
+```
 
-# konteynerleri ayağa kaldır (postgres + django api)
+| Adres | Açıklama |
+|-------|----------|
+| http://127.0.0.1:8080/ | Girişe yönlendirir |
+| http://127.0.0.1:8080/personel-portal-html/giris.html | Personel girişi |
+| http://127.0.0.1:8080/personel-portal-html/index.html | Ana sayfa |
+| http://127.0.0.1:8080/personel-portal-html/admin/index.html | Yönetim paneli |
+| http://127.0.0.1:8000/api/ | Django API |
+
+> **Önemli:** `http://127.0.0.1:8000/` yalnızca API’dir; site sayfaları burada değildir. HTML site için `8080`, React için `5173` kullanın.
+
+---
+
+## Kurulum
+
+### 1) Backend
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env
+```
+
+`backend/.env` içinde PostgreSQL bilgilerini ve CORS köklerini ayarlayın:
+
+```env
+POSTGRES_DB=personel_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=...
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080
+```
+
+Veritabanı hazırsa:
+
+```powershell
+python manage.py migrate
+python manage.py createsuperuser   # isteğe bağlı (Django Admin)
+python manage.py runserver 127.0.0.1:8000
+```
+
+PostgreSQL yoksa Docker ile:
+
+```powershell
+docker compose up -d db
+```
+
+veya yalnızca API + DB:
+
+```powershell
 docker compose up --build
 ```
 
@@ -47,86 +127,108 @@ Frontend'i ayrı çalıştırın (Docker'a dahil etmedim ki hot-reload hızlı k
 
 ```bash
 cd frontend
-cp .env.example .env
+copy .env.example .env
 npm install
 npm run dev
 ```
 
-Frontend: http://localhost:5173
+### 3) React admin (ayrı çalıştırılacaksa)
 
-## 2) Docker'sız yerel kurulum
+`baslat.ps1` admin’i frontend üzerinden `/admin` ile sunar. Ayrı Vite süreci için:
 
-**Backend:**
-```bash
+```powershell
+cd admin
+copy .env.example .env
+npm install
+npm run dev
+```
+
+### 4) HTML site (elle)
+
+```powershell
+# Terminal 1 — API
 cd backend
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env          # POSTGRES_HOST=localhost yapıp yerel postgres kullanın
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-```
+.\venv\Scripts\Activate.ps1
+python manage.py runserver 127.0.0.1:8000
 
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
+# Terminal 2 — statik sunucu
+python serve-template.py
 ```
-
-Yerel PostgreSQL'iniz yoksa: `docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16-alpine`
 
 ---
 
-## GitHub'a Yükleme ve Ekip Çalışması
+## Modüller
 
-### Adım 1 — GitHub'da repo oluşturun
-1. github.com → sağ üstten **New repository**
-2. İsim: `personel-portali`, görünürlük **Private** (ekip projesi için tavsiye edilir)
-3. README/gitignore eklemeyin (zaten var), **Create repository**'ye tıklayın
+### Personel sitesi
 
-### Adım 2 — Projeyi bu klasörden GitHub'a gönderin
-```bash
-cd personel-portali
-git init
-git add .
-git commit -m "İlk commit: Django + React + PostgreSQL iskeleti"
-git branch -M main
-git remote add origin https://github.com/KULLANICI_ADIN/personel-portali.git
-git push -u origin main
-```
-> `KULLANICI_ADIN` yerine kendi kullanıcı adınızı veya organizasyon adınızı yazın.
+- Ana sayfa (haber / duyuru bandı, doğum günü, otomasyon linkleri)
+- Duyurular, etkinlikler (detay sayfaları dahil)
+- Videolar, anketler, sizden gelenler
+- Kaynaklar: protokoller, dokümanlar, mevzuatlar, eğitimler
+- Doğum günü, vefat, yardımcı linkler
+- Profil: şifre / e-posta / oturum kayıtları
 
-### Adım 3 — Ekip arkadaşlarını ekleyin
-Repo → **Settings → Collaborators and teams → Add people** üzerinden e-posta/kullanıcı adlarıyla davet edin. Organizasyon kullanıyorsanız takım (team) oluşturup yetkiyi oradan verin.
+### Yönetim paneli
 
-### Adım 4 — Branch stratejisi (önerilen)
-- `main` → her zaman çalışır durumda, korumalı (protected)
-- `develop` → aktif geliştirme
-- `feature/ozellik-adi` → her görev için ayrı dal
+- Dashboard ve CRUD: duyurular, etkinlikler, videolar, anketler, personeller, yöneticiler
+- Kaynaklar, yardımcı linkler, sizden gelenler, vefat kayıtları
+- Profil ve oturum yönetimi
 
-`main` için **Settings → Branches → Branch protection rule** ekleyip "Require pull request before merging" ve "Require status checks to pass" (CI testleri) seçeneklerini açın.
-
-### Adım 5 — Günlük ekip akışı
-```bash
-git checkout develop
-git pull
-git checkout -b feature/personel-filtreleme
-# ... kod yaz, commit at ...
-git push -u origin feature/personel-filtreleme
-```
-GitHub üzerinden `feature/...` → `develop` için **Pull Request** açın, ekipten review isteyin, onay sonrası merge edin.
-
-### Adım 6 — CI otomatik testler
-`.github/workflows/backend-ci.yml` her push/PR'da otomatik çalışır: Postgres ayağa kalkar, Django `check` ve `test` komutları koşar. Kırmızı (fail) çıkan PR'lar merge edilmemeli.
-
-### Adım 7 — Secrets / hassas bilgiler
-`.env` dosyaları `.gitignore` içinde, asla commit etmeyin. Prod ortam değişkenlerini (secret key, DB şifresi vb.) GitHub → **Settings → Secrets and variables → Actions** kısmına ekleyin; deploy pipeline'ında oradan okunur.
+Giriş: personel için **sicil no + şifre**; yönetici için admin girişi.
 
 ---
 
-## Sırada ne var?
-- Kimlik doğrulama: `dj-rest-auth` + JWT veya Django session auth ile login ekranı
-- Frontend: personel ekleme/düzenleme formları, React Router ile sayfalar
-- Deploy: Backend için Railway/Render/Fly.io, Frontend için Vercel/Netlify, DB için yönetilen Postgres (Supabase, Neon, RDS)
+## API
+
+Temel uç noktalar (`http://127.0.0.1:8000/api/`):
+
+| Uç nokta | Açıklama |
+|----------|----------|
+| `GET /health/` | Sağlık kontrolü |
+| `GET /home/` | Ana sayfa verisi |
+| `GET /duyurular/` | Duyuru listesi |
+| `GET /etkinlikler/` | Etkinlik listesi |
+| `POST /auth/login/` | Personel girişi |
+| `GET /admin/...` | Yönetim CRUD (oturum gerekli) |
+
+Detaylı uç noktalar `backend/config/urls.py` ve `backend/portal/` altında tanımlıdır.
+
+---
+
+## Ortam değişkenleri
+
+| Dosya | Rol |
+|-------|-----|
+| `backend/.env` | Django, Postgres, CORS |
+| `frontend/.env` | API taban adresi |
+| `admin/.env` | API taban adresi |
+
+`.env` dosyalarını commit etmeyin (`.gitignore` içinde). Örnekler: `*.env.example`.
+
+---
+
+## Geliştirme notları
+
+- Görseller tek kaynaktan gelir: kök `images/` → tarayıcıda `/images/...`
+- HTML kopya, React ile aynı DOM / sınıf / API davranışını hedefler (`personel-portal-html/_CONVENTIONS.md`)
+- CORS’ta kullandığınız origin’ler (`5173`, `8080`, …) `backend/.env` içinde olmalı
+- CI: `.github/workflows/backend-ci.yml` — push/PR’da Django check + test
+
+---
+
+## Sık sorunlar
+
+**“Failed to fetch” / CORS**  
+Backend kapalı olabilir veya origin CORS listesinde yoktur. `backend/.env` içindeki `CORS_ALLOWED_ORIGINS` değerini kontrol edin; Django’yu yeniden başlatın.
+
+**8000’de site açılmıyor**  
+Beklenen davranış. Site `5173` (React) veya `8080` (HTML); `8000` yalnızca API.
+
+**HTML’de giriş çalışıyor, React’te değil (veya tersi)**  
+Aynı API’yi kullanırlar; farklı port/origin CORS’ta eksik olabilir.
+
+---
+
+## Lisans / kullanım
+
+Kurumsal iç kullanım. Dağıtım ve erişim politikası Gebze Belediyesi BT birimine aittir.
