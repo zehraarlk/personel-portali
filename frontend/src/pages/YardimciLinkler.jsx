@@ -207,7 +207,6 @@ export default function YardimciLinkler() {
           padding: 14px 12px 12px;
           position: relative;
           transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-          aspect-ratio: 1 / 1;
           justify-content: center;
         }
         .yl-card:hover {
@@ -253,11 +252,16 @@ export default function YardimciLinkler() {
           object-fit: contain;
         }
         .yl-card-title {
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 500;
           color: #222;
           text-align: center;
           margin: 0;
+          line-height: 1.3;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
 
@@ -424,7 +428,7 @@ export default function YardimciLinkler() {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(6, minmax(0, 210px))',
+                        gridTemplateColumns: 'repeat(8, minmax(0, 210px))',
                         gap: 16,
                         paddingTop: 18,
                       }}
@@ -453,6 +457,7 @@ export default function YardimciLinkler() {
                               <i className="fas fa-link" style={{ fontSize: 22, color: BLUE }} aria-hidden="true" />
                             )}
                           </div>
+                          <p className="yl-card-title">{item.baslik}</p>
                         </a>
                       ))}
                     </div>

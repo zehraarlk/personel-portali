@@ -10,10 +10,6 @@
   --documents-paper: #ffffff;
   --documents-accent: #f08a24;
   --documents-accent-deep: #e06a10;
-
-  width: min(1280px, 100%);
-  margin: 0 auto;
-  color: var(--documents-text);
 }
 
 .documents-page *,

@@ -149,7 +149,7 @@ function VideoCard({ video, onOpen }) {
   const videoTypeInfo = getVideoTypeInfo(video);
 
   return (
-    <article className="group relative z-0 h-full origin-center overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] shadow-[0_6px_22px_rgba(2,40,66,0.07)] transition-all duration-300 ease-out hover:z-20 hover:-translate-y-2 hover:scale-[1.035] hover:border-[#022842]/25 hover:shadow-[0_24px_55px_rgba(2,40,66,0.22)] focus-within:z-20 focus-within:-translate-y-2 focus-within:scale-[1.035] focus-within:shadow-[0_24px_55px_rgba(2,40,66,0.22)]">
+    <article className="group relative z-0 h-full origin-center overflow-hidden rounded-2xl border border-[#022842]/10 bg-gradient-to-br from-white via-[#f2f7fb] to-[#dbeaf5] shadow-[0_6px_22px_rgba(2,40,66,0.07)] transition-all duration-300 ease-out hover:z-20 hover:-translate-y-1 hover:border-[#022842]/25 hover:shadow-[0_24px_55px_rgba(2,40,66,0.22)] focus-within:z-20 focus-within:-translate-y-1 focus-within:shadow-[0_24px_55px_rgba(2,40,66,0.22)] sm:hover:-translate-y-2 sm:hover:scale-[1.02] sm:focus-within:-translate-y-2 sm:focus-within:scale-[1.02]">
       <button
         type="button"
         onClick={() => onOpen(video)}

@@ -228,6 +228,8 @@ def auth_session_resume(request):
             recent
             and recent.cikis_zamani
             and (now - recent.cikis_zamani).total_seconds() <= 20
+
+            and (_age_seconds(recent.cikis_zamani, now) or 999) <= 20
         ):
             recent.cikis_zamani = None
             recent.kapanis_tipi = None
@@ -276,7 +278,6 @@ def auth_session_resume(request):
             and recent.cikis_zamani
 
             and (now - recent.cikis_zamani).total_seconds() <= 20
-
             and (_age_seconds(recent.cikis_zamani, now) or 999) <= 20
         ):
             recent.cikis_zamani = None

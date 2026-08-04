@@ -39,6 +39,21 @@ personel-portali/
 └── .github/workflows/backend-ci.yml
 ```
 
+
+├── backend/                 # Django 5 + DRF API
+├── frontend/                # React personel sitesi
+├── admin/                   # React yönetim paneli (Vite)
+├── personel-portal-html/    # React’ın birebir HTML/CSS/JS kopyası
+├── images/                  # Ortak görseller (/images)
+├── vite-plugins/            # kök images sunumu
+├── baslat.ps1               # React + API
+├── personel-portal-html.ps1 # HTML site + API
+├── serve-template.py        # HTML site için statik sunucu (8080)
+└── docker-compose.yml       # Postgres + Django
+```
+
+---
+
 ## Hızlı başlat (Windows)
 
 Önce bir kez kurulum yapın (aşağıdaki “Kurulum” bölümü). Sonra:
@@ -58,7 +73,11 @@ personel-portali/
 | http://127.0.0.1:8000/api/ | Django API |
 | http://127.0.0.1:8000/admin/ | Django Admin |
 
+
 ## 1) Yerelde Docker ile çalıştırma (önerilen)
+
+### HTML kopya
+
 
 ```powershell
 .\personel-portal-html.ps1
@@ -119,13 +138,15 @@ veya yalnızca API + DB:
 ```powershell
 docker compose up --build
 ```
-
 - API: http://localhost:8000/api/home/
 - Admin panel: http://localhost:8000/admin/ (önce `docker compose exec backend python manage.py createsuperuser`)
 
 Frontend'i ayrı çalıştırın (Docker'a dahil etmedim ki hot-reload hızlı kalsın) veya `.\baslat.ps1` kullanın:
 
 ```bash
+### 2) React frontend
+
+```powershell
 cd frontend
 copy .env.example .env
 npm install

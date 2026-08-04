@@ -523,4 +523,13 @@
   .feature__chip {
     flex-basis: 160px;
   }
+
+  /* Anasayfa: yatay taşmayı kilitle */
+  #haberler,
+  #duyurular-bandi,
+  #dogum-gunu,
+  #otomasyon {
+    max-width: 100%;
+    min-width: 0;
+  }
 }
