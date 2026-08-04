@@ -1,3 +1,5 @@
+
+
 .documents-page {
   --documents-navy: #022842;
   --documents-navy-mid: #0a4a6e;
@@ -1079,4 +1081,11 @@
 .documents-page .documents-card:hover::before {
   content: none !important;
   display: none !important;
+}
+
+@media (min-width: 721px) {
+  body[data-route="/dokumanlar"] .mevzuat-toolbar-row__search {
+    flex: 0 1 calc(50% - 0.5rem);
+    max-width: calc(50% - 0.5rem);
+  }
 }

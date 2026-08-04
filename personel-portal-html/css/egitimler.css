@@ -1,3 +1,5 @@
+
+
 /* Eğitimler — protokoller.css'teki .protokol-card yapısını aynen kullanır.
    Burada sadece tek CTA yerine 3 parçalı buton satırı ekleniyor.
    NOT: .protokol-card__cta--split, temel .protokol-card__cta sınıfıyla
@@ -69,5 +71,15 @@
 
   .protokol-card__cta-item i {
     font-size: 0.85rem;
+  }
+}
+
+
+
+@media (min-width: 721px) {
+  body[data-route="/egitimler"] .mevzuat-toolbar-row__search {
+    flex: none !important;
+    width: calc(50% - 15px) !important;
+    max-width: calc(50% - 15px) !important;
   }
 }

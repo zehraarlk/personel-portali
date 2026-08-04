@@ -1,3 +1,6 @@
+
+
+
 /* Mevzuatlar — alt kategori filtre çubuğu (protokoller.css'i tamamlar) */
 
 /* Protokoller sayfasının "prt-*" bileşenlerini (arama + kısayollar) bu
@@ -26,6 +29,9 @@
 .mevzuat-toolbar-row__search {
   flex: 1 1 320px;
   min-width: 0;
+
+  max-width: 340px;
+
 }
 
 .mevzuat-toolbar-row__tabs {
@@ -412,4 +418,12 @@
   line-height: 1.45;
   color: #5b6b78;
   max-width: 40rem;
+}
+
+@media (min-width: 721px) {
+  body[data-route="/mevzuatlar"] .mevzuat-toolbar-row__search {
+    flex: none !important;
+    width: 704px !important;
+    max-width: 704px !important;
+  }
 }
