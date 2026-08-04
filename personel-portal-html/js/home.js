@@ -6,7 +6,8 @@
 (function () {
   'use strict';
 
-  var RAIL_PAGE_SIZE = 4;
+  var RAIL_PAGE_SIZE_DESKTOP = 4;
+  var RAIL_PAGE_SIZE_MOBILE = 2;
 
   /* React useState karşılıkları */
   var data = null;
@@ -15,9 +16,23 @@
   var haberIndex = 0;
   var railPage = 0;
   var isPaused = false;
+  var railPageSize = RAIL_PAGE_SIZE_DESKTOP;
 
   var sliderTimer = null;
   var root = null;
+  var railMq = null;
+
+  function getRailPageSize() {
+    return railPageSize;
+  }
+
+  function syncRailPageSize() {
+    var next = railMq && railMq.matches ? RAIL_PAGE_SIZE_MOBILE : RAIL_PAGE_SIZE_DESKTOP;
+    if (next === railPageSize) return;
+    railPageSize = next;
+    railPage = Math.floor(haberIndex / railPageSize);
+    if (root && !loading && !error) renderHaberler();
+  }
 
   function esc(value) {
     return Portal.escapeHtml(value);
@@ -43,15 +58,15 @@
     return (data && data.otomasyon) || [];
   }
 
-  function railPageCount() {
-    return Math.max(1, Math.ceil(getHaberler().length / RAIL_PAGE_SIZE));
-  }
-
   /* React: useEffect [haberIndex] -> setRailPage(Math.floor(haberIndex / RAIL_PAGE_SIZE)) */
   function setHaberIndex(next) {
     haberIndex = next;
-    railPage = Math.floor(haberIndex / RAIL_PAGE_SIZE);
+    railPage = Math.floor(haberIndex / getRailPageSize());
     renderHaberler();
+  }
+
+  function railPageCount() {
+    return Math.max(1, Math.ceil(getHaberler().length / getRailPageSize()));
   }
 
   /* Haber → etkinlik detay */
@@ -73,13 +88,13 @@
   function handleRailPrevPage() {
     var next = Math.max(0, railPage - 1);
     railPage = next;
-    setHaberIndex(next * RAIL_PAGE_SIZE);
+    setHaberIndex(next * getRailPageSize());
   }
 
   function handleRailNextPage() {
     var next = Math.min(railPageCount() - 1, railPage + 1);
     railPage = next;
-    setHaberIndex(next * RAIL_PAGE_SIZE);
+    setHaberIndex(next * getRailPageSize());
   }
 
   /* Haber Slider Otomatik Geçiş — React: useEffect [data?.haberler] */
@@ -103,8 +118,9 @@
     var list = getHaberler();
     var aktif = list[haberIndex];
     var pageCount = railPageCount();
-    var railStart = railPage * RAIL_PAGE_SIZE;
-    var railItems = list.slice(railStart, railStart + RAIL_PAGE_SIZE);
+    var size = getRailPageSize();
+    var railStart = railPage * size;
+    var railItems = list.slice(railStart, railStart + size);
 
     /* MediaFrame DOM öğesi döndürdüğü için yer tutucu ile eklenir */
     var slots = [];
@@ -114,26 +130,27 @@
     }
 
     var html =
-      '<div class="relative flex flex-col rounded-2xl bg-slate-900 border border-slate-800 shadow-md overflow-hidden min-h-[380px] md:min-h-[460px] group">';
+      '<div class="relative flex min-h-[220px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-md aspect-[16/10] sm:aspect-auto sm:min-h-[380px] md:min-h-[460px] group">';
 
     if (aktif) {
       /* Büyük Haber Alanı — Tıklanınca Etkinlik Detayına Gider */
       html +=
-        '<div class="relative flex-1 bg-slate-950 overflow-hidden cursor-pointer">' +
+        '<div class="relative min-h-0 flex-1 overflow-hidden bg-slate-950 cursor-pointer">' +
         mediaSlot({
           src: Portal.asset(aktif.resim),
           alt: aktif.baslik,
           dark: true,
+          forceCover: true,
           className: 'absolute inset-0 transition-transform duration-500 group-hover:scale-105',
           eager: true,
         }) +
         '<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>' +
-        '<div class="absolute inset-x-0 bottom-0 p-6 md:p-8">' +
-        '<div class="mb-3 flex items-center gap-2">' +
+        '<div class="absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8">' +
+        '<div class="mb-2 flex flex-wrap items-center gap-2 sm:mb-3">' +
         '<span class="rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">Öne Çıkan</span>' +
         '<span class="text-xs text-white/80 font-medium">' + esc(data.tarih_tr) + '</span>' +
         '</div>' +
-        '<h2 class="max-w-4xl text-xl md:text-3xl font-bold leading-tight text-white drop-shadow hover:text-amber-300 transition-colors">' +
+        '<h2 class="max-w-4xl text-base font-bold leading-tight text-white drop-shadow hover:text-amber-300 transition-colors sm:text-xl md:text-3xl">' +
         esc(aktif.baslik) +
         '</h2>' +
         '</div>' +
@@ -142,10 +159,10 @@
       /* Önceki / Sonraki İlerleme Butonları */
       if (list.length > 1) {
         html +=
-          '<button type="button" aria-label="Önceki Haber" class="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition border border-white/10 hover:bg-amber-500 hover:text-white">' +
+          '<button type="button" aria-label="Önceki Haber" class="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:left-4 sm:h-10 sm:w-10">' +
           '<i class="' + icon('onceki') + '" aria-hidden="true"></i>' +
           '</button>' +
-          '<button type="button" aria-label="Sonraki Haber" class="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition border border-white/10 hover:bg-amber-500 hover:text-white">' +
+          '<button type="button" aria-label="Sonraki Haber" class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:right-4 sm:h-10 sm:w-10">' +
           '<i class="' + icon('sonraki') + '" aria-hidden="true"></i>' +
           '</button>';
       }
@@ -173,21 +190,21 @@
         var realIndex = railStart + i;
         var isCurrent = realIndex === haberIndex;
         html +=
-          '<button type="button" class="group/thumb relative flex flex-1 min-w-0 items-center gap-3 overflow-hidden rounded-xl border p-2 pr-3 text-left transition-all duration-200 ' +
+          '<button type="button" class="group/thumb relative flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-xl border p-1.5 text-left transition-all duration-200 sm:gap-3 sm:p-2 sm:pr-3 ' +
           (isCurrent
             ? 'border-amber-400 bg-white shadow-md ring-1 ring-amber-400/40'
             : 'border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-white hover:shadow-sm') +
           '">' +
-          '<span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors ' +
+          '<span class="hidden h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors sm:flex ' +
           (isCurrent ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500 group-hover/thumb:bg-slate-200') +
           '">' +
           (realIndex + 1) +
           '</span>' +
-          '<div class="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-200">' +
-          mediaSlot({ src: Portal.asset(h.resim), alt: '', className: 'absolute inset-0' }) +
+          '<div class="relative h-12 w-full shrink-0 overflow-hidden rounded-lg bg-slate-200 sm:h-14 sm:w-20 sm:max-w-[5rem]">' +
+          mediaSlot({ src: Portal.asset(h.resim), alt: '', forceCover: true, className: 'absolute inset-0' }) +
           (!isCurrent ? '<div class="absolute inset-0 bg-white/40"></div>' : '') +
           '</div>' +
-          '<span class="line-clamp-2 text-xs font-semibold leading-snug ' +
+          '<span class="hidden min-w-0 flex-1 text-xs font-semibold leading-snug sm:line-clamp-2 sm:block ' +
           (isCurrent ? 'text-slate-900' : 'text-slate-600') +
           '">' +
           esc(h.baslik) +
@@ -282,12 +299,12 @@
     var items = duyurular.concat(duyurular);
 
     var html =
-      '<section id="duyurular-bandi" class="flex items-stretch rounded-2xl bg-[#0b3757] border-b-4 border-amber-500 shadow-md overflow-hidden text-white gap-4 select-none min-h-[132px]">' +
-      '<div class="shrink-0 flex items-center gap-2.5 z-10 bg-[#022842] pl-5 pr-6">' +
-      '<i class="' + icon('duyuru_zili') + ' text-2xl text-amber-400" aria-hidden="true"></i>' +
-      '<span class="font-black text-sm md:text-base tracking-wide uppercase">Duyurular</span>' +
+      '<section id="duyurular-bandi" class="flex min-h-[100px] min-w-0 select-none flex-col overflow-hidden rounded-2xl border-b-4 border-amber-500 bg-[#0b3757] text-white shadow-md sm:min-h-[132px] sm:flex-row sm:items-stretch sm:gap-4">' +
+      '<div class="z-10 flex shrink-0 items-center justify-center gap-2 bg-[#022842] px-4 py-2.5 sm:justify-start sm:gap-2.5 sm:py-0 sm:pl-5 sm:pr-6">' +
+      '<i class="' + icon('duyuru_zili') + ' text-xl text-amber-400 sm:text-2xl" aria-hidden="true"></i>' +
+      '<span class="text-xs font-black uppercase tracking-wide sm:text-sm md:text-base">Duyurular</span>' +
       '</div>' +
-      '<div class="flex-1 min-w-0 overflow-hidden relative flex items-center py-3 pr-4" data-duyuru-marquee-host>' +
+      '<div class="relative flex min-w-0 flex-1 items-center overflow-hidden py-3 pr-4" data-duyuru-marquee-host>' +
       '<div class="flex items-start gap-3 whitespace-nowrap w-max animate-marquee" style="animation-play-state: ' +
       (isPaused ? 'paused' : 'running') +
       '">';
@@ -383,15 +400,15 @@
       esc((data && data.tarih_tr) || 'Bugün') +
       '</span>' +
       '</div>' +
-      '<div class="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">';
+      '<div class="relative grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">';
 
     if (dogumGunleri.length) {
       dogumGunleri.forEach(function (p) {
         var foto = p.foto ? Portal.asset(p.foto) : Portal.BRAND_IMG;
         html +=
-          '<div class="group relative flex flex-col items-center justify-center rounded-2xl border border-[#022842]/10 bg-white/90 p-5 text-center shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-300 hover:bg-white hover:shadow-lg">' +
+          '<div class="group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#022842]/10 bg-white/90 p-3 text-center shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-300 hover:bg-white hover:shadow-lg sm:p-5">' +
           '<div class="relative mb-3">' +
-          '<div class="relative h-20 w-20 overflow-hidden rounded-full border-2 border-white shadow-md ring-2 ring-[#022842]/20 transition-transform duration-300 group-hover:scale-105 group-hover:ring-amber-500">' +
+          '<div class="relative h-16 w-16 overflow-hidden rounded-full border-2 border-white shadow-md ring-2 ring-[#022842]/20 transition-transform duration-300 group-hover:scale-105 group-hover:ring-amber-500 sm:h-20 sm:w-20">' +
           '<img src="' + esc(foto) + '" alt="' + esc(p.ad_soyad) + '" class="absolute inset-0 h-full w-full object-cover object-center" />' +
           '</div>' +
           '<span class="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-xs shadow-sm ring-2 ring-white">🎉</span>' +
@@ -422,31 +439,31 @@
 
     var html =
       '<section id="otomasyon" class="flex flex-col rounded-2xl bg-white border border-slate-200/90 shadow-sm p-5 md:p-6">' +
-      '<div class="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">' +
-      '<div class="flex items-center gap-3">' +
-      '<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#022842] text-amber-400 shadow-sm">' +
+      '<div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">' +
+      '<div class="flex min-w-0 items-center gap-3">' +
+      '<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#022842] text-amber-400 shadow-sm">' +
       '<i class="' + icon('otomasyon_sistem') + ' text-xl" aria-hidden="true"></i>' +
       '</div>' +
-      '<div>' +
-      '<h2 class="text-lg md:text-xl font-bold text-[#022842]">Kurum İçi Otomasyon Sistemleri</h2>' +
-      '<p class="text-xs text-slate-500 font-medium">Hızlı erişim ve yönetim portalları</p>' +
+      '<div class="min-w-0">' +
+      '<h2 class="text-base font-bold text-[#022842] sm:text-lg md:text-xl">Kurum İçi Otomasyon Sistemleri</h2>' +
+      '<p class="text-xs font-medium text-slate-500">Hızlı erişim ve yönetim portalları</p>' +
       '</div>' +
       '</div>' +
-      '<span class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-[#022842] border border-slate-200/60">' +
+      '<span class="rounded-lg border border-slate-200/60 bg-slate-100 px-3 py-1 text-xs font-bold text-[#022842]">' +
       otomasyon.length +
       ' Uygulama</span>' +
       '</div>' +
-      '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">';
+      '<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">';
 
     otomasyon.forEach(function (link) {
       var logo = link.logo ? Portal.asset(link.logo) : Portal.BRAND_IMG;
       html +=
-        '<a href="' + esc(link.hedef_url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(link.baslik) + '" class="group relative flex aspect-square items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/30 hover:bg-white hover:shadow-lg">' +
-        '<span class="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100/80 text-slate-400 transition-all duration-300 group-hover:bg-[#022842] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5">' +
+        '<a href="' + esc(link.hedef_url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(link.baslik) + '" class="group relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/30 hover:bg-white hover:shadow-lg sm:p-4">' +
+        '<span class="absolute top-2 right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-100/80 text-slate-400 transition-all duration-300 group-hover:bg-[#022842] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:top-3 sm:right-3 sm:h-7 sm:w-7">' +
         '<i class="' + icon('harici_baglanti') + ' text-sm" aria-hidden="true"></i>' +
         '</span>' +
-        '<div class="flex h-full w-full items-center justify-center rounded-xl bg-white p-3 shadow-xs border border-slate-100 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-md">' +
-        '<img src="' + esc(logo) + '" alt="' + esc(link.baslik) + '" class="h-full w-full object-contain" />' +
+        '<div class="flex h-full w-full items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-2 shadow-xs transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md sm:p-3">' +
+        '<img src="' + esc(logo) + '" alt="' + esc(link.baslik) + '" class="max-h-full max-w-full object-contain" />' +
         '</div>' +
         '</a>';
     });
@@ -473,8 +490,8 @@
     }
 
     root.innerHTML =
-      '<div class="flex flex-col gap-6">' +
-      '<section id="haberler" class="flex flex-col gap-3"></section>' +
+      '<div class="flex min-w-0 flex-col gap-6">' +
+      '<section id="haberler" class="flex min-w-0 flex-col gap-3"></section>' +
       duyurularBandiHtml() +
       dogumGunuHtml() +
       otomasyonHtml() +
@@ -486,6 +503,14 @@
 
   function init() {
     root = document.querySelector('main.app-main');
+
+    if (window.matchMedia) {
+      railMq = window.matchMedia('(max-width: 640px)');
+      syncRailPageSize();
+      if (railMq.addEventListener) railMq.addEventListener('change', syncRailPageSize);
+      else if (railMq.addListener) railMq.addListener(syncRailPageSize);
+    }
+
     renderAll();
 
     Api.fetchHomeDashboard()

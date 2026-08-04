@@ -62,6 +62,13 @@ input {
     height: auto;
     display: block;
   }
+
+  /* Absolute / frame img: height:auto kaymayı ve taşmayı önler */
+  img.absolute,
+  .media-frame img,
+  .youtube-thumb img {
+    max-width: none;
+  }
 }
 
 .app-shell {

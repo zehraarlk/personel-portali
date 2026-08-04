@@ -15,7 +15,7 @@ export default function Home() {
   const [haberIndex, setHaberIndex] = useState(0);
   const [railPage, setRailPage] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const RAIL_PAGE_SIZE = 4;
+  const [railPageSize, setRailPageSize] = useState(4);
   const { icon } = useSiteIcons();
 
   useEffect(() => {
@@ -23,6 +23,15 @@ export default function Home() {
       .then(setData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Mobilde thumbnail rayı 2'li; taşmayı önler
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const sync = () => setRailPageSize(mq.matches ? 2 : 4);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
   }, []);
 
   // Haber Slider Otomatik Geçiş
@@ -36,8 +45,8 @@ export default function Home() {
   }, [data?.haberler]);
 
   useEffect(() => {
-    setRailPage(Math.floor(haberIndex / RAIL_PAGE_SIZE));
-  }, [haberIndex]);
+    setRailPage(Math.floor(haberIndex / railPageSize));
+  }, [haberIndex, railPageSize]);
 
   const haberler = data?.haberler ?? [];
   const duyurular = data?.duyurular ?? [];
@@ -58,14 +67,14 @@ export default function Home() {
     setHaberIndex((prev) => (prev === haberler.length - 1 ? 0 : prev + 1));
   };
 
-  const railPageCount = Math.max(1, Math.ceil(haberler.length / RAIL_PAGE_SIZE));
-  const railStart = railPage * RAIL_PAGE_SIZE;
-  const railItems = haberler.slice(railStart, railStart + RAIL_PAGE_SIZE);
+  const railPageCount = Math.max(1, Math.ceil(haberler.length / railPageSize));
+  const railStart = railPage * railPageSize;
+  const railItems = haberler.slice(railStart, railStart + railPageSize);
 
   const handleRailPrevPage = () => {
     setRailPage((prev) => {
       const next = Math.max(0, prev - 1);
-      setHaberIndex(next * RAIL_PAGE_SIZE);
+      setHaberIndex(next * railPageSize);
       return next;
     });
   };
@@ -73,7 +82,7 @@ export default function Home() {
   const handleRailNextPage = () => {
     setRailPage((prev) => {
       const next = Math.min(railPageCount - 1, prev + 1);
-      setHaberIndex(next * RAIL_PAGE_SIZE);
+      setHaberIndex(next * railPageSize);
       return next;
     });
   };
@@ -96,32 +105,33 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           
           {/* 1. HABER SLIDER */}
-          <section id="haberler" className="flex flex-col gap-3">
-            <div className="relative flex flex-col rounded-2xl bg-slate-900 border border-slate-800 shadow-md overflow-hidden min-h-[380px] md:min-h-[460px] group">
+          <section id="haberler" className="flex min-w-0 flex-col gap-3">
+            <div className="relative flex min-h-[220px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-md aspect-[16/10] sm:aspect-auto sm:min-h-[380px] md:min-h-[460px] group">
               {aktif ? (
                 <>
                   {/* Büyük Haber Alanı — Tıklanınca Etkinlik Detayına Gider */}
                   <div 
-                    className="relative flex-1 bg-slate-950 overflow-hidden cursor-pointer"
+                    className="relative min-h-0 flex-1 overflow-hidden bg-slate-950 cursor-pointer"
                     onClick={() => handleHaberClick(aktif)}
                   >
                     <MediaFrame
                       src={aktif.resim}
                       alt={aktif.baslik}
                       dark
+                      forceCover
                       className="absolute inset-0 transition-transform duration-500 group-hover:scale-105"
                       eager
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     
-                    <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-                      <div className="mb-3 flex items-center gap-2">
+                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8">
+                      <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-3">
                         <span className="rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">
                           Öne Çıkan
                         </span>
                         <span className="text-xs text-white/80 font-medium">{data.tarih_tr}</span>
                       </div>
-                      <h2 className="max-w-4xl text-xl md:text-3xl font-bold leading-tight text-white drop-shadow hover:text-amber-300 transition-colors">
+                      <h2 className="max-w-4xl text-base font-bold leading-tight text-white drop-shadow hover:text-amber-300 transition-colors sm:text-xl md:text-3xl">
                         {aktif.baslik}
                       </h2>
                     </div>
@@ -137,7 +147,7 @@ export default function Home() {
                           handlePrev();
                         }}
                         aria-label="Önceki Haber"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition border border-white/10 hover:bg-amber-500 hover:text-white"
+                        className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:left-4 sm:h-10 sm:w-10"
                       >
                         <i className={icon('onceki')} aria-hidden="true" />
                       </button>
@@ -148,7 +158,7 @@ export default function Home() {
                           handleNext();
                         }}
                         aria-label="Sonraki Haber"
-                        className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition border border-white/10 hover:bg-amber-500 hover:text-white"
+                        className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:right-4 sm:h-10 sm:w-10"
                       >
                         <i className={icon('sonraki')} aria-hidden="true" />
                       </button>
@@ -193,14 +203,14 @@ export default function Home() {
                               setHaberIndex(realIndex);
                             }
                           }}
-                          className={`group/thumb relative flex flex-1 min-w-0 items-center gap-3 overflow-hidden rounded-xl border p-2 pr-3 text-left transition-all duration-200 ${
+                          className={`group/thumb relative flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-xl border p-1.5 text-left transition-all duration-200 sm:gap-3 sm:p-2 sm:pr-3 ${
                             isCurrent
                               ? 'border-amber-400 bg-white shadow-md ring-1 ring-amber-400/40'
                               : 'border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-white hover:shadow-sm'
                           }`}
                         >
                           <span
-                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors ${
+                            className={`hidden h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors sm:flex ${
                               isCurrent
                                 ? 'bg-amber-500 text-white'
                                 : 'bg-slate-100 text-slate-500 group-hover/thumb:bg-slate-200'
@@ -208,12 +218,12 @@ export default function Home() {
                           >
                             {realIndex + 1}
                           </span>
-                          <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-200">
-                            <MediaFrame src={h.resim} alt="" className="absolute inset-0" />
+                          <div className="relative h-12 w-full shrink-0 overflow-hidden rounded-lg bg-slate-200 sm:h-14 sm:w-20 sm:max-w-[5rem]">
+                            <MediaFrame src={h.resim} alt="" forceCover className="absolute inset-0" />
                             {!isCurrent && <div className="absolute inset-0 bg-white/40" />}
                           </div>
                           <span
-                            className={`line-clamp-2 text-xs font-semibold leading-snug ${
+                            className={`hidden min-w-0 flex-1 text-xs font-semibold leading-snug sm:line-clamp-2 sm:block ${
                               isCurrent ? 'text-slate-900' : 'text-slate-600'
                             }`}
                           >
@@ -259,17 +269,17 @@ export default function Home() {
           {/* 2. DUYURU BANT KISMI */}
           <section
             id="duyurular-bandi"
-            className="flex items-stretch rounded-2xl bg-[#0b3757] border-b-4 border-amber-500 shadow-md overflow-hidden text-white gap-4 select-none min-h-[132px]"
+            className="flex min-h-[100px] min-w-0 select-none flex-col overflow-hidden rounded-2xl border-b-4 border-amber-500 bg-[#0b3757] text-white shadow-md sm:min-h-[132px] sm:flex-row sm:items-stretch sm:gap-4"
           >
-            <div className="shrink-0 flex items-center gap-2.5 z-10 bg-[#022842] pl-5 pr-6">
-              <i className={`${icon('duyuru_zili')} text-2xl text-amber-400`} aria-hidden="true" />
-              <span className="font-black text-sm md:text-base tracking-wide uppercase">
+            <div className="z-10 flex shrink-0 items-center justify-center gap-2 bg-[#022842] px-4 py-2.5 sm:justify-start sm:gap-2.5 sm:py-0 sm:pl-5 sm:pr-6">
+              <i className={`${icon('duyuru_zili')} text-xl text-amber-400 sm:text-2xl`} aria-hidden="true" />
+              <span className="text-xs font-black uppercase tracking-wide sm:text-sm md:text-base">
                 Duyurular
               </span>
             </div>
 
             <div
-              className="flex-1 min-w-0 overflow-hidden relative flex items-center py-3 pr-4"
+              className="relative flex min-w-0 flex-1 items-center overflow-hidden py-3 pr-4"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
@@ -329,16 +339,16 @@ export default function Home() {
   </div>
 
   {/* Dikey Dikdörtgen Kart Yapısı */}
-  <div className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+  <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
     {dogumGunleri.length ? (
       dogumGunleri.map((p) => (
         <div
           key={p.id}
-          className="group relative flex flex-col items-center justify-center rounded-2xl border border-[#022842]/10 bg-white/90 p-5 text-center shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-300 hover:bg-white hover:shadow-lg"
+          className="group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#022842]/10 bg-white/90 p-3 text-center shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-300 hover:bg-white hover:shadow-lg sm:p-5"
         >
           {/* Ortalanmış Profil Fotoğrafı ve Konfeti Rozeti */}
           <div className="relative mb-3">
-            <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-white shadow-md ring-2 ring-[#022842]/20 transition-transform duration-300 group-hover:scale-105 group-hover:ring-amber-500">
+            <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-white shadow-md ring-2 ring-[#022842]/20 transition-transform duration-300 group-hover:scale-105 group-hover:ring-amber-500 sm:h-20 sm:w-20">
               <img
                 src={p.foto || BRAND_IMG}
                 alt={p.ad_soyad}
@@ -376,27 +386,27 @@ export default function Home() {
   className="flex flex-col rounded-2xl bg-white border border-slate-200/90 shadow-sm p-5 md:p-6"
 >
   {/* Başlık Alanı */}
-  <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#022842] text-amber-400 shadow-sm">
+  <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+    <div className="flex min-w-0 items-center gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#022842] text-amber-400 shadow-sm">
         <i className={`${icon('otomasyon_sistem')} text-xl`} aria-hidden="true" />
       </div>
-      <div>
-        <h2 className="text-lg md:text-xl font-bold text-[#022842]">
+      <div className="min-w-0">
+        <h2 className="text-base font-bold text-[#022842] sm:text-lg md:text-xl">
           Kurum İçi Otomasyon Sistemleri
         </h2>
-        <p className="text-xs text-slate-500 font-medium">
+        <p className="text-xs font-medium text-slate-500">
           Hızlı erişim ve yönetim portalları
         </p>
       </div>
     </div>
-    <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-[#022842] border border-slate-200/60">
+    <span className="rounded-lg border border-slate-200/60 bg-slate-100 px-3 py-1 text-xs font-bold text-[#022842]">
       {otomasyon.length} Uygulama
     </span>
   </div>
 
   {/* Yenilenmiş Kart Yapısı — eski 5'li grid düzeni, sadece büyük logo, başlıksız */}
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
     {otomasyon.map((link) => (
       <a
         key={link.id}
@@ -404,19 +414,19 @@ export default function Home() {
         target="_blank"
         rel="noopener noreferrer"
         title={link.baslik}
-        className="group relative flex aspect-square items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/30 hover:bg-white hover:shadow-lg"
+        className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/30 hover:bg-white hover:shadow-lg sm:p-4"
       >
         {/* Sağ Üst Çapraz Ok İkonu */}
-        <span className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100/80 text-slate-400 transition-all duration-300 group-hover:bg-[#022842] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+        <span className="absolute top-2 right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-100/80 text-slate-400 transition-all duration-300 group-hover:bg-[#022842] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:top-3 sm:right-3 sm:h-7 sm:w-7">
           <i className={`${icon('harici_baglanti')} text-sm`} aria-hidden="true" />
         </span>
 
         {/* Büyütülmüş Logo/Fotoğraf Alanı */}
-        <div className="flex h-full w-full items-center justify-center rounded-xl bg-white p-3 shadow-xs border border-slate-100 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-md">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-2 shadow-xs transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md sm:p-3">
           <img
             src={link.logo || BRAND_IMG}
             alt={link.baslik}
-            className="h-full w-full object-contain"
+            className="max-h-full max-w-full object-contain"
           />
         </div>
       </a>
