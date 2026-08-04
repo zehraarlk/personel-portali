@@ -405,8 +405,8 @@ export default function Home() {
     </span>
   </div>
 
-  {/* Yenilenmiş Kart Yapısı — eski 5'li grid düzeni, sadece büyük logo, başlıksız */}
-  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+  {/* Yenilenmiş Kart Yapısı — 6'lı grid düzeni, logo + altında başlık */}
+  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
     {otomasyon.map((link) => (
       <a
         key={link.id}
@@ -414,7 +414,7 @@ export default function Home() {
         target="_blank"
         rel="noopener noreferrer"
         title={link.baslik}
-        className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/30 hover:bg-white hover:shadow-lg sm:p-4"
+        className="group relative flex flex-col items-center justify-start gap-2 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-[#022842]/30 hover:bg-white hover:shadow-lg sm:p-4"
       >
         {/* Sağ Üst Çapraz Ok İkonu */}
         <span className="absolute top-2 right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-100/80 text-slate-400 transition-all duration-300 group-hover:bg-[#022842] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:top-3 sm:right-3 sm:h-7 sm:w-7">
@@ -422,13 +422,18 @@ export default function Home() {
         </span>
 
         {/* Büyütülmüş Logo/Fotoğraf Alanı */}
-        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-2 shadow-xs transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md sm:p-3">
+        <div className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-2 shadow-xs transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md sm:p-3">
           <img
             src={link.logo || BRAND_IMG}
             alt={link.baslik}
             className="max-h-full max-w-full object-contain"
           />
         </div>
+
+        {/* Başlık */}
+        <span className="line-clamp-2 w-full text-center text-xs font-semibold leading-tight text-[#022842] sm:text-sm">
+          {link.baslik}
+        </span>
       </a>
     ))}
   </div>
