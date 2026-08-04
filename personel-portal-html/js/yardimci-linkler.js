@@ -184,7 +184,7 @@
               '<span class="yl-section-badge">' + kategoriLinkleri.length + ' Bağlantı</span>' +
             '</div>' +
             '<div class="yl-section-body">' +
-              '<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 210px)); gap: 16px; padding-top: 18px;">';
+              '<div style="display: grid; grid-template-columns: repeat(8, minmax(0, 210px)); gap: 16px; padding-top: 18px;">';
         kategoriLinkleri.forEach(function (item) {
           html +=
             '<a href="' + Portal.escapeHtml(item.hedef_url) + '" target="_blank" rel="noopener noreferrer" class="yl-card">' +
@@ -196,6 +196,7 @@
                   ? '<img src="' + Portal.escapeHtml(Portal.asset(item.logo_url)) + '" alt="" />'
                   : '<i class="fas fa-link" style="font-size: 22px; color: ' + BLUE + ';" aria-hidden="true"></i>') +
               '</div>' +
+              '<p class="yl-card-title">' + Portal.escapeHtml(item.baslik) + '</p>' +
             '</a>';
         });
         html += '</div></div></div>';
