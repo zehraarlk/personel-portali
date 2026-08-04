@@ -195,14 +195,24 @@ export default function SizdenGelenler() {
                 to={`/sizden-gelenler/detay/${oneCikan.id}`}
                 className="mb-6 block overflow-hidden rounded-2xl bg-[#011f34] shadow-sm"
               >
-                <div className="relative h-72">
+                <div className="relative h-72 overflow-hidden rounded-2xl">
                   <img
                     src={oneCikan.resim}
                     alt={oneCikan.kategori}
-                    className="h-full w-full object-cover opacity-80"
+                    className="absolute inset-0 h-full w-full object-cover opacity-80"
+                    style={{
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      maxWidth: 'none',
+                      maxHeight: 'none',
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                      borderRadius: '1rem',
+                    }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#011f34] via-[#011f34]/30 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-[#011f34] via-[#011f34]/30 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 z-[1] p-5">
                     <span className="mb-1.5 inline-block rounded-full bg-[#f5a623] px-2.5 py-1 text-[11px] font-bold text-[#022842]">
                       Öne Çıkan · {oneCikan.kategori}
                     </span>

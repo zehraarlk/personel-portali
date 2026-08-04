@@ -38,31 +38,14 @@ function getDuyuruMetni(duyuru) {
   return duyuru?.icerik || duyuru?.detay || duyuru?.aciklama || '';
 }
 
-function AnnouncementMedia({ announcement, eager = false, contain = false }) {
+function AnnouncementMedia({ announcement, eager = false }) {
   if (announcement?.resim) {
-    if (contain) {
-      // Ana görseli arka plan olarak çiziyoruz. Bu yöntem global img/MediaFrame
-      // stillerinin yeniden object-fit: cover uygulamasını tamamen engeller.
-      return (
-        <div
-          className="duyuru-detay-hero-picture"
-          role="img"
-          aria-label={announcement.baslik || 'Duyuru görseli'}
-          style={{
-            backgroundImage: `url(${JSON.stringify(announcement.resim)})`,
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain',
-          }}
-        />
-      );
-    }
-
     return (
       <MediaFrame
         src={announcement.resim}
         alt={announcement.baslik || 'Duyuru görseli'}
         className="absolute inset-0"
+        forceCover
         eager={eager}
         dark={eager}
       />
@@ -226,7 +209,7 @@ export default function DuyuruDetay() {
             <div className="duyuru-detay-top-grid">
               <article className="duyuru-detay-hero">
                 <div className="duyuru-detay-media">
-                  <AnnouncementMedia announcement={duyuru} eager contain />
+                  <AnnouncementMedia announcement={duyuru} eager />
                   <div className="duyuru-detay-shade" />
                 </div>
 

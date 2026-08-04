@@ -39,7 +39,7 @@
 }
 
 .media-frame .media-img--cover {
-  object-fit: cover;
+  object-fit: cover !important;
 }
 
 .media-fill {

@@ -130,18 +130,18 @@
     }
 
     var html =
-      '<div class="relative flex min-h-[220px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-md aspect-[16/10] sm:aspect-auto sm:min-h-[380px] md:min-h-[460px] group">';
+      '<div class="group relative h-[calc(100dvh-6.5rem)] min-h-[280px] w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-md">';
 
     if (aktif) {
-      /* Büyük Haber Alanı — Tıklanınca Etkinlik Detayına Gider */
+      /* Büyük Haber Alanı — yalnızca başlık tıklanınca detaya gider */
       html +=
-        '<div class="relative min-h-0 flex-1 overflow-hidden bg-slate-950 cursor-pointer">' +
+        '<div class="absolute inset-0 overflow-hidden bg-slate-950">' +
         mediaSlot({
           src: Portal.asset(aktif.resim),
           alt: aktif.baslik,
           dark: true,
           forceCover: true,
-          className: 'absolute inset-0 transition-transform duration-500 group-hover:scale-105',
+          className: 'absolute inset-0',
           eager: true,
         }) +
         '<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>' +
@@ -150,8 +150,10 @@
         '<span class="rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">Öne Çıkan</span>' +
         '<span class="text-xs text-white/80 font-medium">' + esc(data.tarih_tr) + '</span>' +
         '</div>' +
-        '<h2 class="max-w-4xl text-base font-bold leading-tight text-white drop-shadow hover:text-amber-300 transition-colors sm:text-xl md:text-3xl">' +
+        '<h2 class="max-w-4xl text-base font-bold leading-tight text-white drop-shadow sm:text-xl md:text-3xl">' +
+        '<button type="button" data-haber-title class="cursor-pointer text-left transition-colors hover:text-amber-300">' +
         esc(aktif.baslik) +
+        '</button>' +
         '</h2>' +
         '</div>' +
         '</div>';
@@ -159,15 +161,15 @@
       /* Önceki / Sonraki İlerleme Butonları */
       if (list.length > 1) {
         html +=
-          '<button type="button" aria-label="Önceki Haber" class="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:left-4 sm:h-10 sm:w-10">' +
+          '<button type="button" aria-label="Önceki Haber" class="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:left-4 sm:h-10 sm:w-10">' +
           '<i class="' + icon('onceki') + '" aria-hidden="true"></i>' +
           '</button>' +
-          '<button type="button" aria-label="Sonraki Haber" class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:right-4 sm:h-10 sm:w-10">' +
+          '<button type="button" aria-label="Sonraki Haber" class="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:right-4 sm:h-10 sm:w-10">' +
           '<i class="' + icon('sonraki') + '" aria-hidden="true"></i>' +
           '</button>';
       }
     } else {
-      html += '<p class="m-auto p-8 text-slate-400">Haber bulunamadı.</p>';
+      html += '<p class="absolute inset-0 flex items-center justify-center p-8 text-slate-400">Haber bulunamadı.</p>';
     }
 
     html += '</div>';
@@ -249,10 +251,10 @@
       else el.remove();
     });
 
-    /* Olaylar */
-    var hero = section.querySelector('div.cursor-pointer');
-    if (hero) {
-      hero.addEventListener('click', function () {
+    /* Olaylar — yalnızca başlık detaya gider */
+    var titleBtn = section.querySelector('[data-haber-title]');
+    if (titleBtn) {
+      titleBtn.addEventListener('click', function () {
         handleHaberClick(aktif);
       });
     }
@@ -282,13 +284,7 @@
     section.querySelectorAll('button[class~="group/thumb"]').forEach(function (btn, i) {
       var realIndex = railStart + i;
       btn.addEventListener('click', function () {
-        if (realIndex === haberIndex) {
-          /* Zaten seçili habere tekrar tıklarsa direkt etkinliğe gitsin */
-          handleHaberClick(getHaberler()[realIndex]);
-        } else {
-          /* Seçili değilse önce slider'da o haberi seçsin */
-          setHaberIndex(realIndex);
-        }
+        setHaberIndex(realIndex);
       });
     });
   }
@@ -423,9 +419,9 @@
       });
     } else {
       html +=
-        '<div class="col-span-full flex items-center justify-center gap-2 py-8 text-sm text-slate-500 bg-white/60 rounded-xl border border-[#022842]/10">' +
-        '<i class="' + icon('tarih') + ' text-[#022842]/60" aria-hidden="true"></i>' +
-        ' Bugün doğum günü olan personel bulunmamaktadır.' +
+        '<div class="col-span-full flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-sm text-slate-500 bg-white/60 rounded-xl border border-[#022842]/10 sm:flex-row sm:px-6">' +
+        '<i class="' + icon('tarih') + ' shrink-0 text-[#022842]/60" aria-hidden="true"></i>' +
+        '<span class="min-w-0 max-w-prose text-pretty">Bugün doğum günü olan personel bulunmamaktadır.</span>' +
         '</div>';
     }
 

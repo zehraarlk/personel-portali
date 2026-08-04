@@ -68,6 +68,9 @@ input {
   .media-frame img,
   .youtube-thumb img {
     max-width: none;
+    max-height: none;
+    width: 100%;
+    height: 100%;
   }
 }
 

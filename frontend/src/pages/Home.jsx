@@ -8,7 +8,7 @@ import useSiteIcons from '../hooks/useSiteIcons';
 import '../styles/home.css';
 
 export default function Home() {
-  const navigate = useNavigate(); // 2. Hook tanımlandı
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,7 +25,6 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Mobilde thumbnail rayı 2'li; taşmayı önler
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)');
     const sync = () => setRailPageSize(mq.matches ? 2 : 4);
@@ -34,7 +33,6 @@ export default function Home() {
     return () => mq.removeEventListener('change', sync);
   }, []);
 
-  // Haber Slider Otomatik Geçiş
   useEffect(() => {
     const list = data?.haberler ?? [];
     if (list.length < 2) return undefined;
@@ -90,54 +88,54 @@ export default function Home() {
   return (
     <Layout>
       {loading && (
-        <div className="rounded-2xl bg-white border border-slate-200 p-8 text-slate-500 text-center shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
           Yükleniyor…
         </div>
       )}
 
       {error && (
-        <div className="rounded-2xl bg-red-50 text-red-700 p-6 border border-red-200">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
           Veriler alınamadı: {error}
         </div>
       )}
 
       {!loading && !error && (
         <div className="flex flex-col gap-6">
-          
           {/* 1. HABER SLIDER */}
           <section id="haberler" className="flex min-w-0 flex-col gap-3">
-            <div className="relative flex min-h-[220px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-md aspect-[16/10] sm:aspect-auto sm:min-h-[380px] md:min-h-[460px] group">
+            <div className="group relative h-[calc(100dvh-6.5rem)] min-h-[280px] w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-md">
               {aktif ? (
                 <>
-                  {/* Büyük Haber Alanı — Tıklanınca Etkinlik Detayına Gider */}
-                  <div 
-                    className="relative min-h-0 flex-1 overflow-hidden bg-slate-950 cursor-pointer"
-                    onClick={() => handleHaberClick(aktif)}
-                  >
+                  <div className="absolute inset-0 overflow-hidden bg-slate-950">
                     <MediaFrame
                       src={aktif.resim}
                       alt={aktif.baslik}
                       dark
                       forceCover
-                      className="absolute inset-0 transition-transform duration-500 group-hover:scale-105"
+                      className="absolute inset-0"
                       eager
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                    
+
                     <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8">
                       <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-3">
                         <span className="rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">
                           Öne Çıkan
                         </span>
-                        <span className="text-xs text-white/80 font-medium">{data.tarih_tr}</span>
+                        <span className="text-xs font-medium text-white/80">{data.tarih_tr}</span>
                       </div>
-                      <h2 className="max-w-4xl text-base font-bold leading-tight text-white drop-shadow hover:text-amber-300 transition-colors sm:text-xl md:text-3xl">
-                        {aktif.baslik}
+                      <h2 className="max-w-4xl text-base font-bold leading-tight text-white drop-shadow sm:text-xl md:text-3xl">
+                        <button
+                          type="button"
+                          onClick={() => handleHaberClick(aktif)}
+                          className="cursor-pointer text-left transition-colors hover:text-amber-300"
+                        >
+                          {aktif.baslik}
+                        </button>
                       </h2>
                     </div>
                   </div>
 
-                  {/* Önceki / Sonraki İlerleme Butonları (Tıklama Alanına Engel Olmaması İçin stopPropagation Eklenmiştir) */}
                   {haberler.length > 1 && (
                     <>
                       <button
@@ -147,7 +145,7 @@ export default function Home() {
                           handlePrev();
                         }}
                         aria-label="Önceki Haber"
-                        className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:left-4 sm:h-10 sm:w-10"
+                        className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:left-4 sm:h-10 sm:w-10"
                       >
                         <i className={icon('onceki')} aria-hidden="true" />
                       </button>
@@ -158,7 +156,7 @@ export default function Home() {
                           handleNext();
                         }}
                         aria-label="Sonraki Haber"
-                        className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:right-4 sm:h-10 sm:w-10"
+                        className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition hover:bg-amber-500 hover:text-white sm:right-4 sm:h-10 sm:w-10"
                       >
                         <i className={icon('sonraki')} aria-hidden="true" />
                       </button>
@@ -166,7 +164,9 @@ export default function Home() {
                   )}
                 </>
               ) : (
-                <p className="m-auto p-8 text-slate-400">Haber bulunamadı.</p>
+                <p className="absolute inset-0 flex items-center justify-center p-8 text-slate-400">
+                  Haber bulunamadı.
+                </p>
               )}
             </div>
 
@@ -180,13 +180,13 @@ export default function Home() {
                       onClick={handleRailPrevPage}
                       disabled={railPage === 0}
                       aria-label="Önceki Sayfa"
-                      className="shrink-0 flex h-auto w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-500 transition hover:border-amber-400 hover:text-amber-500 disabled:opacity-30 disabled:pointer-events-none"
+                      className="flex h-auto w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-500 transition hover:border-amber-400 hover:text-amber-500 disabled:pointer-events-none disabled:opacity-30"
                     >
                       <i className={icon('onceki')} aria-hidden="true" />
                     </button>
                   )}
 
-                  <div className="flex flex-1 gap-2.5 min-w-0">
+                  <div className="flex min-w-0 flex-1 gap-2.5">
                     {railItems.map((h, i) => {
                       const realIndex = railStart + i;
                       const isCurrent = realIndex === haberIndex;
@@ -194,15 +194,7 @@ export default function Home() {
                         <button
                           key={h.id}
                           type="button"
-                          onClick={() => {
-                            if (isCurrent) {
-                              // Zaten seçili habere tekrar tıklarsa direkt etkinliğe gitsin
-                              handleHaberClick(h);
-                            } else {
-                              // Seçili değilse önce slider'da o haberi seçsin
-                              setHaberIndex(realIndex);
-                            }
-                          }}
+                          onClick={() => setHaberIndex(realIndex)}
                           className={`group/thumb relative flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-xl border p-1.5 text-left transition-all duration-200 sm:gap-3 sm:p-2 sm:pr-3 ${
                             isCurrent
                               ? 'border-amber-400 bg-white shadow-md ring-1 ring-amber-400/40'
@@ -243,7 +235,7 @@ export default function Home() {
                       onClick={handleRailNextPage}
                       disabled={railPage === railPageCount - 1}
                       aria-label="Sonraki Sayfa"
-                      className="shrink-0 flex h-auto w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-500 transition hover:border-amber-400 hover:text-amber-500 disabled:opacity-30 disabled:pointer-events-none"
+                      className="flex h-auto w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-500 transition hover:border-amber-400 hover:text-amber-500 disabled:pointer-events-none disabled:opacity-30"
                     >
                       <i className={icon('sonraki')} aria-hidden="true" />
                     </button>
@@ -372,9 +364,11 @@ export default function Home() {
         </div>
       ))
     ) : (
-      <div className="col-span-full flex items-center justify-center gap-2 py-8 text-sm text-slate-500 bg-white/60 rounded-xl border border-[#022842]/10">
-        <i className={`${icon('tarih')} text-[#022842]/60`} aria-hidden="true" />
-        Bugün doğum günü olan personel bulunmamaktadır.
+      <div className="col-span-full flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-sm text-slate-500 bg-white/60 rounded-xl border border-[#022842]/10 sm:flex-row sm:px-6">
+        <i className={`${icon('tarih')} shrink-0 text-[#022842]/60`} aria-hidden="true" />
+        <span className="min-w-0 max-w-prose text-pretty">
+          Bugün doğum günü olan personel bulunmamaktadır.
+        </span>
       </div>
     )}
   </div>
