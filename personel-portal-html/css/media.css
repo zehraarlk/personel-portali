@@ -20,6 +20,28 @@
   background: #1e293b;
 }
 
+/* Global img { max-width:100%; height:auto } kuralını çerçeve içinde ez —
+   aksi halde fotoğraflar kayar / çerçeveyi doldurmaz. */
+.media-frame > img,
+.media-frame .media-img,
+.media-frame .media-blur {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  object-position: center center !important;
+}
+
+.media-frame .media-img--cover {
+  object-fit: cover;
+}
+
 .media-fill {
   display: block !important;
   width: 100% !important;
