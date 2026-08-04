@@ -8,9 +8,6 @@
   --ak-line: rgba(2, 40, 66, 0.1);
   --ak-paper: #ffffff;
   --ak-canvas: #f4f7fa;
-  width: min(1280px, 100%);
-  margin: 0 auto;
-  padding: 0.25rem 0 3rem;
 }
 
 .anketler-page .sr-only {
