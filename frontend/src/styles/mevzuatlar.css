@@ -413,3 +413,11 @@
   color: #5b6b78;
   max-width: 40rem;
 }
+
+@media (min-width: 721px) {
+  .kaynaklar-page.mevzuatlar-page-route .mevzuat-toolbar-row__search {
+    flex: none !important;
+    width: 50% !important;
+    max-width: 50% !important;
+  }
+}

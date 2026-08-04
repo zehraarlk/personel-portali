@@ -58,7 +58,7 @@ export default function Protokoller() {
 
   return (
     <Layout>
-      <div className="kaynaklar-page">
+      <div className="kaynaklar-page protokoller-page-route">
         <KaynaklarChrome
           pageKey="protokoller"
           query={query}

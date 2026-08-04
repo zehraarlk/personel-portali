@@ -116,7 +116,7 @@ export default function Mevzuatlar() {
 
   return (
     <Layout>
-      <div className="kaynaklar-page">
+      <div className="kaynaklar-page mevzuatlar-page-route">
         <KaynaklarChrome
           pageKey="mevzuatlar"
           query={query}

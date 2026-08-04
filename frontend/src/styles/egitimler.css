@@ -71,3 +71,12 @@
     font-size: 0.85rem;
   }
 }
+
+@media (min-width: 721px) {
+  .kaynaklar-page .mevzuat-toolbar-row__search {
+    flex: none !important;
+    width: calc(50% - 15px) !important;
+    max-width: calc(50% - 15px) !important;
+    margin-right: auto !important;
+  }
+}

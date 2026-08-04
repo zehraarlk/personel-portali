@@ -1080,3 +1080,11 @@
   content: none !important;
   display: none !important;
 }
+
+@media (min-width: 721px) {
+  .kaynaklar-page.documents-page .mevzuat-toolbar-row__search {
+    flex: none !important;
+    width: calc(50% - 0.5rem) !important;
+    max-width: calc(50% - 0.5rem) !important;
+  }
+}
