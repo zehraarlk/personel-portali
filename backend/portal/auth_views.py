@@ -95,7 +95,6 @@ def auth_login(request):
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
-    # Önceki açık oturumları kapat (PHP oturumCloseOtherOpen)
     _close_open_personel_sessions(personel.id, tip='otomatik')
 
     now = timezone.now()
@@ -167,7 +166,6 @@ def _int_or_none(raw):
 
 @api_view(['GET', 'POST'])
 def auth_session_check(request):
-    """Tarayıcıda kalan id'lerin DB'de hâlâ açık oturum olup olmadığını doğrular."""
     src = request.data if request.method == 'POST' else request.query_params
     oturum_id = _int_or_none(
         src.get('oturum_id') or request.headers.get('X-Oturum-Id')
@@ -227,8 +225,6 @@ def auth_session_resume(request):
         if (
             recent
             and recent.cikis_zamani
-            and (now - recent.cikis_zamani).total_seconds() <= 20
-
             and (_age_seconds(recent.cikis_zamani, now) or 999) <= 20
         ):
             recent.cikis_zamani = None
@@ -276,8 +272,6 @@ def auth_session_resume(request):
         if (
             recent
             and recent.cikis_zamani
-
-            and (now - recent.cikis_zamani).total_seconds() <= 20
             and (_age_seconds(recent.cikis_zamani, now) or 999) <= 20
         ):
             recent.cikis_zamani = None
@@ -368,11 +362,6 @@ def auth_forgot_password(request):
 @api_view(['POST'])
 @authentication_classes([])
 def auth_logout(request):
-    """
-    Personel oturum kapatma.
-    Body (sendBeacon uyumlu): oturum_id, personel_id, kapanis_tipi
-    veya X-Personel-Id ile açık oturumlar.
-    """
     tip = _kapanis_tipi(request.data.get('kapanis_tipi'), 'manuel')
     raw_oturum = request.data.get('oturum_id')
     raw_personel = request.data.get('personel_id') or request.headers.get('X-Personel-Id')
