@@ -449,7 +449,7 @@
       otomasyon.length +
       ' Uygulama</span>' +
       '</div>' +
-      '<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">';
+      '<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-8">';
 
     otomasyon.forEach(function (link) {
       var logo = link.logo ? Portal.asset(link.logo) : Portal.BRAND_IMG;

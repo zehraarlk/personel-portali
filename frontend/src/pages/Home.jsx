@@ -399,8 +399,8 @@ export default function Home() {
     </span>
   </div>
 
-  {/* Yenilenmiş Kart Yapısı — 6'lı grid düzeni, logo + altında başlık */}
-  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
+  {/* Yenilenmiş Kart Yapısı — 8'li grid düzeni, logo + altında başlık */}
+  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-8">
     {otomasyon.map((link) => (
       <a
         key={link.id}
